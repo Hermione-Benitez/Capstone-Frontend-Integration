@@ -66,3 +66,22 @@
   from { transform: scale(0.96); opacity: 0; }
   to   { transform: scale(1); opacity: 1; }
 }
+
+/* Exit animations and keyframes */
+.dt-overlay.closing {
+  animation: dt-fade-out 0.18s ease forwards;
+}
+
+.dt-dialog.closing {
+  animation: dt-zoom-out 0.18s ease forwards;
+}
+
+@keyframes dt-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes dt-zoom-out {
+  from { transform: scale(1); opacity: 1; }
+  to   { transform: scale(0.96); opacity: 0; }
+}

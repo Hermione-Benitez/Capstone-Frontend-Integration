@@ -54,29 +54,66 @@ const rowActions: Array<{
   variant?: "default" | "danger";
 }> = [
   {
-    label: "Edit",
+    label: "Edit Details",
     icon: "ti-pencil",
-    onClick: (row: Person) => alert(`Edit ${row.name}`),
+    onClick: (row: Person) => {
+      // Replaced alert with toast notification
+      const { triggerToast } = (window as any).__toastHelpers || {};
+      if (triggerToast) {
+        triggerToast("info", "Edit Mode", `Opening edit portal for ${row.name}...`);
+      } else {
+        console.log(`Edit details clicked for ${row.name}`);
+      }
+    },
     variant: "default",
   },
   {
-    label: "Duplicate",
+    label: "Duplicate Row",
     icon: "ti-copy",
-    onClick: (row: Person) => alert(`Duplicate ${row.name}`),
+    onClick: (row: Person) => {
+      // Replaced alert with toast notification
+      const { triggerToast } = (window as any).__toastHelpers || {};
+      if (triggerToast) {
+        triggerToast("success", "Success", `Record for ${row.name} duplicated.`);
+      } else {
+        console.log(`Duplicate row clicked for ${row.name}`);
+      }
+    },
     variant: "default",
   },
   {
-    label: "Delete",
+    label: "Delete Record",
     icon: "ti-trash",
     variant: "danger",
-    onClick: (row: Person) => alert(`Delete ${row.name}`),
+    onClick: (row: Person) => {
+      // Replaced alert with trigger
+      const { triggerToast, setShowConfirm } = (window as any).__toastHelpers || {};
+      if (triggerToast) {
+        triggerToast("error", "Delete Triggered", `Delete action triggered for ${row.name}. Click 'Confirm Delete' below to execute.`);
+      }
+      if (setShowConfirm) {
+        setShowConfirm(true);
+      }
+    },
   },
 ];
 
 function AppContent() {
-  const { toast } = useToast();
+  const { toast, triggerToast } = useToast();
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [passcode, setPasscode] = React.useState("");
+  const [isConfirmLoading, setIsConfirmLoading] = React.useState(false); // Confirmation loading spinner state
+
+  // Attach toast helpers globally so module-level rowActions can trigger toasts
+  React.useEffect(() => {
+    (window as any).__toastHelpers = {
+      triggerToast,
+      setShowConfirm,
+    };
+    return () => {
+      delete (window as any).__toastHelpers;
+    };
+  }, [triggerToast]);
 
   return (
     <div className="app-layout">
@@ -86,6 +123,7 @@ function AppContent() {
         <GlobalHeader />
 
         <main>
+
           <section className="component-section">
             <h2 className="section-title">Dashboard Layout</h2>
             <DashboardLayout />
@@ -167,14 +205,16 @@ function AppContent() {
               <StatusBadge status="Assigned" />
               <StatusBadge status="Out of Delivery" />
               <StatusBadge status="Returned" />
-              <StatusBadge status="Cancelled" />
-              <StatusBadge status="Partially Paid" />
-              <StatusBadge status="Paid" />
+              <StatusBadge status="Cancelled" size="sm" />
+              <StatusBadge status="Partially Paid" size="sm" />
+              <StatusBadge status="Paid" size="sm" />
               <StatusBadge status="Inflow" />
               <StatusBadge status="Outflow" />
               <StatusBadge status="Overdue" />
               <StatusBadge status="New Payment" />
               <StatusBadge status="30 - 60 Days" />
+              <StatusBadge status="60 - 90 Days" />
+              <StatusBadge status="90+ Days" />
             </div>
           </section>
 
@@ -361,14 +401,21 @@ function AppContent() {
               requiredPasscode="DELETE"
               passcodeValue={passcode}
               onPasscodeChange={setPasscode}
+              loading={isConfirmLoading}
               onCancel={() => {
-                setShowConfirm(false);
-                setPasscode("");
+                if (!isConfirmLoading) {
+                  setShowConfirm(false);
+                  setPasscode("");
+                }
               }}
               onConfirm={() => {
-                alert("Record Deleted!");
-                setShowConfirm(false);
-                setPasscode("");
+                setIsConfirmLoading(true);
+                setTimeout(() => {
+                  setIsConfirmLoading(false);
+                  setShowConfirm(false);
+                  setPasscode("");
+                  toast.error("Waybill SP-77291 has been permanently deleted.", "Deleted");
+                }, 1200);
               }}
             />
           </section>

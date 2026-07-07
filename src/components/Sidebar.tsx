@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useToast } from "./ToastContext";
 
 export interface NavSubItem {
   label: string;
@@ -73,6 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   navGroups = defaultNavGroups,
   profile = defaultProfile,
 }) => {
+  const { toast } = useToast();
   // Persist collapse preference
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
@@ -87,6 +89,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // ── Pinned/Favorites Navigation State ──
+  const [pinnedItems, setPinnedItems] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("sidebar-pinned");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const togglePin = (label: string) => {
+    setPinnedItems((prev) => {
+      const next = prev.includes(label)
+        ? prev.filter((item) => item !== label)
+        : [...prev, label];
+      try {
+        localStorage.setItem("sidebar-pinned", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  // Build the Favorites NavGroup dynamically if there are pinned items
+  const favoritesGroup = useMemo(() => {
+    if (pinnedItems.length === 0) return null;
+    const items: NavItem[] = [];
+    pinnedItems.forEach((label) => {
+      // Look up label across all original navGroups
+      for (const group of navGroups) {
+        const match = group.items.find((i) => i.label === label);
+        if (match) {
+          items.push({
+            ...match,
+            subItems: undefined, // Favorites group items act as direct flat shortcuts
+          });
+          break;
+        }
+      }
+    });
+    return items.length > 0 ? { label: "Favorites", items } : null;
+  }, [pinnedItems, navGroups]);
+
+  const displayNavGroups = useMemo(() => {
+    if (!favoritesGroup) return navGroups;
+    return [favoritesGroup, ...navGroups];
+  }, [favoritesGroup, navGroups]);
 
   const toggleCollapse = () => {
     setCollapsed((prev) => {
@@ -138,12 +187,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Navigation Links */}
       <nav className="sidebar-nav">
-        {navGroups.map((group, groupIndex) => (
+        {displayNavGroups.map((group, groupIndex) => (
           <React.Fragment key={groupIndex}>
             {group.label && <span className="nav-module-label">{group.label}</span>}
             {group.items.map((item, itemIndex) => {
               const hasSubItems = item.subItems && item.subItems.length > 0;
               const isExpanded = !!expandedItems[item.label];
+              const isPinned = pinnedItems.includes(item.label);
+              const showPinToggle = group.label !== "Favorites"; // Hide pin button in Favorites block itself to avoid recursion
 
               return (
                 <div key={itemIndex} className="nav-item-container">
@@ -163,6 +214,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       }
                     }}
                     className={`nav-item ${item.active ? "active" : ""} ${hasSubItems ? "has-subs" : ""}`}
+                    data-tooltip={collapsed ? item.label : undefined}
                   >
                     {item.icon && (
                       <span className="nav-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -175,6 +227,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     )}
                     <span className="nav-label">{item.label}</span>
                     
+                    {/* Pin button visible on hover on expanded sidebar */}
+                    {showPinToggle && !collapsed && (
+                      <button
+                        className={`sb-pin-btn ${isPinned ? "active" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          togglePin(item.label);
+                        }}
+                        title={isPinned ? "Unpin item" : "Pin to top"}
+                        aria-label={isPinned ? "Unpin item" : "Pin to top"}
+                      >
+                        <i className={isPinned ? "ti ti-star-filled pin-icon-starred" : "ti ti-star"} />
+                      </button>
+                    )}
+
                     {/* Badge on expanded mode */}
                     {item.badge && !collapsed && (
                       <span className={`nav-badge ${item.badge.variant || ""}`}>
@@ -241,16 +309,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span className="dropdown-role">{profile.role}</span>
               </div>
               <div className="dropdown-divider" />
-              <button className="dropdown-option" onClick={() => alert("Redirecting to profile details...")}>
+              <button className="dropdown-option" onClick={() => toast.info("Redirecting to profile details...", "My Profile")}>
                 <i className="ti ti-user" />
                 <span>My Profile</span>
               </button>
-              <button className="dropdown-option" onClick={() => alert("Settings Panel opened")}>
+              <button className="dropdown-option" onClick={() => toast.info("Settings Panel opened.", "System Settings")}>
                 <i className="ti ti-settings" />
                 <span>System Settings</span>
               </button>
               <div className="dropdown-divider" />
-              <button className="dropdown-option logout" onClick={() => alert("Logging out of Speedex SSO System...")}>
+              <button className="dropdown-option logout" onClick={() => toast.success("Logging out of Speedex SSO System...", "Log Out")}>
                 <i className="ti ti-logout" />
                 <span>Log Out</span>
               </button>

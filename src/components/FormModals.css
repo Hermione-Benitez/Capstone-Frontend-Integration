@@ -4,30 +4,10 @@
    ================================================================ */
 
 /* ── Motion & Z-Index Tokens ── */
-:root {
-  --motion-instant:  0ms;
-  --motion-fast:     150ms;
-  --motion-standard: 250ms;
-  --motion-enter:    300ms;
-  --motion-exit:     200ms;
-  --motion-emphasis: 400ms;
-
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-enter:    cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-exit:     cubic-bezier(0.4, 0, 1, 1);
-  --ease-emphasis: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  --motion-std: 250ms;
-
-  --z-base:     0;
-  --z-raised:   10;
-  --z-dropdown: 40;
-  --z-sticky:   50;
-  --z-overlay:  80;
-  --z-modal:    100;
-  --z-toast:    200;
-  --z-tooltip:  300;
-}
+/* NOTE: All :root token definitions have been moved to global.css.
+   --motion-*, --ease-*, --z-* are defined in the "Motion", "Easing Aliases",
+   and "Z-Index Scale" sections of global.css.
+   DO NOT re-declare :root tokens here. */
 
 
 /* ================================================================
@@ -177,6 +157,14 @@
 }
 .tf-group.state-success .tf-hint        { color: var(--ok, #059669); }
 .tf-group.state-success .tf-status-icon { color: var(--ok, #059669); }
+.tf-group.state-success .tf-status-icon svg {
+  animation: successIconPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes successIconPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /* Error */
 .tf-group.state-error .tf-label       { color: var(--err, #DC2626); }
@@ -235,6 +223,45 @@
   color: var(--tt, #6B7280);
   display: flex;
   align-items: center;
+  transition: color var(--motion-fast) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
+}
+
+/* Caret colour per state */
+.tf-group.state-focused  .tf-select-caret { color: var(--teal, #00A99D); }
+.tf-group.state-success  .tf-select-caret { color: var(--ok,   #059669); }
+.tf-group.state-error    .tf-select-caret { color: var(--err,  #DC2626); }
+.tf-group.state-disabled .tf-select-caret { color: var(--tm,   #9CA3AF); }
+
+/* Status icon right offset for selects (narrower because no text-icon overlap) */
+.tf-status-icon--select {
+  position: absolute;
+  right: 11px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* ── PHONE FIELD ── */
+.tf-phone-prefix {
+  display: flex;
+  align-items: center;
+  padding-left: 13px;
+  color: var(--teal, #00A99D);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.tf-group.state-error        .tf-phone-prefix,
+.tf-group.state-error-focused .tf-phone-prefix { color: var(--err, #DC2626); }
+.tf-group.state-success      .tf-phone-prefix  { color: var(--ok,  #059669); }
+.tf-group.state-disabled     .tf-phone-prefix  { color: var(--tm,  #9CA3AF); }
+
+.tf-phone-input {
+  /* override default left padding — prefix chip takes that space */
+  padding-left: 8px !important;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── TEXTAREA ── */
@@ -380,6 +407,154 @@
 .cal-day.selected       { background: var(--teal, #00A99D) !important; color: #fff !important; font-weight: 700; }
 .cal-day.today          { border-color: var(--teal, #00A99D); color: var(--teal, #00A99D); font-weight: 700; }
 .cal-day.disabled       { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+/* ── Keyboard focus ring (ARIA grid navigation) ── */
+.cal-day:focus-visible {
+  outline: 2px solid var(--teal, #00A99D);
+  outline-offset: 1px;
+  border-radius: 6px;
+}
+
+/* ── Date range highlights ── */
+.cal-day.range-start,
+.cal-day.range-end {
+  background: var(--teal, #00A99D) !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+.cal-day.range-in {
+  background: rgba(0, 169, 157, 0.12);
+  color: var(--teal, #00A99D);
+  border-radius: 0;
+}
+/* Squared inner edge so strip looks continuous */
+.cal-day.range-start { border-radius: 6px 0 0 6px; }
+.cal-day.range-end   { border-radius: 0 6px 6px 0; }
+/* If start = end (single-day range) restore full radius */
+.cal-day.range-start.range-end { border-radius: 6px; }
+
+/* ── Clickable month label button ── */
+.cal-month-label--btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy, #1B254B);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background var(--motion-fast) var(--ease-standard),
+              color     var(--motion-fast) var(--ease-standard);
+}
+.cal-month-label--btn:hover {
+  background: rgba(0, 169, 157, 0.1);
+  color: var(--teal, #00A99D);
+}
+
+/* ── Year/Month Jump Panel ── */
+.cal-jump-panel {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border-radius: 12px;
+  z-index: 2;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: calIn var(--motion-standard) var(--ease-standard);
+}
+
+.cal-jump-year {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.cal-jump-year-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy, #1B254B);
+}
+
+.cal-jump-months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  flex: 1;
+  align-content: start;
+}
+
+.cal-jump-month {
+  background: #F7F9FF;
+  border: 1px solid #DDE2EB;
+  border-radius: 7px;
+  padding: 9px 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts, #374151);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--motion-fast) var(--ease-standard);
+}
+.cal-jump-month:hover {
+  background: rgba(0, 169, 157, 0.1);
+  border-color: var(--teal, #00A99D);
+  color: var(--teal, #00A99D);
+}
+.cal-jump-month.active {
+  background: var(--teal, #00A99D);
+  border-color: var(--teal, #00A99D);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ── Range Picker: dual-input row ── */
+.cal-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cal-range-inputs .tf-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.cal-range-sep {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tt, #6B7280);
+  flex-shrink: 0;
+}
+
+/* Pulsing teal border on "From" input while user picks end date */
+.tf-range-selecting {
+  border-color: var(--teal, #00A99D) !important;
+  box-shadow: 0 0 0 3px rgba(0, 169, 157, 0.14) !important;
+}
+
+/* Contextual instruction banner inside range calendar */
+.cal-range-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 169, 157, 0.08);
+  border: 1px solid rgba(0, 169, 157, 0.3);
+  border-radius: 7px;
+  padding: 7px 10px;
+  margin-bottom: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--teal, #00A99D);
+}
 
 
 /* ================================================================
@@ -841,4 +1016,37 @@
   .modal-row-half > *:first-child {
     grid-column: auto;
   }
+}
+
+/* ── Compact Modifier classes for Form Fields (e.g. Dashboard views) ── */
+.tf-group--compact .tf-input {
+  padding: 6px 30px 6px 12px !important;
+  font-size: 12px !important;
+}
+.tf-group--compact .tf-cal-input {
+  padding-left: 30px !important;
+}
+.tf-group--compact .tf-cal-icon {
+  left: 10px !important;
+}
+.tf-group--compact .tf-cal-icon svg {
+  width: 13px !important;
+  height: 13px !important;
+}
+.tf-group--compact .cal-range-sep {
+  font-size: 11px !important;
+}
+.tf-group--compact .tf-select {
+  padding: 6px 30px 6px 12px !important;
+  font-size: 12px !important;
+}
+.tf-group--compact .tf-select-caret {
+  right: 10px !important;
+}
+.tf-group--compact .tf-phone-prefix {
+  padding-left: 10px !important;
+}
+.tf-group--compact .tf-phone-input {
+  padding-left: 6px !important;
+  font-size: 12px !important;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, KeyboardEvent } from "react";
+import React, { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import Button from "./Buttons";
 import "./ConfirmModal.css";
@@ -28,6 +28,8 @@ export interface ConfirmModalProps {
   passcodeValue?: string;
   /** Change handler for passcode confirmation */
   onPasscodeChange?: (val: string) => void;
+  /** Optional loading state spinner for async confirmations */
+  loading?: boolean;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -43,9 +45,28 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   requiredPasscode,
   passcodeValue = "",
   onPasscodeChange,
+  loading = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
+
+  const [shouldRender, setShouldRender] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Sync open states with transitions
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      setIsClosing(false);
+    } else if (shouldRender) {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+        setIsClosing(false);
+      }, 180); // matches the 0.18s exit animation
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   // Auto-focus on Cancel button for safety when opening
   useEffect(() => {
@@ -94,7 +115,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   const isDestructive = variant === "danger";
   const defaultIcon = isDestructive ? "ti-alert-triangle" : "ti-info-circle";
@@ -106,19 +127,18 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   return createPortal(
     <div
-      className="dt-overlay"
+      className={`dt-overlay${isClosing ? " closing" : ""}`}
       role="dialog"
       aria-modal="true"
       onClick={onCancel}
       onKeyDown={handleKeyDown}
     >
       <div
-        className="dt-dialog"
+        className={`dt-dialog${isClosing ? " closing" : ""}`}
         ref={containerRef}
         onClick={(e) => e.stopPropagation()}
         style={{
           borderColor: isDestructive ? "var(--err-r)" : "var(--teal-ring)",
-          animation: "abModalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <div
@@ -168,6 +188,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               onChange={(e) => onPasscodeChange?.(e.target.value)}
               placeholder={`Type "${requiredPasscode}"`}
               autoFocus
+              disabled={loading}
             />
           </div>
         )}
@@ -177,6 +198,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             ref={cancelBtnRef}
             className="btn btn--secondary btn--sm"
             onClick={onCancel}
+            disabled={loading}
           >
             {cancelLabel}
           </button>
@@ -185,6 +207,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             variant={variant}
             size="sm"
             disabled={isConfirmDisabled}
+            loading={loading}
             onClick={onConfirm}
           />
         </div>

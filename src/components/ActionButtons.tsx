@@ -10,6 +10,7 @@ const ActionButtons: React.FC = () => {
   const { toast } = useToast();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [confirmInputText, setConfirmInputText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false); // Async confirmation loading state
 
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
@@ -403,6 +404,14 @@ const ActionButtons: React.FC = () => {
                         border-radius: 4px;
                         margin-left: 6px;
                     }
+                    .btn-spinner {
+                        display: inline-block;
+                        animation: spin 1s linear infinite;
+                    }
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
                 `}
       </style>
 
@@ -591,20 +600,33 @@ const ActionButtons: React.FC = () => {
                     ref={cancelBtnRef}
                     className="ab-btn ab-btn-outline"
                     onClick={handleCloseModal}
+                    disabled={isDeleting}
                   >
                     Cancel
                   </button>
                   <button
                     className="ab-btn ab-btn-danger"
+                    disabled={isDeleting}
                     onClick={() => {
-                      handleCloseModal();
-                      toast.error(
-                        "Record TXN-8472910 deleted successfully.",
-                        "Deleted"
-                      );
+                      setIsDeleting(true);
+                      setTimeout(() => {
+                        setIsDeleting(false);
+                        handleCloseModal();
+                        toast.error(
+                          "Record TXN-8472910 deleted successfully.",
+                          "Deleted"
+                        );
+                      }, 1200);
                     }}
                   >
-                    Delete Record
+                    {isDeleting ? (
+                      <>
+                        <i className="ti ti-loader-2 btn-spinner" style={{ marginRight: "6px" }} />
+                        Deleting...
+                      </>
+                    ) : (
+                      "Delete Record"
+                    )}
                   </button>
                 </div>
               </div>
@@ -652,12 +674,13 @@ const ActionButtons: React.FC = () => {
                     ref={cancelBtnRef}
                     className="ab-btn ab-btn-outline"
                     onClick={handleCloseModal}
+                    disabled={isDeleting}
                   >
                     Cancel
                   </button>
                   <button
                     className="ab-btn ab-btn-danger"
-                    disabled={confirmInputText !== "TXN-8472910"}
+                    disabled={confirmInputText !== "TXN-8472910" || isDeleting}
                     style={{
                       opacity: confirmInputText === "TXN-8472910" ? 1 : 0.45,
                       cursor:
@@ -666,11 +689,22 @@ const ActionButtons: React.FC = () => {
                           : "not-allowed",
                     }}
                     onClick={() => {
-                      handleCloseModal();
-                      toast.error("Cleared payment TXN-8472910 deleted.", "Deleted");
+                      setIsDeleting(true);
+                      setTimeout(() => {
+                        setIsDeleting(false);
+                        handleCloseModal();
+                        toast.error("Cleared payment TXN-8472910 deleted.", "Deleted");
+                      }, 1200);
                     }}
                   >
-                    Delete Cleared Record
+                    {isDeleting ? (
+                      <>
+                        <i className="ti ti-loader-2 btn-spinner" style={{ marginRight: "6px" }} />
+                        Deleting...
+                      </>
+                    ) : (
+                      "Delete Cleared Record"
+                    )}
                   </button>
                 </div>
               </div>

@@ -1151,3 +1151,242 @@
 .header-btn-confirm:hover {
   background: #b91c1c;
 }
+
+/* ── Breadcrumbs ── */
+.header-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.header-breadcrumb {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--tt, #6B7280);
+}
+
+.breadcrumb-link {
+  color: var(--tt, #6B7280);
+  text-decoration: none;
+  transition: color 150ms;
+  font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+  color: var(--teal, #00A99D);
+}
+
+.breadcrumb-current {
+  color: var(--tp, #0F172A);
+  font-weight: 600;
+}
+
+.breadcrumb-sep {
+  margin: 0 4px;
+  color: var(--tm, #9CA3AF);
+  flex-shrink: 0;
+}
+
+/* ── Date and Time Clock Widget ── */
+.header-datetime {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--border, #E2E8F0);
+  background: var(--s1, #F7F9FF);
+  color: var(--ts, #374151);
+  font-family: var(--fb, sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--sh1, 0 1px 2px rgba(15, 23, 42, 0.02));
+  white-space: nowrap;
+}
+
+.header-datetime-icon {
+  color: var(--teal, #00A99D);
+  flex-shrink: 0;
+}
+
+.header-datetime-text {
+  letter-spacing: 0.2px;
+}
+
+/* ── WebSocket status badge in header dropdown ── */
+.notification-ws-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--ok-bg, rgba(5, 150, 105, 0.08));
+  border: 1px solid var(--ok-r, rgba(5, 150, 105, 0.2));
+  color: var(--ok, #059669);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ws-pulse-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--ok, #059669);
+  border-radius: 50%;
+  animation: ws-pulse 1.6s infinite ease-in-out;
+}
+
+@keyframes ws-pulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+
+/* ── Category badge chips in notification items ── */
+.notification-title-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Category colors */
+.notification-category-badge.logistics {
+  background: var(--new-bg, rgba(79, 70, 229, 0.07));
+  color: var(--new, #4F46E5);
+}
+.notification-category-badge.finance {
+  background: var(--teal-bg, rgba(0, 169, 157, 0.06));
+  color: var(--teal, #00A99D);
+}
+.notification-category-badge.driver {
+  background: var(--warn-bg, rgba(217, 119, 6, 0.08));
+  color: var(--warn, #D97706);
+}
+.notification-category-badge.system {
+  background: var(--s2, #F0F4FF);
+  color: var(--tt, #6B7280);
+}
+
+/* ── Gmail-style check/action button layout ── */
+.notification-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.mark-as-read-btn-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--teal, #00A99D);
+  cursor: pointer;
+  opacity: 0; /* Hidden by default, shown on hover like Gmail */
+  transition: all 150ms ease;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* Show actions button on hover of the notification dropdown item */
+.notification-dropdown-item:hover .mark-as-read-btn-text {
+  opacity: 1;
+}
+
+.mark-as-read-btn-text:hover {
+  background: var(--teal-bg, rgba(0, 169, 157, 0.08));
+}
+
+
+/* Ensure description text wraps correctly with new layout flex items */
+.notification-dropdown-text-container {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-dropdown-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* ── Avatar Image & Online Dot Indicator ── */
+.avatar-image {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.profile-dropdown-avatar-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 169, 157, 0.15);
+}
+
+.avatar-online-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--ok, #059669);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.profile-dropdown-online-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--ok, #059669);
+  border: 2px solid var(--s1, #F7F9FF);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+
+
+
+

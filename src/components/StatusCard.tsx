@@ -14,6 +14,8 @@ export interface StatusCardProps {
   periodText?: string;
   sparklineData?: number[];
   polarity?: 'higher-is-better' | 'lower-is-better';
+  loading?: boolean;
+  onClick?: () => void;
 }
 
 const variantColors: Record<StatusCardVariant, { accent: string; bg: string }> = {
@@ -35,6 +37,8 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   periodText,
   sparklineData,
   polarity = 'higher-is-better',
+  loading = false,
+  onClick,
 }) => {
   const colors = variantColors[variant] || variantColors.teal;
   
@@ -42,6 +46,8 @@ export const StatusCard: React.FC<StatusCardProps> = ({
     '--kpi-ac': colors.accent,
     '--kpi-ibg': colors.bg,
     '--kpi-ic': colors.accent,
+    cursor: onClick ? 'pointer' : 'default',
+    userSelect: 'none',
   } as React.CSSProperties;
 
   // Polarity aware coloring: for 'lower-is-better', a decrease is positive (green), and an increase is negative (red)
@@ -63,8 +69,24 @@ export const StatusCard: React.FC<StatusCardProps> = ({
 
   const maxSparkVal = sparklineData && sparklineData.length > 0 ? Math.max(...sparklineData) : 1;
 
+  if (loading) {
+    return (
+      <div className="kpi" style={{ ...customStyles, pointerEvents: 'none' }}>
+        <div className="kpi-top">
+          <div className="kpi-shimmer-bg" style={{ width: '55%', height: '12px' }} />
+          <div className="kpi-shimmer-bg kpi-skeleton-circle" style={{ width: '32px', height: '32px' }} />
+        </div>
+        <div className="kpi-shimmer-bg" style={{ width: '75%', height: '28px', margin: '6px 0 12px 0' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginTop: 'auto' }}>
+          <div className="kpi-shimmer-bg" style={{ width: '30%', height: '10px' }} />
+          <div className="kpi-shimmer-bg" style={{ width: '40%', height: '10px' }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="kpi" style={customStyles}>
+    <div className={`kpi ${onClick ? 'kpi-clickable' : ''}`} style={customStyles} onClick={onClick}>
       <div className="kpi-top">
         <span className="kpi-label">{label}</span>
         {icon && (

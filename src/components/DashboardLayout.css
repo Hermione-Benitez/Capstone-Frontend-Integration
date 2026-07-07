@@ -33,12 +33,12 @@
   --transition:     all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg-main);
+  background: transparent; /* Seamless blend inside main catalog */
   display: flex;
   flex-direction: column;
   gap: var(--padding-main);
-  padding: var(--padding-main);
-  border-radius: var(--radius-md);
+  padding: 0; /* Remove double padding */
+  border-radius: 0;
 }
 
 /* ─── Header Card  (matches .header-card from standard) ─── */
@@ -333,4 +333,267 @@
 @media (max-width: 600px) {
   .spx-stats-grid { grid-template-columns: 1fr; }
   .speedex-dashboard { padding: 16px; }
+  .spx-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .spx-header-controls-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .spx-date-filter-group {
+    width: 100%;
+    overflow-x: auto;
+  }
 }
+
+/* ─── Dashboard Header Controls & Date Filters ─── */
+.spx-header-controls-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.spx-date-filter-group {
+  display: flex;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.spx-date-filter-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.spx-date-filter-btn:hover {
+  color: var(--text-primary);
+  background: rgba(0, 169, 157, 0.05);
+}
+
+.spx-date-filter-btn.active {
+  background: var(--bg-card);
+  color: var(--primary);
+  box-shadow: 0px 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+/* Developer controls container (Neat top bar row to avoid overlap) */
+.spx-dev-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: -16px;
+  padding-right: 6px;
+}
+
+.spx-dev-btn {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0px 1px 3px rgba(15, 23, 42, 0.02);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+}
+
+.spx-dev-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.spx-dev-btn.active {
+  background: rgba(220, 38, 38, 0.04);
+  border-color: var(--status-failed);
+  color: var(--status-failed);
+}
+
+/* Date badge layout styling */
+.spx-header-date {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.spx-last-updated {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Form Modal-inspired Date Inputs Styling */
+.spx-custom-picker-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spx-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #DDE2EB;
+  border-radius: 8px;
+  overflow: visible;
+  transition:
+    border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow   0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 142px;
+}
+
+.spx-input-wrap:hover {
+  border-color: #CBD5E1;
+}
+
+.spx-input-wrap:focus-within {
+  border-color: #00A99D;
+  box-shadow: 0 0 0 3px rgba(0, 169, 157, 0.14);
+}
+
+.spx-input-icon {
+  position: absolute;
+  left: 10px;
+  color: #00A99D;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.spx-date-input-field {
+  width: 100%;
+  padding: 6px 8px 6px 28px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  color: #0F172A;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.spx-date-input-field::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ─── Loading State Skeletons ─── */
+.spx-skeleton {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: spxShimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+@keyframes spxShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.spx-skeleton-card {
+  pointer-events: none;
+}
+
+/* ─── Error States & Retry UI ─── */
+.spx-error-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.spx-error-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.spx-error-icon {
+  color: var(--status-failed);
+  margin-bottom: 12px;
+  animation: errorShake 0.4s ease-in-out;
+}
+
+.spx-error-content h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+.spx-error-content p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.spx-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0px 4px 10px rgba(0, 169, 157, 0.2);
+  transition: var(--transition);
+}
+
+.spx-retry-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.spx-retry-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { 
   Bell, 
   CheckCheck, 
@@ -10,8 +10,10 @@ import {
   LogOut, 
   User, 
   ChevronRight,
-  Sparkles,
-  MoreVertical
+  Clock,
+  Calendar,
+  Truck,
+  DollarSign
 } from 'lucide-react';
 import './GlobalHeader.css';
 
@@ -45,35 +47,92 @@ const DUMMY_NOTIFICATIONS: NotificationItem[] = [
   { id: '8', title: 'System Security Update', description: 'Workspace session policies updated for standard users.', timestamp: '4 days ago', read: true, type: 'info', category: 'system', isToday: false }
 ];
 
+export interface BreadcrumbItem {
+  label: string;
+  /** Optional href or route path. Omit for the current (last) crumb. */
+  href?: string;
+}
+
 export interface GlobalHeaderProps {
   title?: string;
+  /** Breadcrumb trail shown below the title. Last item is the current page. */
+  breadcrumbs?: BreadcrumbItem[];
   profile?: {
     name: string;
     role: string;
     avatarInitials: string;
+    avatarUrl?: string;
   };
+  /** Called when a notification action button is clicked. Replaces alert(). */
+  onNotificationAction?: (notification: NotificationItem) => void;
+  /** Called when "View all notifications" footer link is clicked. */
+  onViewAllNotifications?: () => void;
+  /** Called when "My Profile" is clicked in the profile dropdown. */
+  onProfile?: () => void;
+  /** Called when "System Settings" is clicked in the profile dropdown. */
+  onSettings?: () => void;
+  /** Called when "Log Out" is clicked in the profile dropdown. */
+  onLogout?: () => void;
 }
 
-const defaultProfile = {
+const defaultProfile: {
+  name: string;
+  role: string;
+  avatarInitials: string;
+  avatarUrl?: string;
+} = {
   name: 'Hermione Benitez',
   role: 'Logistics Director',
   avatarInitials: 'HB',
 };
 
 const GlobalHeader: React.FC<GlobalHeaderProps> = ({ 
-  title = 'Dashboard', 
-  profile = defaultProfile 
+  title = 'Dashboard',
+  breadcrumbs,
+  profile = defaultProfile,
+  onNotificationAction,
+  onViewAllNotifications,
+  onProfile,
+  onSettings,
+  onLogout,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(DUMMY_NOTIFICATIONS);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  
   const [bellAnimating, setBellAnimating] = useState(false);
 
   const notificationRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // Real-time Clock logic
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedDateTime = useMemo(() => {
+    const dateStr = currentTime.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const timeStr = currentTime.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
+    return `${dateStr} • ${timeStr}`;
+  }, [currentTime]);
+
+
 
   // Auto-close dropdowns on click outside
   useEffect(() => {
@@ -167,11 +226,46 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   return (
     <header className="site-header">
       <nav className="nav-bar">
-        {/* Left Side: Page Title */}
-        <h1 className="header-title">{title}</h1>
+        {/* Left Side: Title + Breadcrumb */}
+        <div className="header-title-group">
+          {/* Breadcrumb trail */}
+          {breadcrumbs && breadcrumbs.length > 0 && (
+            <nav className="header-breadcrumb" aria-label="Breadcrumb">
+              <ol className="breadcrumb-list">
+                {breadcrumbs.map((crumb, i) => {
+                  const isLast = i === breadcrumbs.length - 1;
+                  return (
+                    <li key={i} className="breadcrumb-item">
+                      {!isLast && crumb.href ? (
+                        <a href={crumb.href} className="breadcrumb-link">{crumb.label}</a>
+                      ) : (
+                        <span
+                          className={isLast ? 'breadcrumb-current' : 'breadcrumb-link'}
+                          aria-current={isLast ? 'page' : undefined}
+                        >
+                          {crumb.label}
+                        </span>
+                      )}
+                      {!isLast && (
+                        <ChevronRight size={12} className="breadcrumb-sep" aria-hidden="true" />
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
+          )}
+          <h1 className="header-title">{title}</h1>
+        </div>
         
         {/* Right Side: Interactive Controls */}
         <div className="header-controls">
+
+          {/* Real-time Clock Widget */}
+          <div className="header-datetime" aria-label="Current date and time">
+            <Clock size={14} className="header-datetime-icon" />
+            <span className="header-datetime-text">{formattedDateTime}</span>
+          </div>
           {/* Notification Button & Dropdown */}
           <div className="header-notification-container" ref={notificationRef}>
             <button 
@@ -250,7 +344,11 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                               <div 
                                 key={n.id} 
                                 className={`notification-dropdown-item ${!n.read ? 'unread' : ''} ${isCritical ? 'critical' : ''}`}
-                                onClick={(e) => toggleReadStatus(n.id, e)}
+                                onClick={() => {
+                                  if (!n.read) {
+                                    setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
+                                  }
+                                }}
                               >
                                 <div className="notification-dropdown-item-content">
                                   <div className={`notification-dropdown-icon-container ${n.type}`}>
@@ -260,17 +358,43 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                                   </div>
                                   <div className="notification-dropdown-text-container">
                                     <div className="notification-dropdown-item-header">
-                                      <span className="notification-dropdown-item-title">{n.title}</span>
-                                      <span className="notification-status-indicator-dot" />
+                                      <div className="notification-title-container">
+                                        <span className="notification-dropdown-item-title">{n.title}</span>
+                                        <span className={`notification-category-badge ${n.category}`}>
+                                          {n.category === 'logistics' && <Truck size={10} />}
+                                          {n.category === 'finance' && <DollarSign size={10} />}
+                                          {n.category === 'driver' && <User size={10} />}
+                                          {n.category === 'system' && <Settings size={10} />}
+                                          <span>{n.category}</span>
+                                        </span>
+                                      </div>
+                                      <div className="notification-actions-right">
+                                        <button
+                                          className="mark-as-read-btn-text"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: !item.read } : item));
+                                          }}
+                                          title={n.read ? "Mark as unread" : "Mark as read"}
+                                          aria-label={n.read ? "Mark as unread" : "Mark as read"}
+                                        >
+                                          {n.read ? "Mark unread" : "Mark read"}
+                                        </button>
+                                        <span className="notification-status-indicator-dot" />
+                                      </div>
                                     </div>
                                     <p className="notification-dropdown-item-desc">{n.description}</p>
                                     
-                                    {/* Inline action support for critical items */}
+                                    {/* Inline action button — routes via onNotificationAction prop */}
                                     {n.actionLabel && (
                                       <div style={{ marginTop: '6px' }} onClick={e => e.stopPropagation()}>
                                         <button 
                                           className="notification-action-btn"
-                                          onClick={() => alert(`Redirecting to: ${n.actionLabel}`)}
+                                          onClick={() => {
+                                            onNotificationAction
+                                              ? onNotificationAction(n)
+                                              : console.info('[GlobalHeader] onNotificationAction not set for:', n.actionLabel);
+                                          }}
                                         >
                                           {n.actionLabel} →
                                         </button>
@@ -296,7 +420,11 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                               <div 
                                 key={n.id} 
                                 className={`notification-dropdown-item ${!n.read ? 'unread' : ''} ${isCritical ? 'critical' : ''}`}
-                                onClick={(e) => toggleReadStatus(n.id, e)}
+                                onClick={() => {
+                                  if (!n.read) {
+                                    setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
+                                  }
+                                }}
                               >
                                 <div className="notification-dropdown-item-content">
                                   <div className={`notification-dropdown-icon-container ${n.type}`}>
@@ -306,17 +434,43 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                                   </div>
                                   <div className="notification-dropdown-text-container">
                                     <div className="notification-dropdown-item-header">
-                                      <span className="notification-dropdown-item-title">{n.title}</span>
-                                      <span className="notification-status-indicator-dot" />
+                                      <div className="notification-title-container">
+                                        <span className="notification-dropdown-item-title">{n.title}</span>
+                                        <span className={`notification-category-badge ${n.category}`}>
+                                          {n.category === 'logistics' && <Truck size={10} />}
+                                          {n.category === 'finance' && <DollarSign size={10} />}
+                                          {n.category === 'driver' && <User size={10} />}
+                                          {n.category === 'system' && <Settings size={10} />}
+                                          <span>{n.category}</span>
+                                        </span>
+                                      </div>
+                                      <div className="notification-actions-right">
+                                        <button
+                                          className="mark-as-read-btn-text"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: !item.read } : item));
+                                          }}
+                                          title={n.read ? "Mark as unread" : "Mark as read"}
+                                          aria-label={n.read ? "Mark as unread" : "Mark as read"}
+                                        >
+                                          {n.read ? "Mark unread" : "Mark read"}
+                                        </button>
+                                        <span className="notification-status-indicator-dot" />
+                                      </div>
                                     </div>
                                     <p className="notification-dropdown-item-desc">{n.description}</p>
 
-                                    {/* Inline action support for critical items */}
+                                    {/* Inline action button — routes via onNotificationAction prop */}
                                     {n.actionLabel && (
                                       <div style={{ marginTop: '6px' }} onClick={e => e.stopPropagation()}>
                                         <button 
                                           className="notification-action-btn"
-                                          onClick={() => alert(`Redirecting to: ${n.actionLabel}`)}
+                                          onClick={() => {
+                                            onNotificationAction
+                                              ? onNotificationAction(n)
+                                              : console.info('[GlobalHeader] onNotificationAction not set for:', n.actionLabel);
+                                          }}
                                         >
                                           {n.actionLabel} →
                                         </button>
@@ -337,7 +491,15 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
  
                 {/* Footer Link */}
                 <div className="notification-dropdown-footer">
-                  <button className="view-all-notifications-btn" onClick={() => alert('Opening Notifications Page...')}>
+                  <button
+                    className="view-all-notifications-btn"
+                    onClick={() => {
+                      setShowNotifications(false);
+                      onViewAllNotifications
+                        ? onViewAllNotifications()
+                        : console.info('[GlobalHeader] onViewAllNotifications not set');
+                    }}
+                  >
                     <span>View all notifications</span>
                     <ChevronRight size={14} />
                   </button>
@@ -366,9 +528,14 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               aria-expanded={showProfileMenu}
             >
               <div className="avatar-circle-wrapper">
-                <div className="avatar-circle">
-                  {profile.avatarInitials}
-                </div>
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt={profile.name} className="avatar-image" />
+                ) : (
+                  <div className="avatar-circle">
+                    {profile.avatarInitials}
+                  </div>
+                )}
+                <span className="avatar-online-indicator" title="Online" />
               </div>
             </button>
             
@@ -377,9 +544,14 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 {/* Identity Header */}
                 <div className="profile-dropdown-user-info">
                   <div className="profile-dropdown-avatar-wrapper">
-                    <div className="profile-dropdown-avatar">
-                      {profile.avatarInitials}
-                    </div>
+                    {profile.avatarUrl ? (
+                      <img src={profile.avatarUrl} alt={profile.name} className="profile-dropdown-avatar-image" />
+                    ) : (
+                      <div className="profile-dropdown-avatar">
+                        {profile.avatarInitials}
+                      </div>
+                    )}
+                    <span className="profile-dropdown-online-indicator" title="Online" />
                   </div>
                   <div className="profile-dropdown-meta">
                     <span className="profile-dropdown-name">{profile.name}</span>
@@ -394,8 +566,10 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                   <button 
                     className="profile-dropdown-option"
                     onClick={() => {
-                      alert('Redirecting to My Account profile details...');
                       setShowProfileMenu(false);
+                      onProfile
+                        ? onProfile()
+                        : console.info('[GlobalHeader] onProfile not set');
                     }}
                   >
                     <User size={15} strokeWidth={2} className="option-icon" />
@@ -405,8 +579,10 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                   <button 
                     className="profile-dropdown-option"
                     onClick={() => {
-                      alert('Settings Panel opened');
                       setShowProfileMenu(false);
+                      onSettings
+                        ? onSettings()
+                        : console.info('[GlobalHeader] onSettings not set');
                     }}
                   >
                     <Settings size={15} strokeWidth={2} className="option-icon" />
@@ -414,15 +590,17 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                   </button>
                 </div>
  
-                <div className="profile-dropdown-divider" />
+
                 
                 {/* Logout Option */}
                 <div className="profile-dropdown-logout-section">
                   <button 
                     className="profile-dropdown-option logout-option"
                     onClick={() => {
-                      alert('Logging out of Speedex SSO System...');
                       setShowProfileMenu(false);
+                      onLogout
+                        ? onLogout()
+                        : console.info('[GlobalHeader] onLogout not set');
                     }}
                   >
                     <LogOut size={15} strokeWidth={2} className="option-icon" />
@@ -434,6 +612,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           </div>
         </div>
       </nav>
+
+
 
       {/* Structured Confirmation Dialog for Clear All Actions */}
       {showClearConfirm && (

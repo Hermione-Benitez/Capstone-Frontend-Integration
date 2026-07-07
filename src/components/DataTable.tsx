@@ -12,6 +12,115 @@ import ConfirmModal from "./ConfirmModal";
 import { useToast } from "./ToastContext";
 import "./DataTable.css";
 
+// ─── Row Virtualization Hook ──────────────────────────────────────────────────
+// Zero-dependency windowing: only renders rows visible in the scroll viewport.
+// Falls back to full render when rowCount ≤ VIRTUAL_THRESHOLD.
+const VIRTUAL_THRESHOLD = 100; // rows — below this, skip virtualization overhead
+const OVERSCAN = 5;           // extra rows rendered above/below viewport
+
+function useVirtualRows(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  rowCount: number,
+  rowHeight: number // estimated px per row
+) {
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(600);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || rowCount <= VIRTUAL_THRESHOLD) return;
+
+    const onScroll = () => setScrollTop(el.scrollTop);
+    const ro = new ResizeObserver(() => setViewportHeight(el.clientHeight));
+    el.addEventListener("scroll", onScroll, { passive: true });
+    ro.observe(el);
+    setViewportHeight(el.clientHeight);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+    };
+  }, [containerRef, rowCount]);
+
+  if (rowCount <= VIRTUAL_THRESHOLD) {
+    // No virtualization — render everything
+    return { virtualStart: 0, virtualEnd: rowCount, totalHeight: null, offsetY: 0 };
+  }
+
+  const totalHeight = rowCount * rowHeight;
+  const rawStart = Math.floor(scrollTop / rowHeight) - OVERSCAN;
+  const virtualStart = Math.max(0, rawStart);
+  const rawEnd = Math.ceil((scrollTop + viewportHeight) / rowHeight) + OVERSCAN;
+  const virtualEnd = Math.min(rowCount, rawEnd);
+  const offsetY = virtualStart * rowHeight;
+
+  return { virtualStart, virtualEnd, totalHeight, offsetY };
+}
+
+// ─── Column Resize Hook ───────────────────────────────────────────────────────
+// Drag-to-resize: tracks pointer delta and updates per-column width in local state.
+function useColumnResize(
+  columns: { key: string; width?: string }[],
+  storageKey: string
+) {
+  const [colWidths, setColWidths] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem(`${storageKey}:colWidths`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const dragState = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
+
+  const onResizeStart = useCallback(
+    (e: React.MouseEvent, colKey: string, currentWidth: number) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragState.current = { key: colKey, startX: e.clientX, startWidth: currentWidth };
+
+      const onMove = (me: MouseEvent) => {
+        if (!dragState.current) return;
+        const delta = me.clientX - dragState.current.startX;
+        const newWidth = Math.max(60, dragState.current.startWidth + delta);
+        setColWidths((prev) => {
+          const next = { ...prev, [dragState.current!.key]: newWidth };
+          try { localStorage.setItem(`${storageKey}:colWidths`, JSON.stringify(next)); } catch {}
+          return next;
+        });
+      };
+
+      const onUp = () => {
+        dragState.current = null;
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
+
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [storageKey]
+  );
+
+  const getColWidth = useCallback(
+    (colKey: string, fallbackWidth?: string): number => {
+      if (colWidths[colKey] !== undefined) return colWidths[colKey];
+      if (fallbackWidth) {
+        const px = parseInt(fallbackWidth, 10);
+        if (!isNaN(px)) return px;
+      }
+      return 140; // default column width in px
+    },
+    [colWidths]
+  );
+
+  return { colWidths, getColWidth, onResizeStart };
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type SortDirection = "asc" | "desc" | null;
@@ -60,6 +169,16 @@ export interface CreateButton {
   icon?: string;
   onClick: () => void;
   variant?: "primary" | "secondary";
+}
+
+// Saved filter preset — stored in localStorage per table
+export interface FilterPreset {
+  id: string;
+  name: string;
+  search: string;
+  filters: Record<string, string>;
+  sortKey: string | null;
+  sortDir: SortDirection;
 }
 
 export interface DataTableProps<T> {
@@ -193,20 +312,116 @@ export function DataTable<T>({
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [selected, setSelected] = useState<Set<string | number>>(new Set());
   const [selectAllMatching, setSelectAllMatching] = useState(false);
+  // ── Toolbar State — persisted to localStorage ──────────────────────────────
+  // Key is scoped to the table's column set so different tables don't collide.
+  const tableStorageKey = useMemo(
+    () => `dt:${columns.map((c) => c.key).join("-")}`,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [] // intentionally computed once — column keys are stable
+  );
+
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(() => {
+    // 1. Try localStorage first
+    try {
+      const saved = localStorage.getItem(`${tableStorageKey}:hiddenCols`);
+      if (saved) return new Set<string>(JSON.parse(saved));
+    } catch {}
+    // 2. Fall back to defaultVisible flags
     const h = new Set<string>();
     columns.forEach((c) => {
       if (c.defaultVisible === false) h.add(c.key);
     });
     return h;
   });
+
   const [showColToggle, setShowColToggle] = useState(false);
-  const [density, setDensity] = useState<DensityMode>("regular");
+
+  const [density, setDensity] = useState<DensityMode>(() => {
+    try {
+      const saved = localStorage.getItem(`${tableStorageKey}:density`) as DensityMode | null;
+      if (saved && ["compact", "regular", "relaxed"].includes(saved)) return saved;
+    } catch {}
+    return "regular";
+  });
   const [confirm, setConfirm] = useState<{
     message: string;
     onConfirm: () => void;
   } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const colToggleRef = useRef<HTMLDivElement>(null);
+
+  // ── Filter Presets ─────────────────────────────────────────────────────────
+  const [presets, setPresets] = useState<FilterPreset[]>(() => {
+    try {
+      const saved = localStorage.getItem(`${tableStorageKey}:presets`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [showPresets, setShowPresets] = useState(false);
+  const [presetName, setPresetName]   = useState("");
+  const presetPanelRef = useRef<HTMLDivElement>(null);
+
+  // Close preset panel on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (presetPanelRef.current && !presetPanelRef.current.contains(e.target as Node)) {
+        setShowPresets(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const persistPresets = (next: FilterPreset[]) => {
+    setPresets(next);
+    try { localStorage.setItem(`${tableStorageKey}:presets`, JSON.stringify(next)); } catch {}
+  };
+
+  const savePreset = () => {
+    const name = presetName.trim();
+    if (!name) return;
+    const preset: FilterPreset = {
+      id:      Date.now().toString(),
+      name,
+      search:  search,
+      filters: { ...activeFilters },
+      sortKey: sortKey,
+      sortDir: sortDir,
+    };
+    persistPresets([...presets, preset]);
+    setPresetName("");
+    setShowPresets(false);
+  };
+
+  const applyPreset = (preset: FilterPreset) => {
+    setSearch(preset.search);
+    setActiveFilters(preset.filters);
+    setSortKey(preset.sortKey);
+    setSortDir(preset.sortDir);
+    setPage(1);
+    onSearchChange?.(preset.search);
+    onFilterChange?.(preset.filters);
+    onSortChange?.(preset.sortKey, preset.sortDir);
+    onPageChange?.(1);
+    setShowPresets(false);
+  };
+
+  const deletePreset = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    persistPresets(presets.filter((p) => p.id !== id));
+  };
+
+  // Persist presets on change handled by persistPresets() directly.
+
+  // ── Virtualization ─────────────────────────────────────────────────────────
+  const tableWrapRef = useRef<HTMLDivElement>(null);
+  // Estimate row height based on density
+  const estimatedRowHeight = density === "compact" ? 38 : density === "relaxed" ? 58 : 46;
+
+  // ── Column Resize ──────────────────────────────────────────────────────────
+  const { getColWidth, onResizeStart } = useColumnResize(columns, tableStorageKey);
 
   // ── Outside click closes col-toggle ──────────────────────────────────────────
   useEffect(() => {
@@ -309,6 +524,62 @@ export function DataTable<T>({
 
   const selectedCount = selectAllMatching ? allMatchingKeys.length : selected.size;
 
+  // ── Pagination helpers ─────────────────────────────────────────────────────────
+  /**
+   * Builds the visible page range with proper ellipsis:
+   *   1 … 47 48 49 … 100
+   * Rules:
+   *   - Always show page 1 and totalPages
+   *   - Always show [page-1, page, page+1] (window of 3)
+   *   - Insert ‘…’ wherever there is a gap > 1
+   */
+  const buildPageRange = (): (number | "...")[] => {
+    if (totalPages <= 7) {
+      // Small page count — just show all
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const visible = new Set<number>();
+    // Always include first and last
+    visible.add(1);
+    visible.add(totalPages);
+    // Include window of 3 around current page
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+      visible.add(i);
+    }
+    const sorted = [...visible].sort((a, b) => a - b);
+    const result: (number | "...")[] = [];
+    for (let i = 0; i < sorted.length; i++) {
+      result.push(sorted[i]);
+      if (i < sorted.length - 1 && sorted[i + 1] - sorted[i] > 1) {
+        result.push("...");
+      }
+    }
+    return result;
+  };
+
+  // Direct page input
+  const [pageInputVal, setPageInputVal] = useState("");
+  const [pageInputFocused, setPageInputFocused] = useState(false);
+
+  const commitPageInput = () => {
+    const n = parseInt(pageInputVal, 10);
+    if (!isNaN(n)) {
+      const clamped = Math.min(Math.max(1, n), totalPages);
+      handlePageChange(clamped);
+    }
+    setPageInputVal("");
+    setPageInputFocused(false);
+  };
+
+  // ── Persist toolbar state to localStorage ────────────────────────────────────
+  useEffect(() => {
+    try { localStorage.setItem(`${tableStorageKey}:density`, density); } catch {}
+  }, [density, tableStorageKey]);
+
+  useEffect(() => {
+    try { localStorage.setItem(`${tableStorageKey}:hiddenCols`, JSON.stringify([...hiddenCols])); } catch {}
+  }, [hiddenCols, tableStorageKey]);
+
   // ── Sort ──────────────────────────────────────────────────────────────────────
   const handleSort = (key: string) => {
     let nextKey: string | null = key;
@@ -366,6 +637,23 @@ export function DataTable<T>({
   const showActions = actions.length > 0;
   const hasActiveFilters = !!(search || Object.values(activeFilters).some(Boolean));
   const totalCols = visibleColumns.length + (selectable ? 1 : 0) + (showActions ? 1 : 0);
+
+  // ── Derived display values ─────────────────────────────────────────────────
+  // Count of active filter dropdowns (excludes search, which has its own chip)
+  const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;
+  // Total badges: search counts as 1, each active filter counts as 1
+  const totalActiveCount = (search ? 1 : 0) + activeFilterCount;
+
+  // Human-readable sort label for the sort chip
+  const sortLabel = useMemo(() => {
+    if (!sortKey || !sortDir) return null;
+    const col = columns.find((c) => c.key === sortKey);
+    const dirLabel = sortDir === "asc" ? "↑ A→Z" : "↓ Z→A";
+    return col ? `${col.label} ${dirLabel}` : `${sortKey} ${dirLabel}`;
+  }, [sortKey, sortDir, columns]);
+
+  // True when all filters+search are active but produced 0 results
+  const hasNoResults = !loading && !serverSide && hasActiveFilters && processed.length === 0;
 
   // ── Operation Handlers ─────────────────────────────────────────────────────────
   const handlePageChange = (p: number) => {
@@ -476,6 +764,15 @@ export function DataTable<T>({
     relaxed: "dt-root--relaxed",
   }[density];
 
+  // ── Virtualization window ─────────────────────────────────────────────────
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { virtualStart, virtualEnd, totalHeight, offsetY } = useVirtualRows(
+    tableWrapRef,
+    paginated.length,
+    estimatedRowHeight
+  );
+  const virtualRows = paginated.slice(virtualStart, virtualEnd);
+
   // ── Render ─────────────────────────────────────────────────────────────────────
   return (
     <div className={`dt-root ${densityClass} ${className}`}>
@@ -520,6 +817,105 @@ export function DataTable<T>({
               ))}
             </select>
           ))}
+
+          {/* ── Active filter count badge ── */}
+          {totalActiveCount > 0 && (
+            <span className="dt-filter-count-badge" aria-label={`${totalActiveCount} active filter${totalActiveCount !== 1 ? 's' : ''}`}>
+              <i className="ti ti-filter" aria-hidden="true" />
+              {totalActiveCount} filter{totalActiveCount !== 1 ? 's' : ''}
+              <button
+                className="dt-filter-count-clear"
+                onClick={clearAllFilters}
+                aria-label="Clear all filters"
+                title="Clear all filters"
+              >
+                <i className="ti ti-x" aria-hidden="true" />
+              </button>
+            </span>
+          )}
+
+          {/* ── Filter Presets panel ── */}
+          {filters.length > 0 && (
+            <div className="dt-preset-wrap" ref={presetPanelRef}>
+              <button
+                className="dt-btn dt-btn--ghost dt-btn--icon"
+                title="Saved filter presets"
+                aria-label="Saved filter presets"
+                aria-haspopup="true"
+                aria-expanded={showPresets}
+                onClick={() => setShowPresets((p) => !p)}
+              >
+                <i className="ti ti-bookmark" aria-hidden="true" />
+                {presets.length > 0 && (
+                  <span className="dt-preset-count">{presets.length}</span>
+                )}
+              </button>
+
+              {showPresets && (
+                <div className="dt-preset-panel" role="dialog" aria-label="Filter presets">
+                  <p className="dt-preset-panel-title">
+                    <i className="ti ti-bookmark" aria-hidden="true" /> Saved Presets
+                  </p>
+
+                  {/* Save current as preset */}
+                  <div className="dt-preset-save-row">
+                    <input
+                      type="text"
+                      className="dt-preset-name-input"
+                      placeholder="Name this preset…"
+                      value={presetName}
+                      onChange={(e) => setPresetName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && savePreset()}
+                      maxLength={40}
+                    />
+                    <button
+                      className="dt-btn dt-btn--primary dt-preset-save-btn"
+                      onClick={savePreset}
+                      disabled={!presetName.trim()}
+                      title="Save current filters as preset"
+                    >
+                      <i className="ti ti-plus" aria-hidden="true" /> Save
+                    </button>
+                  </div>
+
+                  {/* Preset list */}
+                  {presets.length === 0 ? (
+                    <p className="dt-preset-empty">No saved presets yet.</p>
+                  ) : (
+                    <ul className="dt-preset-list">
+                      {presets.map((preset) => (
+                        <li key={preset.id} className="dt-preset-item">
+                          <button
+                            className="dt-preset-apply"
+                            onClick={() => applyPreset(preset)}
+                          >
+                            <i className="ti ti-filter" aria-hidden="true" />
+                            <span className="dt-preset-item-name">{preset.name}</span>
+                            {preset.search && (
+                              <span className="dt-preset-item-meta">+search</span>
+                            )}
+                            {Object.keys(preset.filters).length > 0 && (
+                              <span className="dt-preset-item-meta">
+                                {Object.keys(preset.filters).length} filter{Object.keys(preset.filters).length !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </button>
+                          <button
+                            className="dt-preset-delete"
+                            onClick={(e) => deletePreset(preset.id, e)}
+                            aria-label={`Delete preset ${preset.name}`}
+                            title="Delete preset"
+                          >
+                            <i className="ti ti-trash" aria-hidden="true" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="dt-toolbar-right">
@@ -613,8 +1009,8 @@ export function DataTable<T>({
         </div>
       </div>
 
-      {/* ── Active filter chips ── */}
-      {hasActiveFilters && (
+      {/* ── Active filter chips + Sort chip ── */}
+      {(hasActiveFilters || sortLabel) && (
         <div className="dt-filter-chips" aria-label="Active filters">
           {search && (
             <span className="dt-chip">
@@ -648,11 +1044,57 @@ export function DataTable<T>({
               </span>
             );
           })}
+
+          {/* ── Sort chip ── */}
+          {sortLabel && (
+            <span className="dt-chip dt-chip--sort">
+              <i className="ti ti-arrows-sort" aria-hidden="true" />
+              Sorted by: <strong>{sortLabel}</strong>
+              <button
+                className="dt-chip-remove"
+                aria-label="Clear sort"
+                onClick={() => {
+                  setSortKey(null);
+                  setSortDir(null);
+                  onSortChange?.(null, null);
+                }}
+              >
+                <i className="ti ti-x" aria-hidden="true" />
+              </button>
+            </span>
+          )}
+
+          {(hasActiveFilters) && (
+            <button
+              className="dt-btn dt-btn--ghost dt-chip-clear-all"
+              onClick={clearAllFilters}
+            >
+              <i className="ti ti-refresh" aria-hidden="true" /> Clear all
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── No-results feedback banner ── */}
+      {hasNoResults && (
+        <div className="dt-no-results-banner" role="status" aria-live="polite">
+          <div className="dt-no-results-left">
+            <i className="ti ti-search-off dt-no-results-icon" aria-hidden="true" />
+            <span className="dt-no-results-text">
+              No results for{" "}
+              {search && <strong>&ldquo;{search}&rdquo;</strong>}
+              {search && activeFilterCount > 0 && " with "}
+              {activeFilterCount > 0 && (
+                <strong>{activeFilterCount} active filter{activeFilterCount !== 1 ? "s" : ""}</strong>
+              )}
+            </span>
+          </div>
           <button
-            className="dt-btn dt-btn--ghost dt-chip-clear-all"
+            className="dt-no-results-clear"
             onClick={clearAllFilters}
+            aria-label="Clear all filters and search"
           >
-            <i className="ti ti-refresh" aria-hidden="true" /> Clear all
+            <i className="ti ti-x" aria-hidden="true" /> Clear filters
           </button>
         </div>
       )}
@@ -703,7 +1145,7 @@ export function DataTable<T>({
       )}
 
       {/* ── Table ── */}
-      <div className="dt-table-wrap">
+      <div className="dt-table-wrap" ref={tableWrapRef}>
         <table className="dt-table" aria-label="Data table">
           <thead>
             <tr>
@@ -721,38 +1163,52 @@ export function DataTable<T>({
                   />
                 </th>
               )}
-              {visibleColumns.map((col) => (
-                <th
-                  key={col.key}
-                  className={[
-                    "dt-th",
-                    col.sortable ? "dt-th--sortable" : "",
-                    sortKey === col.key ? "dt-th--sorted" : "",
-                    col.frozen ? "dt-th--frozen" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  style={{
-                    width: col.width,
-                    textAlign: col.align ?? "left",
-                    ...(col.frozen ? { left: selectable ? "40px" : "0" } : {}),
-                  }}
-                  onClick={col.sortable ? () => handleSort(col.key) : undefined}
-                  aria-sort={
-                    sortKey === col.key
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : undefined
-                  }
-                  scope="col"
-                >
-                  <span className="dt-th-inner">
-                    {col.label}
-                    {col.sortable && sortIcon(col.key)}
-                  </span>
-                </th>
-              ))}
+              {visibleColumns.map((col) => {
+                const resolvedWidth = getColWidth(col.key, col.width);
+                return (
+                  <th
+                    key={col.key}
+                    className={[
+                      "dt-th",
+                      col.sortable ? "dt-th--sortable" : "",
+                      sortKey === col.key ? "dt-th--sorted" : "",
+                      col.frozen ? "dt-th--frozen" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    style={{
+                      width: resolvedWidth,
+                      minWidth: resolvedWidth,
+                      maxWidth: resolvedWidth,
+                      textAlign: col.align ?? "left",
+                      ...(col.frozen ? { left: selectable ? "40px" : "0" } : {}),
+                    }}
+                    onClick={col.sortable ? () => handleSort(col.key) : undefined}
+                    aria-sort={
+                      col.sortable
+                        ? sortKey === col.key
+                          ? sortDir === "asc"
+                            ? "ascending"
+                            : "descending"
+                          : "none"
+                        : undefined
+                    }
+                    scope="col"
+                  >
+                    <span className="dt-th-inner">
+                      {col.label}
+                      {col.sortable && sortIcon(col.key)}
+                    </span>
+                    {/* ── Resize handle ── */}
+                    <span
+                      className="dt-resize-handle"
+                      onMouseDown={(e) => onResizeStart(e, col.key, resolvedWidth)}
+                      aria-hidden="true"
+                      title="Drag to resize column"
+                    />
+                  </th>
+                );
+              })}
               {showActions && (
                 <th className="dt-th dt-th--actions" style={{ textAlign: "right" }}>
                   Actions
@@ -817,63 +1273,104 @@ export function DataTable<T>({
                 </td>
               </tr>
             ) : (
-              paginated.map((row) => {
-                const key = row[rowKey] as string | number;
-                const isSelected = selectAllMatching || selected.has(key);
-                return (
-                  <tr
-                    key={key}
-                    className={`dt-row${isSelected ? " dt-row--selected" : ""}`}
-                    aria-selected={selectable ? isSelected : undefined}
-                  >
-                    {selectable && (
-                      <td className="dt-td dt-td--check dt-td--sticky-left">
-                        <input
-                          type="checkbox"
-                          className="dt-checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleRow(key)}
-                          aria-label={`Select row ${key}`}
-                        />
-                      </td>
-                    )}
-                    {visibleColumns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={["dt-td", col.frozen ? "dt-td--frozen" : ""]
-                          .filter(Boolean)
-                          .join(" ")}
-                        style={{
-                          textAlign: col.align ?? "left",
-                          ...(col.frozen ? { left: selectable ? "40px" : "0" } : {}),
-                        }}
-                      >
-                        {col.render
-                          ? col.render(row)
-                          : String(getValue(row, col.key) ?? "\u2014")}
-                      </td>
-                    ))}
-                    {showActions && (
-                      <td className="dt-td dt-td--actions">
-                        <ActionMenu row={row} actions={actions} />
-                      </td>
-                    )}
+              <>
+                {/* ── Virtualization spacer (top) ── */}
+                {totalHeight !== null && offsetY > 0 && (
+                  <tr aria-hidden="true" style={{ height: offsetY }}>
+                    <td colSpan={totalCols} style={{ padding: 0, border: 0 }} />
                   </tr>
-                );
-              })
+                )}
+
+                {virtualRows.map((row) => {
+                  const key = row[rowKey] as string | number;
+                  const isSelected = selectAllMatching || selected.has(key);
+                  return (
+                    <tr
+                      key={key}
+                      className={`dt-row${isSelected ? " dt-row--selected" : ""}`}
+                      aria-selected={selectable ? isSelected : undefined}
+                    >
+                      {selectable && (
+                        <td className="dt-td dt-td--check dt-td--sticky-left">
+                          <input
+                            type="checkbox"
+                            className="dt-checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleRow(key)}
+                            aria-label={`Select row ${key}`}
+                          />
+                        </td>
+                      )}
+                      {visibleColumns.map((col) => (
+                        <td
+                          key={col.key}
+                          className={["dt-td", col.frozen ? "dt-td--frozen" : ""]
+                            .filter(Boolean)
+                            .join(" ")}
+                          style={{
+                            textAlign: col.align ?? "left",
+                            ...(col.frozen ? { left: selectable ? "40px" : "0" } : {}),
+                          }}
+                        >
+                          {col.render
+                            ? col.render(row)
+                            : String(getValue(row, col.key) ?? "\u2014")}
+                        </td>
+                      ))}
+                      {showActions && (
+                        <td className="dt-td dt-td--actions">
+                          <ActionMenu row={row} actions={actions} />
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+
+                {/* ── Virtualization spacer (bottom) ── */}
+                {totalHeight !== null && (() => {
+                  const bottomSpace = totalHeight - offsetY - (virtualEnd - virtualStart) * estimatedRowHeight;
+                  return bottomSpace > 0 ? (
+                    <tr aria-hidden="true" style={{ height: bottomSpace }}>
+                      <td colSpan={totalCols} style={{ padding: 0, border: 0 }} />
+                    </tr>
+                  ) : null;
+                })()}
+              </>
             )}
           </tbody>
         </table>
       </div>
 
       {/* ── Pagination ── */}
-      <div className="dt-pagination">
+      <nav
+        className="dt-pagination"
+        aria-label="Table pagination"
+        onKeyDown={(e) => {
+          // Keyboard arrow navigation — only when focus is inside pagination nav
+          if (e.key === "ArrowLeft" && page > 1) {
+            e.preventDefault();
+            handlePageChange(page - 1);
+          } else if (e.key === "ArrowRight" && page < totalPages) {
+            e.preventDefault();
+            handlePageChange(page + 1);
+          } else if (e.key === "Home") {
+            e.preventDefault();
+            handlePageChange(1);
+          } else if (e.key === "End") {
+            e.preventDefault();
+            handlePageChange(totalPages);
+          }
+        }}
+      >
+        {/* Record count info */}
         <span className="dt-page-info">
           {totalRecords === 0
             ? "No records"
-            : `Showing ${fromRow}\u2013${toRow} of ${totalRecords.toLocaleString()} records`}
+            : `Showing ${fromRow}–${toRow} of ${totalRecords.toLocaleString()} records`}
         </span>
+
         <div className="dt-pagination-controls">
+          {/* Rows-per-page selector */}
           <span className="dt-page-size-label">Rows per page</span>
           <select
             className="dt-page-size-select"
@@ -887,59 +1384,125 @@ export function DataTable<T>({
               </option>
             ))}
           </select>
-          <div className="dt-page-btns" role="navigation" aria-label="Pagination">
+
+          {/* ── Desktop page buttons ── */}
+          <div className="dt-page-btns" role="group" aria-label="Page navigation">
+            {/* First page */}
             <button
-              className="dt-page-btn"
+              className="dt-page-btn dt-page-btn--icon"
               disabled={page === 1}
               onClick={() => handlePageChange(1)}
               aria-label="First page"
+              title="First page"
             >
               <i className="ti ti-chevrons-left" aria-hidden="true" />
             </button>
+
+            {/* Previous page */}
             <button
-              className="dt-page-btn"
+              className="dt-page-btn dt-page-btn--icon"
               disabled={page === 1}
               onClick={() => handlePageChange(page - 1)}
               aria-label="Previous page"
+              title="Previous page (Left arrow)"
             >
               <i className="ti ti-chevron-left" aria-hidden="true" />
             </button>
-            {pageRange().map((p, i) =>
-              p === "..." ? (
-                <span key={`ellipsis-${i}`} className="dt-page-ellipsis">
-                  ...
-                </span>
-              ) : (
-                <button
-                  key={p}
-                  className={`dt-page-btn${p === page ? " dt-page-btn--active" : ""}`}
-                  onClick={() => handlePageChange(p)}
-                  aria-label={`Page ${p}`}
-                  aria-current={p === page ? "page" : undefined}
-                >
-                  {p}
-                </button>
-              )
-            )}
+
+            {/* Page number buttons with smart ellipsis */}
+            <span className="dt-page-btns-inner">
+              {buildPageRange().map((p, i) =>
+                p === "..." ? (
+                  <span key={`ellipsis-${i}`} className="dt-page-ellipsis" aria-hidden="true">
+                    &hellip;
+                  </span>
+                ) : (
+                  <button
+                    key={p}
+                    className={`dt-page-btn${p === page ? " dt-page-btn--active" : ""}`}
+                    onClick={() => handlePageChange(p)}
+                    aria-label={`Page ${p}`}
+                    aria-current={p === page ? "page" : undefined}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            </span>
+
+            {/* Next page */}
             <button
-              className="dt-page-btn"
+              className="dt-page-btn dt-page-btn--icon"
               disabled={page === totalPages}
               onClick={() => handlePageChange(page + 1)}
               aria-label="Next page"
+              title="Next page (Right arrow)"
             >
               <i className="ti ti-chevron-right" aria-hidden="true" />
             </button>
+
+            {/* Last page */}
             <button
-              className="dt-page-btn"
+              className="dt-page-btn dt-page-btn--icon"
               disabled={page === totalPages}
               onClick={() => handlePageChange(totalPages)}
               aria-label="Last page"
+              title="Last page"
             >
               <i className="ti ti-chevrons-right" aria-hidden="true" />
             </button>
           </div>
+
+          {/* ── Direct page number input ── */}
+          {totalPages > 1 && (
+            <div className="dt-page-jump" aria-label="Jump to page">
+              <label htmlFor="dt-page-jump-input" className="dt-page-size-label">
+                Go to
+              </label>
+              <input
+                id="dt-page-jump-input"
+                type="number"
+                min={1}
+                max={totalPages}
+                className="dt-page-jump-input"
+                placeholder={String(page)}
+                value={pageInputFocused ? pageInputVal : ""}
+                aria-label={`Go to page (1–${totalPages})`}
+                onFocus={() => { setPageInputFocused(true); setPageInputVal(""); }}
+                onChange={(e) => setPageInputVal(e.target.value)}
+                onBlur={commitPageInput}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitPageInput();
+                  if (e.key === "Escape") { setPageInputVal(""); setPageInputFocused(false); }
+                }}
+              />
+            </div>
+          )}
         </div>
-      </div>
+
+        {/* ── Mobile compact: "Page 3 of 48" with only prev/next ── */}
+        <div className="dt-pagination-mobile" aria-hidden="true">
+          <button
+            className="dt-page-btn dt-page-btn--icon"
+            disabled={page === 1}
+            onClick={() => handlePageChange(page - 1)}
+            aria-label="Previous page"
+          >
+            <i className="ti ti-chevron-left" aria-hidden="true" />
+          </button>
+          <span className="dt-page-mobile-label">
+            Page <strong>{page}</strong> of {totalPages}
+          </span>
+          <button
+            className="dt-page-btn dt-page-btn--icon"
+            disabled={page === totalPages}
+            onClick={() => handlePageChange(page + 1)}
+            aria-label="Next page"
+          >
+            <i className="ti ti-chevron-right" aria-hidden="true" />
+          </button>
+        </div>
+      </nav>
 
       {/* ── Confirm Modal ── */}
       {confirm && (
@@ -949,8 +1512,21 @@ export function DataTable<T>({
           message={confirm.message}
           variant="danger"
           confirmLabel="Confirm Delete"
-          onCancel={() => setConfirm(null)}
-          onConfirm={confirm.onConfirm}
+          loading={confirmLoading}
+          onCancel={() => {
+            if (!confirmLoading) setConfirm(null);
+          }}
+          onConfirm={async () => {
+            setConfirmLoading(true);
+            try {
+              // Simulate API request delay for visual spinner feedback
+              await new Promise((resolve) => setTimeout(resolve, 1200));
+              confirm.onConfirm();
+            } finally {
+              setConfirmLoading(false);
+              setConfirm(null);
+            }
+          }}
         />
       )}
     </div>
