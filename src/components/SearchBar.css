@@ -190,6 +190,39 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════
+   SM VARIANT — dense toolbar contexts (e.g. DataTable toolbar)
+   Matches the 36px control height used by Button/select/dt-btn elements
+   so the search field lines up in mixed toolbars.
+   ══════════════════════════════════════════════════════════════════════ */
+.sb-root.is-sm .sb-field {
+  height: 36px;
+  border-radius: 8px;
+  padding: 0 4px 0 12px;
+  /* Match the flat white/bordered look of other toolbar controls (dt-btn, selects) */
+  background: var(--s0, #fff);
+  border: 1px solid var(--border, #E2E8F0);
+}
+
+.sb-root.is-sm.is-focused .sb-field {
+  background: var(--s0, #fff);
+  border-color: var(--teal, #00A99D);
+  box-shadow: 0 0 0 3px var(--teal-ring, rgba(0, 169, 157, 0.12));
+}
+
+.sb-root.is-sm .sb-input {
+  font-size: 13px;
+}
+
+.sb-root.is-sm .sb-icon-search {
+  padding: 4px;
+}
+
+.sb-root.is-sm .sb-btn-clear {
+  width: 18px;
+  height: 18px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
    SUGGESTIONS DROPDOWN
    OneUI: white card, 20px radius, soft 3-layer shadow
    ⑥ No hard border — depth via shadow only

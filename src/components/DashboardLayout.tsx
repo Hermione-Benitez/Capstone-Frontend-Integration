@@ -149,7 +149,7 @@ const BarTooltip = ({ active, payload, label }: any) => {
       padding: '10px 14px',
       boxShadow: '0px 4px 20px rgba(15, 23, 42, 0.05)',
       fontSize: '0.8rem',
-      fontFamily: "'Outfit', sans-serif",
+      fontFamily: "var(--fb, sans-serif)",
     }}>
       <div style={{ fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>{label}</div>
       {payload.map((p: any) => (
@@ -460,7 +460,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       dataKey="day"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fill: '#64748B', fontWeight: 600, fontFamily: 'Outfit' }}
+                      tick={{ fontSize: 11, fill: '#64748B', fontWeight: 600, fontFamily: 'var(--fb, sans-serif)' }}
                     />
                     <Tooltip content={<BarTooltip />} cursor={{ fill: 'rgba(0, 169, 157, 0.03)' }} />
                     <Bar dataKey="deliveries" name="Deliveries" fill={C.success} radius={[4, 4, 0, 0]} maxBarSize={32} />
@@ -535,7 +535,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       borderRadius: '8px',
                       border: '1px solid #DDE2EB',
                       boxShadow: '0px 4px 20px rgba(15, 23, 42, 0.05)',
-                      fontFamily: 'Outfit, sans-serif',
+                      fontFamily: 'var(--fb, sans-serif)',
                     }}
                   />
                   <Legend
@@ -546,7 +546,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     iconSize={8}
                     wrapperStyle={isMobile ? { paddingTop: 10 } : undefined}
                     formatter={(value) => (
-                      <span style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 500, fontFamily: 'Outfit' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 500, fontFamily: 'var(--fb, sans-serif)' }}>
                         {value}
                       </span>
                     )}

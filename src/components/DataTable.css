@@ -43,59 +43,13 @@
 }
 
 .dt-search-wrap {
-  position: relative;
   width: 260px;
 }
 
-.dt-search {
+/* SearchBar's own root sets max-width: 560px — cap it to the toolbar's slot */
+.dt-search-wrap .sb-root {
+  max-width: none;
   width: 100%;
-  height: 36px;
-  padding: 0 32px 0 34px;
-  border: 1px solid var(--border, #E2E8F0);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--tp, #0F172A);
-  font-size: 13px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.dt-search:focus {
-  outline: none;
-  border-color: var(--teal, #00A99D);
-  box-shadow: 0 0 0 3px rgba(0, 169, 157, 0.12);
-}
-
-.dt-search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: var(--tt, #6B7280);
-  pointer-events: none;
-}
-
-.dt-search-clear {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--tt, #6B7280);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.dt-search-clear:hover {
-  background: var(--s2, #F0F4FF);
-  color: var(--tp, #0F172A);
 }
 
 .dt-filter-select {
@@ -115,74 +69,22 @@
   border-color: var(--teal, #00A99D);
 }
 
-/* ── Toolbar buttons ─────────────────────────────────────────────────────── */
+/* ── Toolbar buttons ─────────────────────────────────────────────────────────
+   NOTE: Buttons in the DataTable toolbar/bulk-bar use the shared <Button/>
+   component (`.btn` classes from global.css) — no local `.dt-btn` variant.
+   This block only aligns their height (36px) with the search bar and
+   filter selects so mixed toolbars line up pixel-for-pixel. */
 
-.dt-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border, #E2E8F0);
-  background: #fff;
-  color: var(--ts, #374151);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
+.dt-toolbar .btn,
+.dt-bulk-bar .btn,
+.dt-filter-chips .btn,
+.dt-empty-action {
+  height: 36px !important;
 }
 
-.dt-btn:hover {
-  background: var(--s1, #F7F9FF);
-  border-color: var(--border-h, #CBD5E1);
-}
-
-.dt-btn:active { transform: scale(0.98); }
-
-.dt-btn--ghost {
-  background: transparent;
-  border-color: transparent;
-  color: var(--tt, #6B7280);
-}
-.dt-btn--ghost:hover { background: var(--s2, #F0F4FF); }
-
-.dt-btn--primary {
-  background: var(--teal, #00A99D);
-  border-color: var(--teal, #00A99D);
-  color: #fff;
-}
-.dt-btn--primary:hover {
-  background: var(--teal-hover, #009189);
-  box-shadow: 0 4px 12px rgba(0, 169, 157, 0.25);
-}
-
-.dt-btn--secondary {
-  background: #fff;
-  border-color: var(--border, #E2E8F0);
-  color: var(--ts, #374151);
-}
-.dt-btn--secondary:hover {
-  border-color: var(--teal, #00A99D);
-  color: var(--teal, #00A99D);
-}
-
-.dt-btn--danger {
-  background: rgba(220, 38, 38, 0.06);
-  border-color: #DC2626;
-  color: #DC2626;
-}
-.dt-btn--danger:hover {
-  background: #DC2626;
-  color: #fff;
-}
-
-.dt-btn--icon {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  justify-content: center;
+.dt-toolbar .btn.btn--icon-only,
+.dt-bulk-bar .btn.btn--icon-only {
+  width: 36px !important;
 }
 
 /* ── Density toggle ──────────────────────────────────────────────────────── */

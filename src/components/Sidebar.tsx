@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useToast } from "./ToastContext";
+import "./Sidebar.css";
 
 export interface NavSubItem {
   label: string;
@@ -90,6 +91,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  // ── Mobile drawer state ──
+  // Below the 480px breakpoint, global.css turns the sidebar into an
+  // off-canvas drawer (`.sidebar` gets `left: -100%`, revealed via
+  // `.mobile-open`). GlobalHeader's hamburger button dispatches this
+  // window event so the sidebar doesn't need a prop wired through
+  // every layout that renders both components independently.
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setMobileOpen((prev) => !prev);
+    window.addEventListener("toggle-sidebar-mobile", handler);
+    return () => window.removeEventListener("toggle-sidebar-mobile", handler);
+  }, []);
+
+  // Close the mobile drawer on route-like interactions (any nav item click)
+  // and on Escape, matching standard drawer UX.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [mobileOpen]);
+
   // ── Pinned/Favorites Navigation State ──
   const [pinnedItems, setPinnedItems] = useState<string[]>(() => {
     try {
@@ -164,7 +190,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   return (
-    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+    <>
+      {/* Mobile drawer backdrop — closes the drawer on tap-outside */}
+      {mobileOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <aside className={`sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}>
       {/* Logo Header */}
       <div className="sidebar-logo">
         <div className="logo-img-wrapper">
@@ -186,7 +221,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation Links */}
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" aria-label="Main navigation">
         {displayNavGroups.map((group, groupIndex) => (
           <React.Fragment key={groupIndex}>
             {group.label && <span className="nav-module-label">{group.label}</span>}
@@ -209,12 +244,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           setCollapsed(false);
                           localStorage.setItem("sidebar-collapsed", "false");
                         }
-                      } else if (item.onClick) {
-                        item.onClick();
+                      } else {
+                        item.onClick?.();
+                        // Close the mobile drawer after navigating (no-op on desktop)
+                        setMobileOpen(false);
                       }
                     }}
                     className={`nav-item ${item.active ? "active" : ""} ${hasSubItems ? "has-subs" : ""}`}
                     data-tooltip={collapsed ? item.label : undefined}
+                    aria-current={item.active ? "page" : undefined}
+                    aria-expanded={hasSubItems ? isExpanded : undefined}
                   >
                     {item.icon && (
                       <span className="nav-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -268,6 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             if (sub.onClick) sub.onClick();
                           }}
                           className={`nav-sub-item ${sub.active ? "active" : ""}`}
+                          aria-current={sub.active ? "page" : undefined}
                         >
                           {sub.label}
                         </a>
@@ -326,7 +366,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
       )}
-    </aside>
+      </aside>
+    </>
   );
 };
 

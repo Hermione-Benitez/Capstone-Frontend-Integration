@@ -1,11 +1,12 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import Button from "./Buttons";
 import "./ConfirmModal.css";
-export const ConfirmModal = ({ isOpen, title, message, variant = "primary", cancelLabel = "Cancel", confirmLabel = "Confirm", onCancel, onConfirm, icon, requiredPasscode, passcodeValue = "", onPasscodeChange, loading = false, }) => {
+export const ConfirmModal = ({ isOpen, title, message, variant = "primary", cancelLabel = "Cancel", confirmLabel = "Confirm", onCancel, onConfirm, icon, requiredPasscode, passcodeValue = "", onPasscodeChange, loading = false, children, confirmDisabled = false, }) => {
     const containerRef = useRef(null);
     const cancelBtnRef = useRef(null);
+    const dialogId = useId();
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [isClosing, setIsClosing] = useState(false);
     // Sync open states with transitions
@@ -72,29 +73,17 @@ export const ConfirmModal = ({ isOpen, title, message, variant = "primary", canc
     const isDestructive = variant === "danger";
     const defaultIcon = isDestructive ? "ti-alert-triangle" : "ti-info-circle";
     const resolvedIcon = icon || defaultIcon;
-    const isConfirmDisabled = requiredPasscode
-        ? passcodeValue.trim() !== requiredPasscode
-        : false;
-    return createPortal(_jsx("div", { className: `dt-overlay${isClosing ? " closing" : ""}`, role: "dialog", "aria-modal": "true", onClick: onCancel, onKeyDown: handleKeyDown, children: _jsxs("div", { className: `dt-dialog${isClosing ? " closing" : ""}`, ref: containerRef, onClick: (e) => e.stopPropagation(), style: {
+    const isConfirmDisabled = confirmDisabled ||
+        (requiredPasscode ? passcodeValue.trim() !== requiredPasscode : false);
+    const hasCustomBody = !!children;
+    const titleId = `${dialogId}-title`;
+    const descId = `${dialogId}-desc`;
+    return createPortal(_jsx("div", { className: `dt-overlay${isClosing ? " closing" : ""}`, role: "presentation", onClick: onCancel, children: _jsxs("div", { className: `dt-dialog${isClosing ? " closing" : ""}${hasCustomBody ? " dt-dialog--form" : ""}`, ref: containerRef, onClick: (e) => e.stopPropagation(), onKeyDown: handleKeyDown, role: "alertdialog", "aria-modal": "true", "aria-labelledby": titleId, "aria-describedby": message ? descId : undefined, style: {
                 borderColor: isDestructive ? "var(--err-r)" : "var(--teal-ring)",
             }, children: [_jsx("div", { className: "dt-dialog-icon", style: {
                         background: isDestructive ? "var(--err-bg)" : "var(--teal-bg)",
                         color: isDestructive ? "var(--err)" : "var(--teal)",
-                    }, children: _jsx("i", { className: `ti ${resolvedIcon}`, "aria-hidden": "true" }) }), _jsx("h3", { className: "dt-dialog-title", style: { fontFamily: "var(--fh)" }, children: title }), _jsx("p", { className: "dt-dialog-msg", children: message }), requiredPasscode && (_jsxs("div", { className: "ab-form-group", style: { marginTop: "16px", textAlign: "left" }, children: [_jsxs("label", { className: "tf-label", style: {
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                                color: "var(--ts)",
-                                marginBottom: "6px",
-                                display: "block",
-                            }, children: ["Type ", _jsx("strong", { style: { color: "var(--tp)" }, children: requiredPasscode }), " to confirm"] }), _jsx("input", { type: "text", className: "tf-input", style: {
-                                width: "100%",
-                                height: "36px",
-                                border: "1px solid var(--border)",
-                                borderRadius: "var(--r-xs)",
-                                padding: "0 10px",
-                                fontSize: "13px",
-                            }, value: passcodeValue, onChange: (e) => onPasscodeChange?.(e.target.value), placeholder: `Type "${requiredPasscode}"`, autoFocus: true, disabled: loading })] })), _jsxs("div", { className: "dt-dialog-actions", style: { marginTop: "24px" }, children: [_jsx("button", { ref: cancelBtnRef, className: "btn btn--secondary btn--sm", onClick: onCancel, disabled: loading, children: cancelLabel }), _jsx(Button, { title: confirmLabel, variant: variant, size: "sm", disabled: isConfirmDisabled, loading: loading, onClick: onConfirm })] })] }) }), document.body);
+                    }, children: _jsx("i", { className: `ti ${resolvedIcon}`, "aria-hidden": "true" }) }), _jsx("h3", { className: "dt-dialog-title", id: titleId, style: { fontFamily: "var(--fh)" }, children: title }), message && (_jsx("p", { className: "dt-dialog-msg", id: descId, children: message })), hasCustomBody && (_jsx("div", { className: "dt-dialog-body", children: children })), requiredPasscode && (_jsxs("div", { className: "dt-dialog-passcode", children: [_jsxs("label", { className: "tf-label", htmlFor: "dt-dialog-passcode-input", children: ["Type ", _jsx("strong", { style: { color: "var(--tp)" }, children: requiredPasscode }), " to confirm"] }), _jsx("input", { id: "dt-dialog-passcode-input", type: "text", className: "tf-input dt-dialog-passcode-input", value: passcodeValue, onChange: (e) => onPasscodeChange?.(e.target.value), placeholder: `Type "${requiredPasscode}"`, autoFocus: true, disabled: loading })] })), _jsxs("div", { className: "dt-dialog-actions", children: [_jsx(Button, { ref: cancelBtnRef, title: cancelLabel, variant: "secondary", size: "sm", onClick: onCancel, disabled: loading }), _jsx(Button, { title: confirmLabel, variant: variant, size: "sm", disabled: isConfirmDisabled, loading: loading, onClick: onConfirm })] })] }) }), document.body);
 };
 export default ConfirmModal;
 //# sourceMappingURL=ConfirmModal.js.map

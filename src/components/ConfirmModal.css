@@ -46,14 +46,91 @@
 .dt-dialog-msg {
   font-size: 13.5px;
   color: var(--tt, #6B7280);
-  margin: 0 0 24px;
+  margin: 0 0 8px;
   line-height: 1.6;
+}
+
+/* ── Custom body content (read-only fields / form inputs) ──
+   When `children` is passed, the dialog widens and left-aligns text so
+   forms and field grids remain readable instead of the centered layout
+   used for plain confirm/delete prompts. */
+.dt-dialog--form {
+  max-width: 480px;
+  text-align: left;
+}
+
+.dt-dialog--form .dt-dialog-icon {
+  margin: 0 0 12px;
+}
+
+.dt-dialog--form .dt-dialog-title,
+.dt-dialog--form .dt-dialog-msg {
+  text-align: left;
+}
+
+.dt-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 16px 0 4px;
+  text-align: left;
+}
+
+.ab-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ab-view-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ab-view-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--tt, #6B7280);
+}
+
+.ab-view-value {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--tp, #0F172A);
+}
+
+/* ── Type-to-confirm passcode field (high-friction destructive actions) ── */
+.dt-dialog-passcode {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.dt-dialog-passcode .tf-label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.dt-dialog-passcode-input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: var(--r-xs, 4px);
+  padding: 0 10px;
+  font-size: 13px;
 }
 
 .dt-dialog-actions {
   display: flex;
   gap: 10px;
   justify-content: center;
+  margin-top: 24px;
+}
+
+.dt-dialog--form .dt-dialog-actions {
+  justify-content: flex-end;
 }
 
 /* Animations and keyframes */

@@ -1,10 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import {
   Bell,
-  CheckCheck,
-  Trash2,
-  Check,
-  Eye,
   AlertTriangle,
   CheckCircle2,
   Info,
@@ -12,22 +8,14 @@ import {
 } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import ConfirmModal from "./ConfirmModal";
+import Button from "./Buttons";
+import type { NotificationItem } from "./notificationTypes";
 import "./Notifications.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface NotificationItem {
-  id: string;
-  title: string;
-  description: string;
-  timestamp: string;
-  date: string;
-  read: boolean;
-  type: "alert" | "success" | "info" | "system";
-  waybillNo?: string;
-  statusBadge?: string;
-  source: string;
-}
+// NotificationItem is now defined once in ./notificationTypes and shared with
+// GlobalHeader's preview dropdown so both surfaces describe the same record.
+export type { NotificationItem };
 
 export interface NotificationsProps {
   /** Override initial notifications data */
@@ -45,8 +33,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Delivery attempt failed in Makati for Juan Dela Cruz. Rider could not locate address.",
     timestamp: "10:32 AM",
     date: "Today",
+    isToday: true,
     read: false,
     type: "alert",
+    category: "logistics",
     waybillNo: "SP-77291",
     statusBadge: "Failed",
     source: "DMS Auto-Alert",
@@ -57,8 +47,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Route #8 is running 35 mins behind schedule. SLA impact imminent for 3 orders.",
     timestamp: "9:15 AM",
     date: "Today",
+    isToday: true,
     read: false,
     type: "alert",
+    category: "logistics",
     waybillNo: "SP-80124",
     statusBadge: "At Risk",
     source: "TARS Monitor",
@@ -69,8 +61,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Package successfully delivered to Sofia Martinez in Quezon City.",
     timestamp: "8:45 AM",
     date: "Today",
+    isToday: true,
     read: false,
     type: "success",
+    category: "logistics",
     waybillNo: "SP-77288",
     statusBadge: "Delivered",
     source: "DMS",
@@ -81,8 +75,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Waybill SP-77291 assigned to driver Juan dela Cruz for afternoon dispatch.",
     timestamp: "7:00 AM",
     date: "Today",
+    isToday: true,
     read: true,
     type: "info",
+    category: "logistics",
     waybillNo: "SP-77291",
     statusBadge: "Assigned",
     source: "DMS",
@@ -93,8 +89,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Vendor payout to FastTrack Cargo rejected by bank. Amount: PHP 45,000.",
     timestamp: "Yesterday, 4:30 PM",
     date: "Yesterday",
+    isToday: false,
     read: false,
     type: "alert",
+    category: "finance",
     waybillNo: "INV-2024-088",
     statusBadge: "Failed",
     source: "FinSys",
@@ -105,8 +103,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Weekly dispatch efficiency audit is ready for download. Coverage: March 1-7.",
     timestamp: "Yesterday, 2:00 PM",
     date: "Yesterday",
+    isToday: false,
     read: true,
     type: "success",
+    category: "logistics",
     source: "TARS Analytics",
   },
   {
@@ -115,8 +115,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Truck Plate TX-492 cleared for long-haul duty after scheduled servicing.",
     timestamp: "Yesterday, 11:00 AM",
     date: "Yesterday",
+    isToday: false,
     read: true,
     type: "info",
+    category: "driver",
     source: "Fleet Ops",
   },
   {
@@ -125,8 +127,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "Workspace session policies updated. All active sessions refreshed automatically.",
     timestamp: "March 3, 2025",
     date: "March 3, 2025",
+    isToday: false,
     read: true,
     type: "system",
+    category: "system",
     source: "IT Security",
   },
   {
@@ -135,8 +139,10 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
     description: "All users must update passwords within 14 days per new compliance directive.",
     timestamp: "March 2, 2025",
     date: "March 2, 2025",
+    isToday: false,
     read: true,
     type: "system",
+    category: "system",
     source: "IT Security",
   },
 ];
@@ -248,12 +254,22 @@ export const Notifications: React.FC<NotificationsProps> = ({
     <>
       {/* Page Header */}
       <div className="notif-actions-row">
-        <button className="btn btn-outline btn-sm" onClick={markAllAsRead} disabled={unreadCount === 0}>
-          <CheckCheck size={14} /> Mark all as read
-        </button>
-        <button className="btn btn-outline btn-sm" onClick={() => setShowClearConfirm(true)} disabled={notifications.length === 0}>
-          <Trash2 size={14} /> Clear all
-        </button>
+        <Button
+          title="Mark all as read"
+          icon="ti-checks"
+          variant="secondary"
+          size="sm"
+          onClick={markAllAsRead}
+          disabled={unreadCount === 0}
+        />
+        <Button
+          title="Clear all"
+          icon="ti-trash"
+          variant="secondary"
+          size="sm"
+          onClick={() => setShowClearConfirm(true)}
+          disabled={notifications.length === 0}
+        />
         <span className="notif-unread-count">{unreadCount} unread notifications</span>
       </div>
 
@@ -329,13 +345,14 @@ export const Notifications: React.FC<NotificationsProps> = ({
           <div className="notif-detail-panel">
             <div className="notif-detail-header">
               <h3>Notification Detail</h3>
-              <button
-                className="btn btn-ghost btn-sm"
+              <Button
+                title="Close detail"
+                icon="ti-x"
+                iconOnly
+                variant="ghost"
+                size="sm"
                 onClick={() => setSelectedId("")}
-                aria-label="Close detail"
-              >
-                ✕
-              </button>
+              />
             </div>
 
             {/* Alert type bar */}
@@ -384,24 +401,27 @@ export const Notifications: React.FC<NotificationsProps> = ({
 
             {/* Actions */}
             <div className="notif-detail-actions">
-              <button
-                className="btn btn-primary btn-sm"
+              <Button
+                title="View Order"
+                icon="ti-eye"
+                variant="primary"
+                size="sm"
                 onClick={() => onViewOrder?.(selected)}
-              >
-                <Eye size={14} /> View Order
-              </button>
-              <button
-                className="btn btn-outline btn-sm"
+              />
+              <Button
+                title="Mark Read"
+                icon="ti-check"
+                variant="secondary"
+                size="sm"
                 onClick={() => markNotificationRead(selected.id)}
-              >
-                <Check size={14} /> Mark Read
-              </button>
-              <button
-                className="btn btn-danger btn-sm"
+              />
+              <Button
+                title="Delete"
+                icon="ti-trash"
+                variant="danger"
+                size="sm"
                 onClick={() => deleteNotification(selected.id)}
-              >
-                <Trash2 size={14} /> Delete
-              </button>
+              />
             </div>
           </div>
         )}
@@ -410,12 +430,8 @@ export const Notifications: React.FC<NotificationsProps> = ({
       {/* ── Floating Selection Bar ──────────────────────────────────── */}
       <div className={`floating-selection-bar ${checkedIds.length > 0 ? "visible" : ""}`}>
         <span className="floating-selection-count">{checkedIds.length} selected</span>
-        <button className="btn btn-sm" onClick={handleMarkCheckedAsRead}>
-          <Check size={14} /> Mark read
-        </button>
-        <button className="btn btn-sm btn-danger" onClick={handleDeleteChecked}>
-          <Trash2 size={14} /> Delete
-        </button>
+        <Button title="Mark read" icon="ti-check" variant="primary" size="sm" onClick={handleMarkCheckedAsRead} />
+        <Button title="Delete" icon="ti-trash" variant="danger" size="sm" onClick={handleDeleteChecked} />
       </div>
 
       {/* ── Clear All Confirmation ──────────────────────────────────── */}

@@ -1,4 +1,4 @@
-﻿/* ================================================================
+/* ================================================================
    Speedex OneUI — Global CSS
    Single source of truth for all design tokens.
    Shared across DMS, TARS, and FinSys.
@@ -70,6 +70,8 @@
     /* Neutral / Terminated Slate Grey */
     --status-assign: #4F46E5;
     /* Assignment / Ownership Indigo */
+    --status-warn-danger: #EA580C;
+    /* Alert / Aging Warn-Danger Orange-Red (60-90 days) */
 
     /* ── Chart / Graph Color Tokens ── */
     /* Consolidated from DashboardLayout — exported as CSS tokens */
@@ -120,8 +122,8 @@
     /* Sidebar expanded width */
     --sc: 64px;
     /* Sidebar collapsed width */
-    --hh: 62px;
-    /* Header height */
+    --hh: 70px;
+    /* Header height — matches GlobalHeader.css height: 70px */
 
     /* ── Motion ── */
     /* Consolidated from FormModals.css — single source of truth */
@@ -226,6 +228,8 @@
     --status-danger: #F87171;
     --status-neutral: #94A3B8;
     --status-assign: #818CF8;
+    --status-warn-danger: #FB923C;
+    /* Brighter for dark bg readability */
 
     /* Chart tokens (dark) */
     --chart-success: #00C4B7;
@@ -293,6 +297,52 @@
 
   button {
     cursor: pointer;
+  }
+
+  /* ================================================================
+     UNIVERSAL FOCUS-VISIBLE RING
+     Applies to every interactive element by default (WCAG 2.4.7).
+     Components with a bespoke focus treatment (search pill border,
+     calendar day ring, etc.) already override this locally — this
+     is the safety net for everything else: buttons, badges, nav
+     items, chips, table rows, checkboxes, links.
+     ================================================================ */
+  a:focus,
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  [tabindex]:focus {
+    outline: none;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--teal, #00A99D);
+    outline-offset: 2px;
+    border-radius: var(--r-xs, 4px);
+  }
+
+  /* Pill/rounded controls need a matching rounded ring instead of the
+     default 4px radius above. */
+  .btn:focus-visible,
+  .badge:focus-visible,
+  .nav-badge:focus-visible {
+    border-radius: var(--r-sm, 8px);
+  }
+
+  /* Dark sidebar needs a brighter ring for contrast against navy bg */
+  .nav-item:focus-visible,
+  .nav-sub-item:focus-visible,
+  .profile-card:focus-visible,
+  .sb-toggle-btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
   }
 
   .app-shell {
@@ -1296,6 +1346,10 @@
     border-color: var(--border-h);
   }
 
+  .kpi-clickable {
+    cursor: pointer;
+  }
+
   .kpi:hover::before {
     opacity: 1;
   }
@@ -1450,6 +1504,11 @@
     /* Header: tighter padding on mobile */
     .site-header {
       padding: 0 16px;
+    }
+
+    /* Reveal the hamburger drawer toggle on mobile */
+    .header-menu-btn {
+      display: flex;
     }
 
     /* Header title smaller on mobile */

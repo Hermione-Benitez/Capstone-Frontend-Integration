@@ -7,37 +7,54 @@
               --radius-sm, --radius-md, --shadow-card, --shadow-lg, --transition
 ──────────────────────────────────────────────────────── */
 
-/* Inject SPEEDEX tokens locally so this component is self-contained
-   in the integration project whose global.css uses different variable names */
+/* Map DashboardLayout local names → canonical global.css tokens.
+   NO hardcoded hex values here — all resolved from :root.
+   This prevents visual drift between DMS, TARS, and FinSys.
+   If global.css tokens change, this dashboard updates automatically. */
 .speedex-dashboard {
-  --primary:        #00A99D;
-  --primary-hover:  #009189;
-  --primary-dark:   #1B254B;
-  --bg-main:        #F4F6F9;
-  --bg-body:        #EBF0F5;
-  --bg-card:        #FFFFFF;
-  --border:         #DDE2EB;
-  --text-primary:   #0F172A;
-  --text-secondary: #475569;
-  --text-muted:     #64748B;
-  --status-active:  #059669;
-  --status-pending: #D97706;
-  --status-failed:  #DC2626;
-  --status-transit: #0284C7;
-  --status-new:     #4F46E5;
-  --radius-sm:      8px;
-  --radius-md:      12px;
-  --padding-main:   28px;
-  --shadow-card:    0px 4px 20px rgba(15, 23, 42, 0.05);
-  --shadow-lg:      0px 8px 30px rgba(15, 23, 42, 0.08);
-  --transition:     all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Brand / Primary */
+  --primary:        var(--teal,        #00A99D);
+  --primary-hover:  var(--teal-hover,  #009189);
+  --primary-dark:   var(--navy,        #1B254B);
 
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Surfaces */
+  --bg-card:        var(--s0);
+  --bg-main:        var(--s1);
+  --bg-body:        var(--s2);
+
+  /* Borders */
+  --border:         var(--border,      #E2E8F0);
+
+  /* Text */
+  --text-primary:   var(--tp);
+  --text-secondary: var(--ts);
+  --text-muted:     var(--tt);
+
+  /* Status (maps to global status tokens) */
+  --status-active:  var(--status-success,  #059669);
+  --status-pending: var(--status-warning,  #D97706);
+  --status-failed:  var(--status-danger,   #DC2626);
+  --status-transit: var(--status-info,     #0284C7);
+  --status-new:     var(--status-assign,   #4F46E5);
+
+  /* Geometry */
+  --radius-sm:      var(--r-sm,  8px);
+  --radius-md:      var(--r-md,  12px);
+  --padding-main:   28px;
+
+  /* Shadows */
+  --shadow-card:    var(--sh1);
+  --shadow-lg:      var(--sh3);
+
+  /* Motion (use global alias — avoids duplicate timing values) */
+  --transition:     all var(--mt-std, 200ms) var(--ease-std, cubic-bezier(0.4, 0, 0.2, 1));
+
+  font-family: var(--fb, -apple-system, BlinkMacSystemFont, sans-serif);
   background: transparent; /* Seamless blend inside main catalog */
   display: flex;
   flex-direction: column;
   gap: var(--padding-main);
-  padding: 0; /* Remove double padding */
+  padding: 0;
   border-radius: 0;
 }
 
@@ -489,7 +506,7 @@
 .spx-date-input-field {
   width: 100%;
   padding: 6px 8px 6px 28px;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--fb, sans-serif);
   font-size: 12px;
   color: #0F172A;
   background: transparent;

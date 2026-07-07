@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, KeyboardEvent } from "react";
+import React, { useEffect, useRef, useState, useId, KeyboardEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Button from "./Buttons";
 import "./ConfirmModal.css";
@@ -8,7 +8,7 @@ export interface ConfirmModalProps {
   isOpen: boolean;
   /** Modal title text */
   title: string;
-  /** Detailed description or body text */
+  /** Detailed description or body text. Leave empty when using `children` for custom form content. */
   message: string;
   /** Primary action variant. Set to 'danger' for destructive actions (e.g. delete/deactivate) */
   variant?: "primary" | "danger" | "success" | "warning";
@@ -30,6 +30,14 @@ export interface ConfirmModalProps {
   onPasscodeChange?: (val: string) => void;
   /** Optional loading state spinner for async confirmations */
   loading?: boolean;
+  /**
+   * Optional custom body content (e.g. read-only fields, form inputs) rendered
+   * below `message`. When provided alongside form fields, the dialog widens
+   * and left-aligns text for readability.
+   */
+  children?: ReactNode;
+  /** Disable the confirm button (e.g. while a form is invalid) */
+  confirmDisabled?: boolean;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -46,9 +54,12 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   passcodeValue = "",
   onPasscodeChange,
   loading = false,
+  children,
+  confirmDisabled = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
+  const dialogId = useId();
 
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
@@ -121,22 +132,31 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   const defaultIcon = isDestructive ? "ti-alert-triangle" : "ti-info-circle";
   const resolvedIcon = icon || defaultIcon;
 
-  const isConfirmDisabled = requiredPasscode
-    ? passcodeValue.trim() !== requiredPasscode
-    : false;
+  const isConfirmDisabled =
+    confirmDisabled ||
+    (requiredPasscode ? passcodeValue.trim() !== requiredPasscode : false);
+
+  const hasCustomBody = !!children;
+  const titleId = `${dialogId}-title`;
+  const descId = `${dialogId}-desc`;
 
   return createPortal(
     <div
       className={`dt-overlay${isClosing ? " closing" : ""}`}
-      role="dialog"
-      aria-modal="true"
+      role="presentation"
       onClick={onCancel}
-      onKeyDown={handleKeyDown}
     >
       <div
-        className={`dt-dialog${isClosing ? " closing" : ""}`}
+        className={`dt-dialog${isClosing ? " closing" : ""}${
+          hasCustomBody ? " dt-dialog--form" : ""
+        }`}
         ref={containerRef}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleKeyDown}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={message ? descId : undefined}
         style={{
           borderColor: isDestructive ? "var(--err-r)" : "var(--teal-ring)",
         }}
@@ -150,40 +170,28 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         >
           <i className={`ti ${resolvedIcon}`} aria-hidden="true" />
         </div>
-        <h3 className="dt-dialog-title" style={{ fontFamily: "var(--fh)" }}>
+        <h3 className="dt-dialog-title" id={titleId} style={{ fontFamily: "var(--fh)" }}>
           {title}
         </h3>
-        <p className="dt-dialog-msg">{message}</p>
+        {message && (
+          <p className="dt-dialog-msg" id={descId}>
+            {message}
+          </p>
+        )}
+
+        {hasCustomBody && (
+          <div className="dt-dialog-body">{children}</div>
+        )}
 
         {requiredPasscode && (
-          <div
-            className="ab-form-group"
-            style={{ marginTop: "16px", textAlign: "left" }}
-          >
-            <label
-              className="tf-label"
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                color: "var(--ts)",
-                marginBottom: "6px",
-                display: "block",
-              }}
-            >
+          <div className="dt-dialog-passcode">
+            <label className="tf-label" htmlFor="dt-dialog-passcode-input">
               Type <strong style={{ color: "var(--tp)" }}>{requiredPasscode}</strong> to confirm
             </label>
             <input
+              id="dt-dialog-passcode-input"
               type="text"
-              className="tf-input"
-              style={{
-                width: "100%",
-                height: "36px",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--r-xs)",
-                padding: "0 10px",
-                fontSize: "13px",
-              }}
+              className="tf-input dt-dialog-passcode-input"
               value={passcodeValue}
               onChange={(e) => onPasscodeChange?.(e.target.value)}
               placeholder={`Type "${requiredPasscode}"`}
@@ -193,15 +201,15 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </div>
         )}
 
-        <div className="dt-dialog-actions" style={{ marginTop: "24px" }}>
-          <button
+        <div className="dt-dialog-actions">
+          <Button
             ref={cancelBtnRef}
-            className="btn btn--secondary btn--sm"
+            title={cancelLabel}
+            variant="secondary"
+            size="sm"
             onClick={onCancel}
             disabled={loading}
-          >
-            {cancelLabel}
-          </button>
+          />
           <Button
             title={confirmLabel}
             variant={variant}

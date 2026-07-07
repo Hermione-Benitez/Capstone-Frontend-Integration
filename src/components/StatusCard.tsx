@@ -86,7 +86,23 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   }
 
   return (
-    <div className={`kpi ${onClick ? 'kpi-clickable' : ''}`} style={customStyles} onClick={onClick}>
+    <div
+      className={`kpi ${onClick ? 'kpi-clickable' : ''}`}
+      style={customStyles}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+    >
       <div className="kpi-top">
         <span className="kpi-label">{label}</span>
         {icon && (

@@ -1,4 +1,4 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useToast } from "./ToastContext";
 const defaultNavGroups = [
@@ -46,6 +46,30 @@ export const Sidebar = ({ logoUrl = "/logo.png", logoText = "SPEEDEX", navGroups
     });
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const profileRef = useRef(null);
+    // ── Mobile drawer state ──
+    // Below the 480px breakpoint, global.css turns the sidebar into an
+    // off-canvas drawer (`.sidebar` gets `left: -100%`, revealed via
+    // `.mobile-open`). GlobalHeader's hamburger button dispatches this
+    // window event so the sidebar doesn't need a prop wired through
+    // every layout that renders both components independently.
+    const [mobileOpen, setMobileOpen] = useState(false);
+    useEffect(() => {
+        const handler = () => setMobileOpen((prev) => !prev);
+        window.addEventListener("toggle-sidebar-mobile", handler);
+        return () => window.removeEventListener("toggle-sidebar-mobile", handler);
+    }, []);
+    // Close the mobile drawer on route-like interactions (any nav item click)
+    // and on Escape, matching standard drawer UX.
+    useEffect(() => {
+        if (!mobileOpen)
+            return;
+        const handleEscape = (e) => {
+            if (e.key === "Escape")
+                setMobileOpen(false);
+        };
+        document.addEventListener("keydown", handleEscape);
+        return () => document.removeEventListener("keydown", handleEscape);
+    }, [mobileOpen]);
     // ── Pinned/Favorites Navigation State ──
     const [pinnedItems, setPinnedItems] = useState(() => {
         try {
@@ -116,34 +140,36 @@ export const Sidebar = ({ logoUrl = "/logo.png", logoText = "SPEEDEX", navGroups
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-    return (_jsxs("aside", { className: `sidebar ${collapsed ? "collapsed" : ""}`, children: [_jsxs("div", { className: "sidebar-logo", children: [_jsx("div", { className: "logo-img-wrapper", children: logoUrl ? (_jsx("img", { src: logoUrl, alt: "Logo", className: "sidebar-logo-img" })) : (_jsx("span", { style: { fontSize: "18px", fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", fontFamily: "var(--fh)" }, children: logoText })) }), _jsx("button", { className: "sb-toggle-btn", onClick: toggleCollapse, "aria-label": collapsed ? "Expand sidebar" : "Collapse sidebar", children: _jsx("i", { className: collapsed ? "ti ti-chevron-right" : "ti ti-chevron-left" }) })] }), _jsx("nav", { className: "sidebar-nav", children: displayNavGroups.map((group, groupIndex) => (_jsxs(React.Fragment, { children: [group.label && _jsx("span", { className: "nav-module-label", children: group.label }), group.items.map((item, itemIndex) => {
-                            const hasSubItems = item.subItems && item.subItems.length > 0;
-                            const isExpanded = !!expandedItems[item.label];
-                            const isPinned = pinnedItems.includes(item.label);
-                            const showPinToggle = group.label !== "Favorites"; // Hide pin button in Favorites block itself to avoid recursion
-                            return (_jsxs("div", { className: "nav-item-container", children: [_jsxs("a", { href: "#", onClick: (e) => {
-                                            e.preventDefault();
-                                            if (hasSubItems) {
-                                                toggleExpand(item.label);
-                                                if (collapsed) {
-                                                    // Expand sidebar when clicking collapsed menu with sub-items
-                                                    setCollapsed(false);
-                                                    localStorage.setItem("sidebar-collapsed", "false");
-                                                }
-                                            }
-                                            else if (item.onClick) {
-                                                item.onClick();
-                                            }
-                                        }, className: `nav-item ${item.active ? "active" : ""} ${hasSubItems ? "has-subs" : ""}`, "data-tooltip": collapsed ? item.label : undefined, children: [item.icon && (_jsxs("span", { className: "nav-icon", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", position: "relative" }, children: [_jsx("i", { className: item.icon, style: { fontSize: "18px" } }), item.badge && collapsed && (_jsx("span", { className: `nav-icon-badge-dot ${item.badge.variant || "default"}` }))] })), _jsx("span", { className: "nav-label", children: item.label }), showPinToggle && !collapsed && (_jsx("button", { className: `sb-pin-btn ${isPinned ? "active" : ""}`, onClick: (e) => {
-                                                    e.stopPropagation();
+    return (_jsxs(_Fragment, { children: [mobileOpen && (_jsx("div", { className: "sidebar-backdrop", onClick: () => setMobileOpen(false), "aria-hidden": "true" })), _jsxs("aside", { className: `sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`, children: [_jsxs("div", { className: "sidebar-logo", children: [_jsx("div", { className: "logo-img-wrapper", children: logoUrl ? (_jsx("img", { src: logoUrl, alt: "Logo", className: "sidebar-logo-img" })) : (_jsx("span", { style: { fontSize: "18px", fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", fontFamily: "var(--fh)" }, children: logoText })) }), _jsx("button", { className: "sb-toggle-btn", onClick: toggleCollapse, "aria-label": collapsed ? "Expand sidebar" : "Collapse sidebar", children: _jsx("i", { className: collapsed ? "ti ti-chevron-right" : "ti ti-chevron-left" }) })] }), _jsx("nav", { className: "sidebar-nav", "aria-label": "Main navigation", children: displayNavGroups.map((group, groupIndex) => (_jsxs(React.Fragment, { children: [group.label && _jsx("span", { className: "nav-module-label", children: group.label }), group.items.map((item, itemIndex) => {
+                                    const hasSubItems = item.subItems && item.subItems.length > 0;
+                                    const isExpanded = !!expandedItems[item.label];
+                                    const isPinned = pinnedItems.includes(item.label);
+                                    const showPinToggle = group.label !== "Favorites"; // Hide pin button in Favorites block itself to avoid recursion
+                                    return (_jsxs("div", { className: "nav-item-container", children: [_jsxs("a", { href: "#", onClick: (e) => {
                                                     e.preventDefault();
-                                                    togglePin(item.label);
-                                                }, title: isPinned ? "Unpin item" : "Pin to top", "aria-label": isPinned ? "Unpin item" : "Pin to top", children: _jsx("i", { className: isPinned ? "ti ti-star-filled pin-icon-starred" : "ti ti-star" }) })), item.badge && !collapsed && (_jsx("span", { className: `nav-badge ${item.badge.variant || ""}`, children: item.badge.text })), hasSubItems && !collapsed && (_jsx("i", { className: `ti ti-chevron-${isExpanded ? "down" : "right"} nav-chevron` }))] }), hasSubItems && isExpanded && !collapsed && (_jsx("div", { className: "nav-sub-list", children: item.subItems.map((sub, subIdx) => (_jsx("a", { href: "#", onClick: (e) => {
-                                                e.preventDefault();
-                                                if (sub.onClick)
-                                                    sub.onClick();
-                                            }, className: `nav-sub-item ${sub.active ? "active" : ""}`, children: sub.label }, subIdx))) }))] }, itemIndex));
-                        })] }, groupIndex))) }), profile && (_jsxs("div", { className: "sidebar-footer", ref: profileRef, children: [_jsxs("div", { className: `profile-card ${showProfileMenu ? "active" : ""}`, onClick: () => setShowProfileMenu(!showProfileMenu), role: "button", "aria-haspopup": "true", "aria-expanded": showProfileMenu, children: [_jsx("div", { className: "profile-av", children: profile.avatarInitials }), _jsxs("div", { className: "profile-info", children: [_jsx("span", { className: "profile-name", children: profile.name }), _jsx("span", { className: "profile-role", children: profile.role })] }), !collapsed && (_jsx("i", { className: "ti ti-selector profile-selector-icon", style: { marginLeft: "auto", opacity: 0.5, fontSize: "14px" } }))] }), showProfileMenu && (_jsxs("div", { className: `sidebar-profile-dropdown ${collapsed ? "collapsed" : ""}`, children: [_jsxs("div", { className: "dropdown-identity", children: [_jsx("span", { className: "dropdown-name", children: profile.name }), _jsx("span", { className: "dropdown-role", children: profile.role })] }), _jsx("div", { className: "dropdown-divider" }), _jsxs("button", { className: "dropdown-option", onClick: () => toast.info("Redirecting to profile details...", "My Profile"), children: [_jsx("i", { className: "ti ti-user" }), _jsx("span", { children: "My Profile" })] }), _jsxs("button", { className: "dropdown-option", onClick: () => toast.info("Settings Panel opened.", "System Settings"), children: [_jsx("i", { className: "ti ti-settings" }), _jsx("span", { children: "System Settings" })] }), _jsx("div", { className: "dropdown-divider" }), _jsxs("button", { className: "dropdown-option logout", onClick: () => toast.success("Logging out of Speedex SSO System...", "Log Out"), children: [_jsx("i", { className: "ti ti-logout" }), _jsx("span", { children: "Log Out" })] })] }))] }))] }));
+                                                    if (hasSubItems) {
+                                                        toggleExpand(item.label);
+                                                        if (collapsed) {
+                                                            // Expand sidebar when clicking collapsed menu with sub-items
+                                                            setCollapsed(false);
+                                                            localStorage.setItem("sidebar-collapsed", "false");
+                                                        }
+                                                    }
+                                                    else {
+                                                        item.onClick?.();
+                                                        // Close the mobile drawer after navigating (no-op on desktop)
+                                                        setMobileOpen(false);
+                                                    }
+                                                }, className: `nav-item ${item.active ? "active" : ""} ${hasSubItems ? "has-subs" : ""}`, "data-tooltip": collapsed ? item.label : undefined, "aria-current": item.active ? "page" : undefined, "aria-expanded": hasSubItems ? isExpanded : undefined, children: [item.icon && (_jsxs("span", { className: "nav-icon", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", position: "relative" }, children: [_jsx("i", { className: item.icon, style: { fontSize: "18px" } }), item.badge && collapsed && (_jsx("span", { className: `nav-icon-badge-dot ${item.badge.variant || "default"}` }))] })), _jsx("span", { className: "nav-label", children: item.label }), showPinToggle && !collapsed && (_jsx("button", { className: `sb-pin-btn ${isPinned ? "active" : ""}`, onClick: (e) => {
+                                                            e.stopPropagation();
+                                                            e.preventDefault();
+                                                            togglePin(item.label);
+                                                        }, title: isPinned ? "Unpin item" : "Pin to top", "aria-label": isPinned ? "Unpin item" : "Pin to top", children: _jsx("i", { className: isPinned ? "ti ti-star-filled pin-icon-starred" : "ti ti-star" }) })), item.badge && !collapsed && (_jsx("span", { className: `nav-badge ${item.badge.variant || ""}`, children: item.badge.text })), hasSubItems && !collapsed && (_jsx("i", { className: `ti ti-chevron-${isExpanded ? "down" : "right"} nav-chevron` }))] }), hasSubItems && isExpanded && !collapsed && (_jsx("div", { className: "nav-sub-list", children: item.subItems.map((sub, subIdx) => (_jsx("a", { href: "#", onClick: (e) => {
+                                                        e.preventDefault();
+                                                        if (sub.onClick)
+                                                            sub.onClick();
+                                                    }, className: `nav-sub-item ${sub.active ? "active" : ""}`, "aria-current": sub.active ? "page" : undefined, children: sub.label }, subIdx))) }))] }, itemIndex));
+                                })] }, groupIndex))) }), profile && (_jsxs("div", { className: "sidebar-footer", ref: profileRef, children: [_jsxs("div", { className: `profile-card ${showProfileMenu ? "active" : ""}`, onClick: () => setShowProfileMenu(!showProfileMenu), role: "button", "aria-haspopup": "true", "aria-expanded": showProfileMenu, children: [_jsx("div", { className: "profile-av", children: profile.avatarInitials }), _jsxs("div", { className: "profile-info", children: [_jsx("span", { className: "profile-name", children: profile.name }), _jsx("span", { className: "profile-role", children: profile.role })] }), !collapsed && (_jsx("i", { className: "ti ti-selector profile-selector-icon", style: { marginLeft: "auto", opacity: 0.5, fontSize: "14px" } }))] }), showProfileMenu && (_jsxs("div", { className: `sidebar-profile-dropdown ${collapsed ? "collapsed" : ""}`, children: [_jsxs("div", { className: "dropdown-identity", children: [_jsx("span", { className: "dropdown-name", children: profile.name }), _jsx("span", { className: "dropdown-role", children: profile.role })] }), _jsx("div", { className: "dropdown-divider" }), _jsxs("button", { className: "dropdown-option", onClick: () => toast.info("Redirecting to profile details...", "My Profile"), children: [_jsx("i", { className: "ti ti-user" }), _jsx("span", { children: "My Profile" })] }), _jsxs("button", { className: "dropdown-option", onClick: () => toast.info("Settings Panel opened.", "System Settings"), children: [_jsx("i", { className: "ti ti-settings" }), _jsx("span", { children: "System Settings" })] }), _jsx("div", { className: "dropdown-divider" }), _jsxs("button", { className: "dropdown-option logout", onClick: () => toast.success("Logging out of Speedex SSO System...", "Log Out"), children: [_jsx("i", { className: "ti ti-logout" }), _jsx("span", { children: "Log Out" })] })] }))] }))] })] }));
 };
 export default Sidebar;
 //# sourceMappingURL=Sidebar.js.map

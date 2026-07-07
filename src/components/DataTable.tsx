@@ -9,6 +9,7 @@ import React, {
 import Button from "./Buttons";
 import Dropdown from "./Dropdown";
 import ConfirmModal from "./ConfirmModal";
+import SearchBar from "./SearchBar";
 import { useToast } from "./ToastContext";
 import "./DataTable.css";
 
@@ -780,25 +781,14 @@ export function DataTable<T>({
       <div className="dt-toolbar">
         <div className="dt-toolbar-left">
           <div className="dt-search-wrap">
-            <i className="ti ti-search dt-search-icon" aria-hidden="true" />
-            <input
+            <SearchBar
               id="dt-search-input"
-              type="text"
-              className="dt-search"
+              variant="sm"
               placeholder={searchPlaceholder}
               value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              aria-label="Search records"
+              onChange={handleSearchChange}
+              onClear={() => handleSearchChange("")}
             />
-            {search && (
-              <button
-                className="dt-search-clear"
-                aria-label="Clear search"
-                onClick={() => handleSearchChange("")}
-              >
-                <i className="ti ti-x" aria-hidden="true" />
-              </button>
-            )}
           </div>
 
           {filters.map((f) => (
@@ -837,19 +827,19 @@ export function DataTable<T>({
           {/* ── Filter Presets panel ── */}
           {filters.length > 0 && (
             <div className="dt-preset-wrap" ref={presetPanelRef}>
-              <button
-                className="dt-btn dt-btn--ghost dt-btn--icon"
+              <Button
                 title="Saved filter presets"
-                aria-label="Saved filter presets"
+                iconOnly
+                icon="ti-bookmark"
+                variant="ghost"
+                size="sm"
                 aria-haspopup="true"
                 aria-expanded={showPresets}
                 onClick={() => setShowPresets((p) => !p)}
-              >
-                <i className="ti ti-bookmark" aria-hidden="true" />
-                {presets.length > 0 && (
-                  <span className="dt-preset-count">{presets.length}</span>
-                )}
-              </button>
+              />
+              {presets.length > 0 && (
+                <span className="dt-preset-count">{presets.length}</span>
+              )}
 
               {showPresets && (
                 <div className="dt-preset-panel" role="dialog" aria-label="Filter presets">
@@ -868,14 +858,15 @@ export function DataTable<T>({
                       onKeyDown={(e) => e.key === "Enter" && savePreset()}
                       maxLength={40}
                     />
-                    <button
-                      className="dt-btn dt-btn--primary dt-preset-save-btn"
+                    <Button
+                      title="Save"
+                      icon="ti-plus"
+                      variant="primary"
+                      size="sm"
+                      className="dt-preset-save-btn"
                       onClick={savePreset}
                       disabled={!presetName.trim()}
-                      title="Save current filters as preset"
-                    >
-                      <i className="ti ti-plus" aria-hidden="true" /> Save
-                    </button>
+                    />
                   </div>
 
                   {/* Preset list */}
@@ -900,14 +891,15 @@ export function DataTable<T>({
                               </span>
                             )}
                           </button>
-                          <button
+                          <Button
+                            title={`Delete preset ${preset.name}`}
+                            iconOnly
+                            icon="ti-trash"
+                            variant="ghost"
+                            size="sm"
                             className="dt-preset-delete"
                             onClick={(e) => deletePreset(preset.id, e)}
-                            aria-label={`Delete preset ${preset.name}`}
-                            title="Delete preset"
-                          >
-                            <i className="ti ti-trash" aria-hidden="true" />
-                          </button>
+                          />
                         </li>
                       ))}
                     </ul>
@@ -947,16 +939,17 @@ export function DataTable<T>({
 
           {columnToggle && (
             <div className="dt-col-toggle-wrap" ref={colToggleRef}>
-              <button
+              <Button
                 id="dt-col-toggle-btn"
-                className="dt-btn dt-btn--icon"
                 title="Column visibility"
+                iconOnly
+                icon="ti-columns"
+                variant="secondary"
+                size="sm"
                 aria-haspopup="true"
                 aria-expanded={showColToggle}
                 onClick={() => setShowColToggle((p) => !p)}
-              >
-                <i className="ti ti-columns" aria-hidden="true" />
-              </button>
+              />
               {showColToggle && (
                 <div
                   className="dt-col-panel"
@@ -987,20 +980,21 @@ export function DataTable<T>({
           )}
 
           {exportable && (
-            <button
+            <Button
               id="dt-export-btn"
-              className="dt-btn dt-btn--secondary"
+              title="Export"
+              icon="ti-download"
+              variant="secondary"
+              size="sm"
               onClick={handleExport}
-              title="Export to CSV"
-            >
-              <i className="ti ti-download" aria-hidden="true" /> Export
-            </button>
+            />
           )}
 
           {createButtons.map((btn, i) => (
             <Button
               key={i}
               title={btn.label}
+              icon={btn.icon}
               variant={btn.variant === "secondary" ? "secondary" : "primary"}
               size="sm"
               onClick={btn.onClick}
@@ -1065,12 +1059,14 @@ export function DataTable<T>({
           )}
 
           {(hasActiveFilters) && (
-            <button
-              className="dt-btn dt-btn--ghost dt-chip-clear-all"
+            <Button
+              title="Clear all"
+              icon="ti-refresh"
+              variant="ghost"
+              size="sm"
+              className="dt-chip-clear-all"
               onClick={clearAllFilters}
-            >
-              <i className="ti ti-refresh" aria-hidden="true" /> Clear all
-            </button>
+            />
           )}
         </div>
       )}
@@ -1089,13 +1085,15 @@ export function DataTable<T>({
               )}
             </span>
           </div>
-          <button
+          <Button
+            title="Clear filters"
+            icon="ti-x"
+            variant="ghost"
+            size="sm"
             className="dt-no-results-clear"
             onClick={clearAllFilters}
             aria-label="Clear all filters and search"
-          >
-            <i className="ti ti-x" aria-hidden="true" /> Clear filters
-          </button>
+          />
         </div>
       )}
 
@@ -1122,24 +1120,23 @@ export function DataTable<T>({
           </div>
           <div className="dt-bulk-actions">
             {bulkActions.map((action, i) => (
-              <button
+              <Button
                 key={i}
-                className={`dt-btn${
-                  action.variant === "danger" ? " dt-btn--danger" : " dt-btn--secondary"
-                }`}
+                title={action.label}
+                icon={action.icon}
+                variant={action.variant === "danger" ? "danger" : "secondary"}
+                size="sm"
                 onClick={() => handleBulkAction(action)}
-              >
-                {action.icon && <i className={`ti ${action.icon}`} aria-hidden="true" />}
-                {action.label}
-              </button>
+              />
             ))}
-            <button
-              className="dt-btn dt-btn--ghost"
+            <Button
+              title="Deselect"
+              icon="ti-x"
+              variant="ghost"
+              size="sm"
               onClick={clearSelection}
               aria-label="Clear selection"
-            >
-              <i className="ti ti-x" aria-hidden="true" /> Deselect
-            </button>
+            />
           </div>
         </div>
       )}
@@ -1184,6 +1181,17 @@ export function DataTable<T>({
                       ...(col.frozen ? { left: selectable ? "40px" : "0" } : {}),
                     }}
                     onClick={col.sortable ? () => handleSort(col.key) : undefined}
+                    onKeyDown={
+                      col.sortable
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleSort(col.key);
+                            }
+                          }
+                        : undefined
+                    }
+                    tabIndex={col.sortable ? 0 : undefined}
                     aria-sort={
                       col.sortable
                         ? sortKey === col.key
@@ -1262,12 +1270,14 @@ export function DataTable<T>({
                         : "Create a new record to get started."}
                     </p>
                     {hasActiveFilters && (
-                      <button
-                        className="dt-btn dt-btn--secondary dt-empty-action"
+                      <Button
+                        title="Clear Filters"
+                        icon="ti-refresh"
+                        variant="secondary"
+                        size="sm"
+                        className="dt-empty-action"
                         onClick={clearAllFilters}
-                      >
-                        <i className="ti ti-refresh" aria-hidden="true" /> Clear Filters
-                      </button>
+                      />
                     )}
                   </div>
                 </td>

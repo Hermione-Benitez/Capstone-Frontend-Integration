@@ -26,8 +26,8 @@ export interface SearchBarProps {
   /** Show spinner instead of search icon */
   loading?: boolean;
   disabled?: boolean;
-  /** 'default' (54 px) | 'compact' (42 px) */
-  variant?: 'default' | 'compact';
+  /** 'default' (54 px) | 'compact' (42 px) | 'sm' (36 px — for dense toolbars, e.g. DataTable) */
+  variant?: 'default' | 'compact' | 'sm';
   className?: string;
   /** HTML id for the <input> */
   id?: string;
@@ -182,6 +182,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         focused   ? 'is-focused'  : '',
         disabled  ? 'is-disabled' : '',
         variant === 'compact' ? 'is-compact' : '',
+        variant === 'sm' ? 'is-sm' : '',
         className,
       ].filter(Boolean).join(' ')}
     >
@@ -199,7 +200,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         >
           {loading
             ? <span className="sb-spinner" />
-            : <Search size={variant === 'compact' ? 18 : 20} strokeWidth={2} />
+            : <Search size={variant === 'compact' ? 18 : variant === 'sm' ? 16 : 20} strokeWidth={2} />
           }
         </span>
 

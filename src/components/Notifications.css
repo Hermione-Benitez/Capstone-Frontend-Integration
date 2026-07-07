@@ -372,12 +372,12 @@
   border-color: var(--teal-hover, #009189);
 }
 
-.floating-selection-bar .btn-danger {
+.floating-selection-bar .btn--danger {
   background: var(--err, #DC2626);
   border-color: var(--err, #DC2626);
 }
 
-.floating-selection-bar .btn-danger:hover {
+.floating-selection-bar .btn--danger:hover {
   background: #b91c1c;
   border-color: #b91c1c;
 }

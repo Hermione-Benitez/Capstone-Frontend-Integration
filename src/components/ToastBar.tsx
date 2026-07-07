@@ -14,7 +14,13 @@ export const ToastBar: React.FC = () => {
   };
 
   return (
-    <div className="tb-toast-wrapper">
+    <div
+      className="tb-toast-wrapper"
+      aria-label="Notifications"
+      aria-live="polite"
+      aria-atomic="false"
+      role="region"
+    >
       {toasts.map((toast) => {
         const isPersistent = toast.type === "error" && toast.duration === undefined;
         const showProgress = !isPersistent && toast.duration !== 0;
@@ -26,6 +32,9 @@ export const ToastBar: React.FC = () => {
             className={`tb-toast-item tb-${toast.type} ${
               toast.isLeaving ? "tb-toast-leave" : "tb-toast-enter"
             }`}
+            role={toast.type === "error" ? "alert" : "status"}
+            aria-live={toast.type === "error" ? "assertive" : "polite"}
+            aria-atomic="true"
           >
             <div className="tb-toast-icon">
               {toast.type === "success" && <CheckCircle2 size={18} strokeWidth={2.5} />}

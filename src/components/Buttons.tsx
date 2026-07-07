@@ -1,4 +1,4 @@
-import React, { ButtonHTMLAttributes, ReactNode } from "react";
+import React, { ButtonHTMLAttributes, ReactNode, forwardRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,20 +32,23 @@ export interface ButtonProps
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export function Button({
-  title,
-  variant = "primary",
-  size = "md",
-  icon,
-  iconPosition = "left",
-  loading = false,
-  fullWidth = false,
-  iconOnly = false,
-  disabled,
-  className = "",
-  children,
-  ...rest
-}: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    title,
+    variant = "primary",
+    size = "md",
+    icon,
+    iconPosition = "left",
+    loading = false,
+    fullWidth = false,
+    iconOnly = false,
+    disabled,
+    className = "",
+    children,
+    ...rest
+  },
+  ref
+) {
   const classes = [
     "btn",
     `btn--${variant}`,
@@ -57,6 +60,7 @@ export function Button({
 
   return (
     <button
+      ref={ref}
       type="button"
       className={classes}
       disabled={disabled || loading}
@@ -74,6 +78,6 @@ export function Button({
       )}
     </button>
   );
-}
+});
 
 export default Button;

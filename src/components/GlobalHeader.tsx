@@ -13,38 +13,31 @@ import {
   Clock,
   Calendar,
   Truck,
-  DollarSign
+  DollarSign,
+  Menu
 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
+import type { NotificationItem } from './notificationTypes';
 import './GlobalHeader.css';
 
-export interface NotificationItem {
-  id: string;
-  title: string;
-  description: string;
-  timestamp: string;
-  read: boolean;
-  type: 'info' | 'alert' | 'success';
-  category: 'logistics' | 'finance' | 'driver' | 'system';
-  isToday: boolean;
-  actionLabel?: string;
-}
+export type { NotificationItem };
 
 const DUMMY_NOTIFICATIONS: NotificationItem[] = [
   // Logistics Director / Coordinator Alerts
-  { id: '1', title: 'SLA Breach Warning', description: 'Route #8 is running 35 mins behind schedule. SLA impact imminent.', timestamp: '2m ago', read: false, type: 'alert', category: 'logistics', isToday: true, actionLabel: 'View Route #8' },
-  { id: '2', title: 'Fleet Report Available', description: 'Weekly dispatch efficiency audit is ready for download.', timestamp: '1h ago', read: false, type: 'success', category: 'logistics', isToday: true },
-  { id: '3', title: 'New Route Manifest', description: 'Waybill SP-77291 assigned to driver Juan dela Cruz.', timestamp: '3h ago', read: true, type: 'info', category: 'logistics', isToday: true },
-  
+  { id: '1', title: 'SLA Breach Warning', description: 'Route #8 is running 35 mins behind schedule. SLA impact imminent.', timestamp: '2m ago', date: 'Today', read: false, type: 'alert', category: 'logistics', isToday: true, source: 'TARS Monitor', actionLabel: 'View Route #8' },
+  { id: '2', title: 'Fleet Report Available', description: 'Weekly dispatch efficiency audit is ready for download.', timestamp: '1h ago', date: 'Today', read: false, type: 'success', category: 'logistics', isToday: true, source: 'TARS Analytics' },
+  { id: '3', title: 'New Route Manifest', description: 'Waybill SP-77291 assigned to driver Juan dela Cruz.', timestamp: '3h ago', date: 'Today', read: true, type: 'info', category: 'logistics', isToday: true, source: 'DMS' },
+
   // Finance approvals
-  { id: '4', title: 'Capital Expenditure Request', description: 'Approval required for fuel replenishment fund PHP 120,000.', timestamp: '5h ago', read: false, type: 'info', category: 'finance', isToday: true, actionLabel: 'Review Fund' },
-  { id: '5', title: 'Invoice Settlement Failed', description: 'Vendor payout to FastTrack Cargo rejected by bank.', timestamp: 'Yesterday', read: false, type: 'alert', category: 'finance', isToday: false, actionLabel: 'Re-submit Pay' },
-  
+  { id: '4', title: 'Capital Expenditure Request', description: 'Approval required for fuel replenishment fund PHP 120,000.', timestamp: '5h ago', date: 'Today', read: false, type: 'info', category: 'finance', isToday: true, source: 'FinSys', actionLabel: 'Review Fund' },
+  { id: '5', title: 'Invoice Settlement Failed', description: 'Vendor payout to FastTrack Cargo rejected by bank.', timestamp: 'Yesterday', date: 'Yesterday', read: false, type: 'alert', category: 'finance', isToday: false, source: 'FinSys', actionLabel: 'Re-submit Pay' },
+
   // Driver notifications
-  { id: '6', title: 'Route Update: Delivery Order', description: 'New dispatch assignment: Pickup at warehouse Cluster B.', timestamp: 'Yesterday', read: false, type: 'info', category: 'driver', isToday: false },
-  { id: '7', title: 'Vehicle Maintenance Complete', description: 'Truck Plate TX-492 cleared for long-haul duty.', timestamp: '3 days ago', read: true, type: 'success', category: 'driver', isToday: false },
-  
+  { id: '6', title: 'Route Update: Delivery Order', description: 'New dispatch assignment: Pickup at warehouse Cluster B.', timestamp: 'Yesterday', date: 'Yesterday', read: false, type: 'info', category: 'driver', isToday: false, source: 'Fleet Ops' },
+  { id: '7', title: 'Vehicle Maintenance Complete', description: 'Truck Plate TX-492 cleared for long-haul duty.', timestamp: '3 days ago', date: 'March 3, 2025', read: true, type: 'success', category: 'driver', isToday: false, source: 'Fleet Ops' },
+
   // General System
-  { id: '8', title: 'System Security Update', description: 'Workspace session policies updated for standard users.', timestamp: '4 days ago', read: true, type: 'info', category: 'system', isToday: false }
+  { id: '8', title: 'System Security Update', description: 'Workspace session policies updated for standard users.', timestamp: '4 days ago', date: 'March 3, 2025', read: true, type: 'system', category: 'system', isToday: false, source: 'IT Security' }
 ];
 
 export interface BreadcrumbItem {
@@ -105,6 +98,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   const notificationRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const bellBtnRef = useRef<HTMLButtonElement>(null);
+  const avatarBtnRef = useRef<HTMLButtonElement>(null);
 
   // Real-time Clock logic
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -147,6 +142,25 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Close dropdowns on Escape and return focus to the trigger button
+  // (keyboard-accessibility parity with the shared Dropdown.tsx component)
+  useEffect(() => {
+    if (!showNotifications && !showProfileMenu) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (showNotifications) {
+        setShowNotifications(false);
+        bellBtnRef.current?.focus();
+      }
+      if (showProfileMenu) {
+        setShowProfileMenu(false);
+        avatarBtnRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showNotifications, showProfileMenu]);
 
   // Filter notifications by active user role to show relevance
   const roleRelevantNotifications = useMemo(() => {
@@ -226,6 +240,16 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   return (
     <header className="site-header">
       <nav className="nav-bar">
+        {/* Mobile-only hamburger — toggles the off-canvas Sidebar drawer.
+            Hidden above the 480px breakpoint via .header-menu-btn CSS. */}
+        <button
+          className="header-menu-btn"
+          onClick={() => window.dispatchEvent(new Event('toggle-sidebar-mobile'))}
+          aria-label="Toggle navigation menu"
+        >
+          <Menu size={20} strokeWidth={1.75} />
+        </button>
+
         {/* Left Side: Title + Breadcrumb */}
         <div className="header-title-group">
           {/* Breadcrumb trail */}
@@ -269,12 +293,14 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           {/* Notification Button & Dropdown */}
           <div className="header-notification-container" ref={notificationRef}>
             <button 
+              ref={bellBtnRef}
               className={`header-icon-btn ${bellAnimating ? 'bell-pulse' : ''}`}
               onClick={() => {
                 setShowNotifications(!showNotifications);
                 setShowProfileMenu(false);
               }}
               aria-label="Notifications"
+              aria-haspopup="true"
               aria-expanded={showNotifications}
             >
               <Bell size={20} strokeWidth={1.75} />
@@ -288,7 +314,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             {showNotifications && (
               <div 
                 className="notification-dropdown"
-                role="region"
+                role="dialog"
                 aria-live="polite"
                 aria-label="Notification center"
               >
@@ -355,6 +381,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                                     {n.type === 'alert' && <AlertTriangle size={14} />}
                                     {n.type === 'success' && <CheckCircle2 size={14} />}
                                     {n.type === 'info' && <Info size={14} />}
+                                    {n.type === 'system' && <Settings size={14} />}
                                   </div>
                                   <div className="notification-dropdown-text-container">
                                     <div className="notification-dropdown-item-header">
@@ -431,6 +458,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                                     {n.type === 'alert' && <AlertTriangle size={14} />}
                                     {n.type === 'success' && <CheckCircle2 size={14} />}
                                     {n.type === 'info' && <Info size={14} />}
+                                    {n.type === 'system' && <Settings size={14} />}
                                   </div>
                                   <div className="notification-dropdown-text-container">
                                     <div className="notification-dropdown-item-header">
@@ -519,12 +547,14 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           {/* Profile Avatar & Dropdown */}
           <div className="header-profile-container" ref={profileRef}>
             <button 
+              ref={avatarBtnRef}
               className="header-avatar-btn" 
               onClick={() => {
                 setShowProfileMenu(!showProfileMenu);
                 setShowNotifications(false);
               }}
               aria-label="User Profile Dropdown"
+              aria-haspopup="true"
               aria-expanded={showProfileMenu}
             >
               <div className="avatar-circle-wrapper">
@@ -540,7 +570,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             </button>
             
             {showProfileMenu && (
-              <div className="profile-dropdown">
+              <div className="profile-dropdown" role="menu" aria-label="Profile menu">
                 {/* Identity Header */}
                 <div className="profile-dropdown-user-info">
                   <div className="profile-dropdown-avatar-wrapper">
@@ -565,6 +595,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 <div className="profile-dropdown-options">
                   <button 
                     className="profile-dropdown-option"
+                    role="menuitem"
                     onClick={() => {
                       setShowProfileMenu(false);
                       onProfile
@@ -578,6 +609,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                   
                   <button 
                     className="profile-dropdown-option"
+                    role="menuitem"
                     onClick={() => {
                       setShowProfileMenu(false);
                       onSettings
@@ -596,6 +628,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 <div className="profile-dropdown-logout-section">
                   <button 
                     className="profile-dropdown-option logout-option"
+                    role="menuitem"
                     onClick={() => {
                       setShowProfileMenu(false);
                       onLogout
@@ -615,27 +648,21 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
 
 
-      {/* Structured Confirmation Dialog for Clear All Actions */}
-      {showClearConfirm && (
-        <div className="header-confirm-overlay" onClick={() => setShowClearConfirm(false)}>
-          <div className="header-confirm-card" onClick={e => e.stopPropagation()} role="alertdialog" aria-modal="true">
-            <div className="header-confirm-icon-box">
-              <Trash2 size={24} />
-            </div>
-            <h2 className="header-confirm-title">Clear all notifications?</h2>
-            <p className="header-confirm-desc">
-              This will permanently delete all notifications for your current role. This action is irreversible.
-            </p>
-            <div className="header-confirm-actions">
-              <button className="header-btn-cancel" onClick={() => setShowClearConfirm(false)}>Cancel</button>
-              <button className="header-btn-confirm" onClick={() => {
-                clearAll();
-                setShowClearConfirm(false);
-              }}>Clear Notifications</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Confirmation dialog for the destructive "Clear all" action — shared ConfirmModal */}
+      <ConfirmModal
+        isOpen={showClearConfirm}
+        title="Clear all notifications?"
+        message="This will permanently delete all notifications for your current role. This action is irreversible."
+        variant="danger"
+        confirmLabel="Clear Notifications"
+        cancelLabel="Cancel"
+        icon="ti-trash"
+        onCancel={() => setShowClearConfirm(false)}
+        onConfirm={() => {
+          clearAll();
+          setShowClearConfirm(false);
+        }}
+      />
 
     </header>
   );
