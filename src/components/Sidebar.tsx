@@ -63,9 +63,9 @@ const defaultNavGroups: NavGroup[] = [
 ];
 
 const defaultProfile = {
-  name: "Hermione Benitez",
+  name: "FirstName LastName",
   role: "Logistics Director",
-  avatarInitials: "HB",
+  avatarInitials: "FL",
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({

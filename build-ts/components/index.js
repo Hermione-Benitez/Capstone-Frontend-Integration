@@ -13,5 +13,6 @@ export { default as DashboardLayout } from "./DashboardLayout";
 export { default as FormModals } from "./FormModals";
 export { default as SearchBar } from "./SearchBar";
 export { default as ConfirmModal } from "./ConfirmModal";
+export { default as Notifications } from "./Notifications";
 export { ToastProvider, useToast } from "./ToastContext";
 //# sourceMappingURL=index.js.map

@@ -4,8 +4,10 @@ import React, {
   useEffect,
   useCallback,
   useId,
+  useMemo,
   ReactNode,
   KeyboardEvent,
+  ChangeEvent,
 } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -50,6 +52,12 @@ export interface DropdownProps {
   className?: string;
   /** Optional class on the panel */
   panelClassName?: string;
+  /** Enable a search/filter input inside the dropdown (useful for large item lists) */
+  searchable?: boolean;
+  /** Placeholder text for the search input */
+  searchPlaceholder?: string;
+  /** Max height for the items list area (enables scrolling). Default: 240px when item count > 8 */
+  maxHeight?: number;
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -67,6 +75,9 @@ export function Dropdown({
   onOpenChange,
   className = "",
   panelClassName = "",
+  searchable = false,
+  searchPlaceholder = "Search…",
+  maxHeight,
 }: DropdownProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
@@ -74,11 +85,13 @@ export function Dropdown({
 
   const [resolvedPlacement, setResolvedPlacement] = useState(placement);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const menuId = useId();
 
   const setOpen = useCallback(
@@ -129,12 +142,30 @@ export function Dropdown({
   useEffect(() => {
     if (open) {
       setActiveIndex(-1);
+      setSearchQuery("");
+      // Focus the search input when the panel opens and is searchable
+      if (searchable) {
+        requestAnimationFrame(() => searchInputRef.current?.focus());
+      }
     }
-  }, [open]);
+  }, [open, searchable]);
 
-  const enabledIndices = (items ?? [])
-    .map((it, i) => (it.disabled ? -1 : i))
+  // ── Filter items based on search query ──────────────────────────────────────
+  const filteredItems = useMemo(() => {
+    if (!items) return [];
+    if (!searchQuery.trim()) return items;
+    const q = searchQuery.toLowerCase();
+    return items.filter(
+      (item) => item.divider || item.label.toLowerCase().includes(q)
+    );
+  }, [items, searchQuery]);
+
+  const enabledIndices = filteredItems
+    .map((it, i) => (it.disabled || it.divider ? -1 : i))
     .filter((i) => i !== -1);
+
+  // Determine if we should apply max-height scrolling
+  const resolvedMaxHeight = maxHeight ?? (filteredItems.length > 8 ? 240 : undefined);
 
   const focusItem = (index: number) => {
     setActiveIndex(index);
@@ -143,7 +174,7 @@ export function Dropdown({
 
   // ── Keyboard navigation for the default `items` list ────────────────────────
   const handlePanelKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (!items || items.length === 0) return;
+    if (!filteredItems || filteredItems.length === 0) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       const pos = enabledIndices.indexOf(activeIndex);
@@ -219,33 +250,74 @@ export function Dropdown({
           className={`dd-panel dd-panel--${align} dd-panel--${resolvedPlacement} ${panelClassName}`}
           onKeyDown={handlePanelKeyDown}
         >
-          {children
-            ? children
-            : items?.map((item, i) =>
-                item.divider ? (
-                  <div key={item.key} className="dd-divider" role="separator" />
-                ) : (
-                  <button
-                    key={item.key}
-                    ref={(el) => {
-                      itemRefs.current[i] = el;
-                    }}
-                    role="menuitem"
-                    type="button"
-                    className={`dd-item${
-                      item.variant === "danger" ? " dd-item--danger" : ""
-                    }`}
-                    disabled={item.disabled}
-                    tabIndex={activeIndex === i ? 0 : -1}
-                    onClick={() => handleItemClick(item)}
-                  >
-                    {item.icon && (
-                      <i className={`ti ${item.icon}`} aria-hidden="true" />
-                    )}
-                    {item.label}
-                  </button>
+          {/* Search filter input */}
+          {searchable && !children && (
+            <div className="dd-search-wrap">
+              <input
+                ref={searchInputRef}
+                type="text"
+                className="dd-search-input"
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setSearchQuery(e.target.value);
+                  setActiveIndex(-1);
+                }}
+                onKeyDown={(e) => {
+                  // Allow arrow keys to navigate items from search input
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    if (enabledIndices.length > 0) focusItem(enabledIndices[0]);
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    setOpen(false);
+                    triggerRef.current?.focus();
+                  }
+                }}
+                aria-label="Filter options"
+                role="searchbox"
+              />
+            </div>
+          )}
+
+          {children ? (
+            children
+          ) : (
+            <div
+              className="dd-items-list"
+              style={resolvedMaxHeight ? { maxHeight: resolvedMaxHeight, overflowY: "auto" } : undefined}
+            >
+              {filteredItems.length === 0 ? (
+                <div className="dd-no-results">No results found</div>
+              ) : (
+                filteredItems.map((item, i) =>
+                  item.divider ? (
+                    <div key={item.key} className="dd-divider" role="separator" />
+                  ) : (
+                    <button
+                      key={item.key}
+                      ref={(el) => {
+                        itemRefs.current[i] = el;
+                      }}
+                      role="menuitem"
+                      type="button"
+                      className={`dd-item${
+                        item.variant === "danger" ? " dd-item--danger" : ""
+                      }`}
+                      disabled={item.disabled}
+                      tabIndex={activeIndex === i ? 0 : -1}
+                      onClick={() => handleItemClick(item)}
+                    >
+                      {item.icon && (
+                        <i className={`ti ${item.icon}`} aria-hidden="true" />
+                      )}
+                      {item.label}
+                    </button>
+                  )
                 )
               )}
+            </div>
+          )}
         </div>
       )}
     </div>

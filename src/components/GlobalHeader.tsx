@@ -81,9 +81,9 @@ const defaultProfile: {
   avatarInitials: string;
   avatarUrl?: string;
 } = {
-  name: 'Hermione Benitez',
+  name: 'FirstName LastName',
   role: 'Logistics Director',
-  avatarInitials: 'HB',
+  avatarInitials: 'FL',
 };
 
 const GlobalHeader: React.FC<GlobalHeaderProps> = ({ 

@@ -1,16 +1,18 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState, useRef, useEffect, useCallback, useId, } from "react";
+import { useState, useRef, useEffect, useCallback, useId, useMemo, } from "react";
 // ─── Component ─────────────────────────────────────────────────────────────────
-export function Dropdown({ trigger, triggerLabel = "Open menu", items, children, align = "left", placement = "bottom", disabled = false, closeOnSelect = true, open: controlledOpen, onOpenChange, className = "", panelClassName = "", }) {
+export function Dropdown({ trigger, triggerLabel = "Open menu", items, children, align = "left", placement = "bottom", disabled = false, closeOnSelect = true, open: controlledOpen, onOpenChange, className = "", panelClassName = "", searchable = false, searchPlaceholder = "Search…", maxHeight, }) {
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
     const isControlled = controlledOpen !== undefined;
     const open = isControlled ? controlledOpen : uncontrolledOpen;
     const [resolvedPlacement, setResolvedPlacement] = useState(placement);
     const [activeIndex, setActiveIndex] = useState(-1);
+    const [searchQuery, setSearchQuery] = useState("");
     const wrapRef = useRef(null);
     const triggerRef = useRef(null);
     const panelRef = useRef(null);
     const itemRefs = useRef([]);
+    const searchInputRef = useRef(null);
     const menuId = useId();
     const setOpen = useCallback((next) => {
         if (!isControlled)
@@ -56,18 +58,34 @@ export function Dropdown({ trigger, triggerLabel = "Open menu", items, children,
     useEffect(() => {
         if (open) {
             setActiveIndex(-1);
+            setSearchQuery("");
+            // Focus the search input when the panel opens and is searchable
+            if (searchable) {
+                requestAnimationFrame(() => searchInputRef.current?.focus());
+            }
         }
-    }, [open]);
-    const enabledIndices = (items ?? [])
-        .map((it, i) => (it.disabled ? -1 : i))
+    }, [open, searchable]);
+    // ── Filter items based on search query ──────────────────────────────────────
+    const filteredItems = useMemo(() => {
+        if (!items)
+            return [];
+        if (!searchQuery.trim())
+            return items;
+        const q = searchQuery.toLowerCase();
+        return items.filter((item) => item.divider || item.label.toLowerCase().includes(q));
+    }, [items, searchQuery]);
+    const enabledIndices = filteredItems
+        .map((it, i) => (it.disabled || it.divider ? -1 : i))
         .filter((i) => i !== -1);
+    // Determine if we should apply max-height scrolling
+    const resolvedMaxHeight = maxHeight ?? (filteredItems.length > 8 ? 240 : undefined);
     const focusItem = (index) => {
         setActiveIndex(index);
         itemRefs.current[index]?.focus();
     };
     // ── Keyboard navigation for the default `items` list ────────────────────────
     const handlePanelKeyDown = (e) => {
-        if (!items || items.length === 0)
+        if (!filteredItems || filteredItems.length === 0)
             return;
         if (e.key === "ArrowDown") {
             e.preventDefault();
@@ -111,11 +129,24 @@ export function Dropdown({ trigger, triggerLabel = "Open menu", items, children,
             triggerRef.current?.focus();
         }
     };
-    return (_jsxs("div", { ref: wrapRef, className: `dd-wrap ${className}`, children: [trigger ? (_jsx("div", { onClick: () => !disabled && setOpen(!open), "aria-haspopup": "true", "aria-expanded": open, children: trigger })) : (_jsx("button", { ref: triggerRef, type: "button", className: "dd-trigger-btn", "aria-label": triggerLabel, "aria-haspopup": "true", "aria-expanded": open, "aria-controls": menuId, disabled: disabled, onClick: () => setOpen(!open), onKeyDown: handleTriggerKeyDown, children: _jsx("span", { className: "dd-trigger-icon", "aria-hidden": "true", children: "\u22EE" }) })), open && (_jsx("div", { ref: panelRef, id: menuId, role: "menu", className: `dd-panel dd-panel--${align} dd-panel--${resolvedPlacement} ${panelClassName}`, onKeyDown: handlePanelKeyDown, children: children
-                    ? children
-                    : items?.map((item, i) => item.divider ? (_jsx("div", { className: "dd-divider", role: "separator" }, item.key)) : (_jsxs("button", { ref: (el) => {
-                            itemRefs.current[i] = el;
-                        }, role: "menuitem", type: "button", className: `dd-item${item.variant === "danger" ? " dd-item--danger" : ""}`, disabled: item.disabled, tabIndex: activeIndex === i ? 0 : -1, onClick: () => handleItemClick(item), children: [item.icon && (_jsx("i", { className: `ti ${item.icon}`, "aria-hidden": "true" })), item.label] }, item.key))) }))] }));
+    return (_jsxs("div", { ref: wrapRef, className: `dd-wrap ${className}`, children: [trigger ? (_jsx("div", { onClick: () => !disabled && setOpen(!open), "aria-haspopup": "true", "aria-expanded": open, children: trigger })) : (_jsx("button", { ref: triggerRef, type: "button", className: "dd-trigger-btn", "aria-label": triggerLabel, "aria-haspopup": "true", "aria-expanded": open, "aria-controls": menuId, disabled: disabled, onClick: () => setOpen(!open), onKeyDown: handleTriggerKeyDown, children: _jsx("span", { className: "dd-trigger-icon", "aria-hidden": "true", children: "\u22EE" }) })), open && (_jsxs("div", { ref: panelRef, id: menuId, role: "menu", className: `dd-panel dd-panel--${align} dd-panel--${resolvedPlacement} ${panelClassName}`, onKeyDown: handlePanelKeyDown, children: [searchable && !children && (_jsx("div", { className: "dd-search-wrap", children: _jsx("input", { ref: searchInputRef, type: "text", className: "dd-search-input", placeholder: searchPlaceholder, value: searchQuery, onChange: (e) => {
+                                setSearchQuery(e.target.value);
+                                setActiveIndex(-1);
+                            }, onKeyDown: (e) => {
+                                // Allow arrow keys to navigate items from search input
+                                if (e.key === "ArrowDown") {
+                                    e.preventDefault();
+                                    if (enabledIndices.length > 0)
+                                        focusItem(enabledIndices[0]);
+                                }
+                                else if (e.key === "Escape") {
+                                    e.preventDefault();
+                                    setOpen(false);
+                                    triggerRef.current?.focus();
+                                }
+                            }, "aria-label": "Filter options", role: "searchbox" }) })), children ? (children) : (_jsx("div", { className: "dd-items-list", style: resolvedMaxHeight ? { maxHeight: resolvedMaxHeight, overflowY: "auto" } : undefined, children: filteredItems.length === 0 ? (_jsx("div", { className: "dd-no-results", children: "No results found" })) : (filteredItems.map((item, i) => item.divider ? (_jsx("div", { className: "dd-divider", role: "separator" }, item.key)) : (_jsxs("button", { ref: (el) => {
+                                itemRefs.current[i] = el;
+                            }, role: "menuitem", type: "button", className: `dd-item${item.variant === "danger" ? " dd-item--danger" : ""}`, disabled: item.disabled, tabIndex: activeIndex === i ? 0 : -1, onClick: () => handleItemClick(item), children: [item.icon && (_jsx("i", { className: `ti ${item.icon}`, "aria-hidden": "true" })), item.label] }, item.key)))) }))] }))] }));
 }
 export default Dropdown;
 //# sourceMappingURL=Dropdown.js.map

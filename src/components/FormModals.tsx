@@ -1487,7 +1487,7 @@ export const FormModals: React.FC = () => {
                 <AlertTriangle size={19} className="warning-icon" strokeWidth={2} />
                 <p className="warning-text">
                   You are locking profile permissions on{' '}
-                  <strong>Hermione Benitez (Logistics Director)</strong>. This restricts system
+                  <strong>FirstName LastName (Logistics Director)</strong>. This restricts system
                   access controls immediately.
                 </p>
               </div>

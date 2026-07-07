@@ -1,11 +1,28 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "./Buttons";
 import "./ConfirmModal.css";
-export const ConfirmModal = ({ isOpen, title, message, variant = "primary", cancelLabel = "Cancel", confirmLabel = "Confirm", onCancel, onConfirm, icon, requiredPasscode, passcodeValue = "", onPasscodeChange, }) => {
+export const ConfirmModal = ({ isOpen, title, message, variant = "primary", cancelLabel = "Cancel", confirmLabel = "Confirm", onCancel, onConfirm, icon, requiredPasscode, passcodeValue = "", onPasscodeChange, loading = false, }) => {
     const containerRef = useRef(null);
     const cancelBtnRef = useRef(null);
+    const [shouldRender, setShouldRender] = useState(isOpen);
+    const [isClosing, setIsClosing] = useState(false);
+    // Sync open states with transitions
+    useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true);
+            setIsClosing(false);
+        }
+        else if (shouldRender) {
+            setIsClosing(true);
+            const timer = setTimeout(() => {
+                setShouldRender(false);
+                setIsClosing(false);
+            }, 180); // matches the 0.18s exit animation
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen]);
     // Auto-focus on Cancel button for safety when opening
     useEffect(() => {
         if (isOpen) {
@@ -50,7 +67,7 @@ export const ConfirmModal = ({ isOpen, title, message, variant = "primary", canc
             }
         }
     };
-    if (!isOpen)
+    if (!shouldRender)
         return null;
     const isDestructive = variant === "danger";
     const defaultIcon = isDestructive ? "ti-alert-triangle" : "ti-info-circle";
@@ -58,9 +75,8 @@ export const ConfirmModal = ({ isOpen, title, message, variant = "primary", canc
     const isConfirmDisabled = requiredPasscode
         ? passcodeValue.trim() !== requiredPasscode
         : false;
-    return createPortal(_jsx("div", { className: "dt-overlay", role: "dialog", "aria-modal": "true", onClick: onCancel, onKeyDown: handleKeyDown, children: _jsxs("div", { className: "dt-dialog", ref: containerRef, onClick: (e) => e.stopPropagation(), style: {
+    return createPortal(_jsx("div", { className: `dt-overlay${isClosing ? " closing" : ""}`, role: "dialog", "aria-modal": "true", onClick: onCancel, onKeyDown: handleKeyDown, children: _jsxs("div", { className: `dt-dialog${isClosing ? " closing" : ""}`, ref: containerRef, onClick: (e) => e.stopPropagation(), style: {
                 borderColor: isDestructive ? "var(--err-r)" : "var(--teal-ring)",
-                animation: "abModalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
             }, children: [_jsx("div", { className: "dt-dialog-icon", style: {
                         background: isDestructive ? "var(--err-bg)" : "var(--teal-bg)",
                         color: isDestructive ? "var(--err)" : "var(--teal)",
@@ -78,7 +94,7 @@ export const ConfirmModal = ({ isOpen, title, message, variant = "primary", canc
                                 borderRadius: "var(--r-xs)",
                                 padding: "0 10px",
                                 fontSize: "13px",
-                            }, value: passcodeValue, onChange: (e) => onPasscodeChange?.(e.target.value), placeholder: `Type "${requiredPasscode}"`, autoFocus: true })] })), _jsxs("div", { className: "dt-dialog-actions", style: { marginTop: "24px" }, children: [_jsx("button", { ref: cancelBtnRef, className: "btn btn--secondary btn--sm", onClick: onCancel, children: cancelLabel }), _jsx(Button, { title: confirmLabel, variant: variant, size: "sm", disabled: isConfirmDisabled, onClick: onConfirm })] })] }) }), document.body);
+                            }, value: passcodeValue, onChange: (e) => onPasscodeChange?.(e.target.value), placeholder: `Type "${requiredPasscode}"`, autoFocus: true, disabled: loading })] })), _jsxs("div", { className: "dt-dialog-actions", style: { marginTop: "24px" }, children: [_jsx("button", { ref: cancelBtnRef, className: "btn btn--secondary btn--sm", onClick: onCancel, disabled: loading, children: cancelLabel }), _jsx(Button, { title: confirmLabel, variant: variant, size: "sm", disabled: isConfirmDisabled, loading: loading, onClick: onConfirm })] })] }) }), document.body);
 };
 export default ConfirmModal;
 //# sourceMappingURL=ConfirmModal.js.map

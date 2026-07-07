@@ -319,6 +319,13 @@
     gap: 1rem;
   }
 
+  /* When inside dashboard layout, nav-bar should be full-width */
+  .main-area .nav-bar {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
   .brand {
     font-weight: 700;
     color: #1f2937;
@@ -536,6 +543,49 @@
     font-weight: 700;
   }
 
+  /* 8. Link (Inline text button — no background, teal underline on hover) */
+  .btn-link,
+  .btn--link {
+    background: transparent;
+    color: var(--teal, #00A99D);
+    border-color: transparent;
+    padding: 0;
+    height: auto;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .btn-link:hover:not(:disabled),
+  .btn--link:hover:not(:disabled) {
+    background: transparent;
+    color: var(--teal-dark, #007A72);
+    text-decoration: underline;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* Icon-Only (square button, no label) */
+  .btn--icon-only {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .btn--icon-only.btn--sm {
+    width: 30px;
+    height: 30px;
+  }
+
+  .btn--icon-only.btn--md {
+    width: 38px;
+    height: 38px;
+  }
+
+  .btn--icon-only.btn--lg {
+    width: 44px;
+    height: 44px;
+  }
+
   /* Spinner */
 
   .btn-spinner {
@@ -651,6 +701,66 @@
     height: 1px;
     margin: 4px 6px;
     background: var(--border, #e3e1d8);
+  }
+
+  /* ── Dropdown: Search filter input ────────────────────────────────── */
+  .dd-search-wrap {
+    padding: 4px 4px 2px;
+    border-bottom: 1px solid var(--border, #e3e1d8);
+    margin-bottom: 4px;
+  }
+
+  .dd-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--border, #e3e1d8);
+    border-radius: 6px;
+    font-size: 12px;
+    background: var(--s1, #f7f9ff);
+    color: var(--tp, #2c2c2a);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .dd-search-input::placeholder {
+    color: var(--tm, #9CA3AF);
+  }
+
+  .dd-search-input:focus {
+    border-color: var(--teal, #00A99D);
+    box-shadow: 0 0 0 2px var(--teal-ring, rgba(0, 169, 157, 0.18));
+  }
+
+  /* ── Dropdown: Scrollable items list ──────────────────────────────── */
+  .dd-items-list {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-h, #CBD5E1) transparent;
+  }
+
+  .dd-items-list::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .dd-items-list::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  .dd-items-list::-webkit-scrollbar-thumb {
+    background: var(--border-h, #CBD5E1);
+    border-radius: 3px;
+  }
+
+  .dd-items-list::-webkit-scrollbar-thumb:hover {
+    background: var(--tm, #9CA3AF);
+  }
+
+  /* ── Dropdown: No results state ───────────────────────────────────── */
+  .dd-no-results {
+    padding: 12px 10px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--tm, #9CA3AF);
   }
 
   .site-footer {
