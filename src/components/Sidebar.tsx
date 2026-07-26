@@ -38,27 +38,27 @@ export interface SidebarProps {
 
 const defaultNavGroups: NavGroup[] = [
   {
-    label: "Overview",
+    label: 'Overview',
     items: [
-      { label: "Dashboard", icon: "ti ti-dashboard", active: true },
-      { label: "Analytics", icon: "ti ti-chart-bar", badge: { text: "New", variant: "teal" } },
+      { label: 'Dashboard', icon: 'ti ti-dashboard', active: true },
+      { label: 'Analytics', icon: 'ti ti-chart-bar', badge: { text: 'New', variant: 'teal' } },
     ],
   },
   {
-    label: "Management",
+    label: 'Management',
     items: [
       {
-        label: "Shipments",
-        icon: "ti ti-truck",
-        badge: { text: "8", variant: "warn" },
+        label: 'Shipments',
+        icon: 'ti ti-truck',
+        badge: { text: '8', variant: 'warn' },
         subItems: [
-          { label: "Active Routes", active: false },
-          { label: "Completed Log", active: false },
-          { label: "Returns Audit", active: false },
+          { label: 'Active Routes', active: false },
+          { label: 'Completed Log', active: false },
+          { label: 'Returns Audit', active: false },
         ],
       },
-      { label: "Inventory", icon: "ti ti-box" },
-      { label: "Drivers", icon: "ti ti-users" },
+      { label: 'Inventory', icon: 'ti ti-box' },
+      { label: 'Drivers', icon: 'ti ti-users' },
     ],
   },
 ];

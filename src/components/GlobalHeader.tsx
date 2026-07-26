@@ -1,20 +1,19 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { 
-  Bell, 
-  CheckCheck, 
-  Trash2, 
-  Info, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Settings, 
-  LogOut, 
-  User, 
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import {
+  Bell,
+  CheckCheck,
+  Trash2,
+  Info,
+  AlertTriangle,
+  CheckCircle2,
+  Settings,
+  LogOut,
+  User,
   ChevronRight,
   Clock,
-  Calendar,
   Truck,
   DollarSign,
-  Menu
+  Menu,
 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import type { NotificationItem } from './notificationTypes';
@@ -46,6 +45,26 @@ export interface BreadcrumbItem {
   href?: string;
 }
 
+/** One entry in the system list for the system-switcher dropdown. */
+export interface SystemSwitcherEntry {
+  key: string;         // e.g. 'dms' | 'stars' | 'foms'
+  name: string;        // Short label shown in the dropdown, e.g. 'DMS'
+  icon: string;        // Tabler icon class, e.g. 'ti ti-truck'
+  accentColor?: string; // Optional accent for active indicator
+}
+
+/**
+ * System-switcher configuration.
+ * variant 'A' — inline chip next to the page title.
+ * variant 'B' — section inside the profile dropdown.
+ */
+export interface SystemSwitcherConfig {
+  variant: 'A' | 'B';
+  currentSystem: string;
+  systems: SystemSwitcherEntry[];
+  onSwitch: (key: string) => void;
+}
+
 export interface GlobalHeaderProps {
   title?: string;
   /** Breadcrumb trail shown below the title. Last item is the current page. */
@@ -66,6 +85,12 @@ export interface GlobalHeaderProps {
   onSettings?: () => void;
   /** Called when "Log Out" is clicked in the profile dropdown. */
   onLogout?: () => void;
+  /**
+   * Optional system-switcher dropdown.
+   * Variant A: compact chip inline with the page <h1>.
+   * Variant B: system-switcher section at the top of the profile dropdown.
+   */
+  systemSwitcher?: SystemSwitcherConfig;
 }
 
 const defaultProfile: {
@@ -79,7 +104,7 @@ const defaultProfile: {
   avatarInitials: 'FL',
 };
 
-const GlobalHeader: React.FC<GlobalHeaderProps> = ({ 
+const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   title = 'Dashboard',
   breadcrumbs,
   profile = defaultProfile,
@@ -88,9 +113,11 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   onProfile,
   onSettings,
   onLogout,
+  systemSwitcher,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showSwitcherDropdown, setShowSwitcherDropdown] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(DUMMY_NOTIFICATIONS);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -98,8 +125,10 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   const notificationRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const switcherChipRef = useRef<HTMLDivElement>(null);
   const bellBtnRef = useRef<HTMLButtonElement>(null);
   const avatarBtnRef = useRef<HTMLButtonElement>(null);
+  const switcherBtnRef = useRef<HTMLButtonElement>(null);
 
   // Real-time Clock logic
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -138,6 +167,9 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
       }
+      if (switcherChipRef.current && !switcherChipRef.current.contains(event.target as Node)) {
+        setShowSwitcherDropdown(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -146,7 +178,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   // Close dropdowns on Escape and return focus to the trigger button
   // (keyboard-accessibility parity with the shared Dropdown.tsx component)
   useEffect(() => {
-    if (!showNotifications && !showProfileMenu) return;
+    if (!showNotifications && !showProfileMenu && !showSwitcherDropdown) return;
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (showNotifications) {
@@ -157,10 +189,14 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         setShowProfileMenu(false);
         avatarBtnRef.current?.focus();
       }
+      if (showSwitcherDropdown) {
+        setShowSwitcherDropdown(false);
+        switcherBtnRef.current?.focus();
+      }
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [showNotifications, showProfileMenu]);
+  }, [showNotifications, showProfileMenu, showSwitcherDropdown]);
 
   // Filter notifications by active user role to show relevance
   const roleRelevantNotifications = useMemo(() => {
@@ -237,6 +273,11 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const todayNotifications = useMemo(() => sortedFiltered.filter(n => n.isToday), [sortedFiltered]);
   const earlierNotifications = useMemo(() => sortedFiltered.filter(n => !n.isToday), [sortedFiltered]);
 
+  /* ── Derived values for the Variant A chip ── */
+  const currentSysEntry = systemSwitcher?.systems.find(
+    (s) => s.key === systemSwitcher.currentSystem
+  );
+
   return (
     <header className="site-header">
       <nav className="nav-bar">
@@ -250,7 +291,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           <Menu size={20} strokeWidth={1.75} />
         </button>
 
-        {/* Left Side: Title + Breadcrumb */}
+        {/* Left Side: Title + Breadcrumb + optional Variant A chip */}
         <div className="header-title-group">
           {/* Breadcrumb trail */}
           {breadcrumbs && breadcrumbs.length > 0 && (
@@ -279,7 +320,70 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               </ol>
             </nav>
           )}
-          <h1 className="header-title">{title}</h1>
+
+          {/* Title row — may include the Variant A system chip */}
+          <div className="header-title-row">
+            {/* ── SYSTEM SWITCHER: VARIANT A ── */}
+            {systemSwitcher?.variant === 'A' && currentSysEntry && (
+              <div className="sys-chip-wrap" ref={switcherChipRef}>
+                <button
+                  ref={switcherBtnRef}
+                  id="sys-chip-btn"
+                  className={`sys-chip-btn ${showSwitcherDropdown ? 'open' : ''}`}
+                  onClick={() => {
+                    setShowSwitcherDropdown((v) => !v);
+                    setShowNotifications(false);
+                    setShowProfileMenu(false);
+                  }}
+                  aria-haspopup="listbox"
+                  aria-expanded={showSwitcherDropdown}
+                  aria-label={`Current system: ${currentSysEntry.name}. Click to switch system.`}
+                  title="Switch system"
+                >
+                  <i className={`${currentSysEntry.icon} sys-chip-icon`} aria-hidden="true" />
+                  <span className="sys-chip-name">{currentSysEntry.name}</span>
+                  <i
+                    className={`ti ti-chevron-down sys-chip-chevron ${showSwitcherDropdown ? 'rotated' : ''}`}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                {/* Variant A Dropdown */}
+                {showSwitcherDropdown && (
+                  <div
+                    className="sys-chip-dropdown"
+                    role="listbox"
+                    aria-label="Select a system"
+                  >
+                    <div className="sys-chip-dropdown-header">Switch System</div>
+                    {systemSwitcher.systems.map((sys) => {
+                      const isActive = sys.key === systemSwitcher.currentSystem;
+                      return (
+                        <button
+                          key={sys.key}
+                          role="option"
+                          aria-selected={isActive}
+                          className={`sys-chip-dropdown-item ${isActive ? 'active' : ''}`}
+                          onClick={() => {
+                            setShowSwitcherDropdown(false);
+                            if (!isActive) systemSwitcher.onSwitch(sys.key);
+                          }}
+                        >
+                          <i className={`${sys.icon} sys-chip-item-icon`} aria-hidden="true" />
+                          <span className="sys-chip-item-name">{sys.name}</span>
+                          {isActive && (
+                            <i className="ti ti-check sys-chip-item-check" aria-hidden="true" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <h1 className="header-title">{title}</h1>
+          </div>
         </div>
         
         {/* Right Side: Interactive Controls */}
@@ -588,8 +692,46 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                     <span className="profile-dropdown-role">{profile.role}</span>
                   </div>
                 </div>
- 
+
                 <div className="profile-dropdown-divider" />
+
+                {/* ── SYSTEM SWITCHER: VARIANT B ── */}
+                {systemSwitcher?.variant === 'B' && (
+                  <>
+                    <div className="profile-switcher-section" role="group" aria-label="Switch system">
+                      <div className="profile-switcher-label">
+                        <i className="ti ti-apps" aria-hidden="true" />
+                        Switch System
+                      </div>
+                      {systemSwitcher.systems.map((sys) => {
+                        const isActive = sys.key === systemSwitcher.currentSystem;
+                        return (
+                          <button
+                            key={sys.key}
+                            role="menuitemradio"
+                            aria-checked={isActive}
+                            className={`profile-switcher-option ${isActive ? 'active' : ''}`}
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              if (!isActive) systemSwitcher.onSwitch(sys.key);
+                            }}
+                          >
+                            <i
+                              className={`${sys.icon} profile-switcher-option-icon`}
+                              aria-hidden="true"
+                              style={isActive && sys.accentColor ? { color: sys.accentColor } : undefined}
+                            />
+                            <span>{sys.name}</span>
+                            {isActive && (
+                              <i className="ti ti-check profile-switcher-check" aria-hidden="true" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="profile-dropdown-divider" />
+                  </>
+                )}
                 
                 {/* Options List */}
                 <div className="profile-dropdown-options">

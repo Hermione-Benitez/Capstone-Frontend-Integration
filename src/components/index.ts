@@ -17,4 +17,8 @@ export { default as Notifications } from "./Notifications";
 export { default as ActionButtons } from "./ActionButtons";
 export { default as ToastBar } from "./ToastBar";
 export { ToastProvider, useToast } from "./ToastContext";
+export { default as SystemSelectorPage, SPEEDEX_SYSTEMS } from "./SystemSelectorPage";
+export type { SystemKey, SpeedexSystem, SystemSelectorPageProps } from "./SystemSelectorPage";
 export type { NotificationItem } from "./notificationTypes";
+export type { SystemSwitcherEntry, SystemSwitcherConfig } from "./GlobalHeader";
+
