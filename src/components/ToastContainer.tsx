@@ -1,9 +1,9 @@
 import React from "react";
 import { CheckCircle2, Info, AlertTriangle, XCircle } from "lucide-react";
 import { useToast, Toast } from "./ToastContext";
-import "./ToastBar.css";
+import "./ToastContainer.css";
 
-export const ToastBar: React.FC = () => {
+export const ToastContainer: React.FC = () => {
   const { toasts, dismissToast } = useToast();
 
   const handleAction = (toast: Toast) => {
@@ -75,4 +75,4 @@ export const ToastBar: React.FC = () => {
   );
 };
 
-export default ToastBar;
+export default ToastContainer;

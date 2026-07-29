@@ -1,8 +1,10 @@
 /* Toast Stack Container */
 .tb-toast-wrapper {
-  position: fixed;
-  top: 24px;
-  right: 24px;
+  position: fixed !important;
+  top: 24px !important;
+  right: 24px !important;
+  bottom: auto !important;
+  left: auto !important;
   display: flex;
   flex-direction: column;
   gap: 12px;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 export type StatusCardVariant = 'teal' | 'success' | 'warning' | 'danger' | 'info' | 'new' | 'delivery';
 
@@ -28,6 +28,89 @@ const variantColors: Record<StatusCardVariant, { accent: string; bg: string }> =
   delivery: { accent: 'var(--delivery)', bg: 'var(--delivery-bg)' },
 };
 
+// ── SVG Sparkline ──────────────────────────────────────────────────────────────
+interface SparklineProps {
+  data: number[];
+  accentVar: string;
+  gradientId: string;
+  clipId: string;
+}
+
+const Sparkline: React.FC<SparklineProps> = ({ data, accentVar, gradientId, clipId }) => {
+  const W = 120;
+  const H = 36;
+  const PAD = 2;
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+
+  const points = data.map((v, i) => {
+    const x = PAD + (i / (data.length - 1)) * (W - PAD * 2);
+    const y = PAD + (1 - (v - min) / range) * (H - PAD * 2);
+    return [x, y] as [number, number];
+  });
+
+  // Smooth cubic bezier path
+  const linePath = points.reduce((acc, [x, y], i) => {
+    if (i === 0) return `M ${x},${y}`;
+    const [px, py] = points[i - 1];
+    const cpx = (px + x) / 2;
+    return `${acc} C ${cpx},${py} ${cpx},${y} ${x},${y}`;
+  }, '');
+
+  const areaPath = `${linePath} L ${points[points.length - 1][0]},${H} L ${points[0][0]},${H} Z`;
+  const [lastX, lastY] = points[points.length - 1];
+
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      className="kpi-spark-svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={accentVar} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={accentVar} stopOpacity="0.02" />
+        </linearGradient>
+        <clipPath id={clipId}>
+          <rect x="0" y="0" width={W} height={H} className="kpi-spark-clip" />
+        </clipPath>
+      </defs>
+
+      {/* Gradient area fill */}
+      <path d={areaPath} fill={`url(#${gradientId})`} className="kpi-spark-area" />
+
+      {/* Line */}
+      <path
+        d={linePath}
+        fill="none"
+        stroke={accentVar}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="kpi-spark-line"
+        clipPath={`url(#${clipId})`}
+      />
+
+      {/* Last-point dot */}
+      <circle cx={lastX} cy={lastY} r="2.5" fill={accentVar} className="kpi-spark-dot" />
+      {/* Pulse ring */}
+      <circle
+        cx={lastX}
+        cy={lastY}
+        r="2.5"
+        fill="none"
+        stroke={accentVar}
+        strokeWidth="1.5"
+        className="kpi-spark-pulse"
+      />
+    </svg>
+  );
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────────
 export const StatusCard: React.FC<StatusCardProps> = ({
   label,
   value,
@@ -40,8 +123,12 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   loading = false,
   onClick,
 }) => {
+  const uid = useId();
+  const gradientId = `spark-grad-${uid.replace(/:/g, '')}`;
+  const clipId = `spark-clip-${uid.replace(/:/g, '')}`;
+
   const colors = variantColors[variant] || variantColors.teal;
-  
+
   const customStyles = {
     '--kpi-ac': colors.accent,
     '--kpi-ibg': colors.bg,
@@ -50,10 +137,8 @@ export const StatusCard: React.FC<StatusCardProps> = ({
     userSelect: 'none',
   } as React.CSSProperties;
 
-  // Polarity aware coloring: for 'lower-is-better', a decrease is positive (green), and an increase is negative (red)
   const getTrendClass = (type: 'up' | 'down' | 'neutral') => {
     if (type === 'neutral') return 't-nl';
-    
     if (polarity === 'lower-is-better') {
       return type === 'down' ? 't-up' : 't-dn';
     } else {
@@ -66,8 +151,6 @@ export const StatusCard: React.FC<StatusCardProps> = ({
     if (type === 'down') return '↓';
     return '•';
   };
-
-  const maxSparkVal = sparklineData && sparklineData.length > 0 ? Math.max(...sparklineData) : 1;
 
   if (loading) {
     return (
@@ -120,26 +203,19 @@ export const StatusCard: React.FC<StatusCardProps> = ({
             <span>{getTrendIcon(trend.type)} {trend.value}</span>
           </div>
         )}
-        
         {periodText && (
           <span className="kpi-period">{periodText}</span>
         )}
       </div>
 
-      {sparklineData && sparklineData.length > 0 && (
+      {sparklineData && sparklineData.length > 1 && (
         <div className="kpi-spark">
-          {sparklineData.map((val, idx) => {
-            const heightPercent = maxSparkVal > 0 ? (val / maxSparkVal) * 100 : 0;
-            const isHigh = val > maxSparkVal * 0.7; // highlight highest bars
-            return (
-              <div
-                key={idx}
-                className={`spark-b ${isHigh ? 'hi' : ''}`}
-                style={{ height: `${heightPercent}%` }}
-                title={`Value: ${val}`}
-              />
-            );
-          })}
+          <Sparkline
+            data={sparklineData}
+            accentVar={colors.accent}
+            gradientId={gradientId}
+            clipId={clipId}
+          />
         </div>
       )}
     </div>

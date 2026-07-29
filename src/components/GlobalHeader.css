@@ -670,6 +670,7 @@
 }
 
 .header-avatar-btn {
+  position: relative;
   width: 38px;
   height: 38px;
   border-radius: 8px;
@@ -1270,26 +1271,24 @@
 
 .avatar-online-indicator {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 10px;
-  height: 10px;
+  bottom: 0px;
+  right: 0px;
+  width: 8px;
+  height: 8px;
   background-color: var(--ok, #059669);
-  border: 2px solid #ffffff;
+  border: 1.5px solid #ffffff;
   border-radius: 50%;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .profile-dropdown-online-indicator {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 12px;
-  height: 12px;
+  bottom: 0px;
+  right: 0px;
+  width: 9px;
+  height: 9px;
   background-color: var(--ok, #059669);
-  border: 2px solid var(--s1, #F7F9FF);
+  border: 1.5px solid var(--s1, #F7F9FF);
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 

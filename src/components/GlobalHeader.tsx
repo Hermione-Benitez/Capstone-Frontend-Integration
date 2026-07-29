@@ -16,6 +16,7 @@ import {
   Menu,
 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
+import CurrentDate from './CurrentDate';
 import type { NotificationItem } from './notificationTypes';
 import './GlobalHeader.css';
 
@@ -55,11 +56,9 @@ export interface SystemSwitcherEntry {
 
 /**
  * System-switcher configuration.
- * variant 'A' — inline chip next to the page title.
- * variant 'B' — section inside the profile dropdown.
+
  */
 export interface SystemSwitcherConfig {
-  variant: 'A' | 'B';
   currentSystem: string;
   systems: SystemSwitcherEntry[];
   onSwitch: (key: string) => void;
@@ -129,34 +128,6 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const bellBtnRef = useRef<HTMLButtonElement>(null);
   const avatarBtnRef = useRef<HTMLButtonElement>(null);
   const switcherBtnRef = useRef<HTMLButtonElement>(null);
-
-  // Real-time Clock logic
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formattedDateTime = useMemo(() => {
-    const dateStr = currentTime.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    const timeStr = currentTime.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-    });
-    return `${dateStr} • ${timeStr}`;
-  }, [currentTime]);
-
-
 
   // Auto-close dropdowns on click outside
   useEffect(() => {
@@ -320,68 +291,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               </ol>
             </nav>
           )}
-
-          {/* Title row — may include the Variant A system chip */}
           <div className="header-title-row">
-            {/* ── SYSTEM SWITCHER: VARIANT A ── */}
-            {systemSwitcher?.variant === 'A' && currentSysEntry && (
-              <div className="sys-chip-wrap" ref={switcherChipRef}>
-                <button
-                  ref={switcherBtnRef}
-                  id="sys-chip-btn"
-                  className={`sys-chip-btn ${showSwitcherDropdown ? 'open' : ''}`}
-                  onClick={() => {
-                    setShowSwitcherDropdown((v) => !v);
-                    setShowNotifications(false);
-                    setShowProfileMenu(false);
-                  }}
-                  aria-haspopup="listbox"
-                  aria-expanded={showSwitcherDropdown}
-                  aria-label={`Current system: ${currentSysEntry.name}. Click to switch system.`}
-                  title="Switch system"
-                >
-                  <i className={`${currentSysEntry.icon} sys-chip-icon`} aria-hidden="true" />
-                  <span className="sys-chip-name">{currentSysEntry.name}</span>
-                  <i
-                    className={`ti ti-chevron-down sys-chip-chevron ${showSwitcherDropdown ? 'rotated' : ''}`}
-                    aria-hidden="true"
-                  />
-                </button>
-
-                {/* Variant A Dropdown */}
-                {showSwitcherDropdown && (
-                  <div
-                    className="sys-chip-dropdown"
-                    role="listbox"
-                    aria-label="Select a system"
-                  >
-                    <div className="sys-chip-dropdown-header">Switch System</div>
-                    {systemSwitcher.systems.map((sys) => {
-                      const isActive = sys.key === systemSwitcher.currentSystem;
-                      return (
-                        <button
-                          key={sys.key}
-                          role="option"
-                          aria-selected={isActive}
-                          className={`sys-chip-dropdown-item ${isActive ? 'active' : ''}`}
-                          onClick={() => {
-                            setShowSwitcherDropdown(false);
-                            if (!isActive) systemSwitcher.onSwitch(sys.key);
-                          }}
-                        >
-                          <i className={`${sys.icon} sys-chip-item-icon`} aria-hidden="true" />
-                          <span className="sys-chip-item-name">{sys.name}</span>
-                          {isActive && (
-                            <i className="ti ti-check sys-chip-item-check" aria-hidden="true" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
             <h1 className="header-title">{title}</h1>
           </div>
         </div>
@@ -389,11 +299,9 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         {/* Right Side: Interactive Controls */}
         <div className="header-controls">
 
-          {/* Real-time Clock Widget */}
-          <div className="header-datetime" aria-label="Current date and time">
-            <Clock size={14} className="header-datetime-icon" />
-            <span className="header-datetime-text">{formattedDateTime}</span>
-          </div>
+          {/* Date Widget */}
+          <CurrentDate />
+          
           {/* Notification Button & Dropdown */}
           <div className="header-notification-container" ref={notificationRef}>
             <button 
@@ -669,8 +577,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                     {profile.avatarInitials}
                   </div>
                 )}
-                <span className="avatar-online-indicator" title="Online" />
               </div>
+              <span className="avatar-online-indicator" title="Online" />
             </button>
             
             {showProfileMenu && (
@@ -695,8 +603,8 @@ const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
                 <div className="profile-dropdown-divider" />
 
-                {/* ── SYSTEM SWITCHER: VARIANT B ── */}
-                {systemSwitcher?.variant === 'B' && (
+                {/* ── SYSTEM SWITCHER ── */}
+                {systemSwitcher && (
                   <>
                     <div className="profile-switcher-section" role="group" aria-label="Switch system">
                       <div className="profile-switcher-label">

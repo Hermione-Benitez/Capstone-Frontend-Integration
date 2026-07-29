@@ -413,7 +413,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </div>
 
                   {dateRange === 'custom' && (
-                    <div style={{ width: '260px' }}>
+                    <div style={{ width: '310px' }}>
                       <CalendarRangePicker
                         startValue={customStart}
                         endValue={customEnd}
@@ -545,7 +545,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     iconType="circle"
                     iconSize={8}
                     wrapperStyle={isMobile ? { paddingTop: 10 } : undefined}
-                    formatter={(value) => (
+                    formatter={(value: string) => (
                       <span style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 500, fontFamily: 'var(--fb, sans-serif)' }}>
                         {value}
                       </span>

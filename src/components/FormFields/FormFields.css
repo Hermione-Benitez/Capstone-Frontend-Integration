@@ -18,7 +18,7 @@
 .tf-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
   width: 100%;
 }
 
@@ -730,7 +730,7 @@
 
 /* ── Header ── */
 .modal-hd {
-  padding: 24px 28px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -799,10 +799,10 @@
 
 /* ── Body ── */
 .modal-bd {
-  padding: 24px 28px 20px;
+  padding: 22px 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   overflow: visible;
 }
 
@@ -829,11 +829,11 @@
 }
 
 .modal-ft {
-  padding: 16px 28px 24px;
+  padding: 14px 24px 18px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 

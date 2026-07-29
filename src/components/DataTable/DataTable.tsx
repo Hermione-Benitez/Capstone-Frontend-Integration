@@ -6,213 +6,30 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import Button from "./Buttons";
-import Dropdown from "./Dropdown";
-import ConfirmModal from "./ConfirmModal";
-import SearchBar from "./SearchBar";
-import { useToast } from "./ToastContext";
+import Button from "../Buttons";
+import Dropdown from "../Dropdown";
+import ConfirmModal from "../ConfirmModal";
+import SearchBar from "../SearchBar";
+import { useToast } from "../ToastContext";
 import "./DataTable.css";
 
-// ─── Row Virtualization Hook ──────────────────────────────────────────────────
-// Zero-dependency windowing: only renders rows visible in the scroll viewport.
-// Falls back to full render when rowCount ≤ VIRTUAL_THRESHOLD.
-const VIRTUAL_THRESHOLD = 100; // rows — below this, skip virtualization overhead
-const OVERSCAN = 5;           // extra rows rendered above/below viewport
+import { useVirtualRows } from "./hooks/useVirtualRows";
+import { useColumnResize } from "./hooks/useColumnResize";
+import TableToolbar from "./TableToolbar";
+import TablePagination from "./TablePagination";
+import {
+  SortDirection,
+  DensityMode,
+  ColumnDef,
+  FilterOption,
+  FilterConfig,
+  ActionItem,
+  BulkAction,
+  CreateButton,
+  FilterPreset,
+  DataTableProps
+} from "./types";
 
-function useVirtualRows(
-  containerRef: React.RefObject<HTMLDivElement | null>,
-  rowCount: number,
-  rowHeight: number // estimated px per row
-) {
-  const [scrollTop, setScrollTop] = useState(0);
-  const [viewportHeight, setViewportHeight] = useState(600);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || rowCount <= VIRTUAL_THRESHOLD) return;
-
-    const onScroll = () => setScrollTop(el.scrollTop);
-    const ro = new ResizeObserver(() => setViewportHeight(el.clientHeight));
-    el.addEventListener("scroll", onScroll, { passive: true });
-    ro.observe(el);
-    setViewportHeight(el.clientHeight);
-    return () => {
-      el.removeEventListener("scroll", onScroll);
-      ro.disconnect();
-    };
-  }, [containerRef, rowCount]);
-
-  if (rowCount <= VIRTUAL_THRESHOLD) {
-    // No virtualization — render everything
-    return { virtualStart: 0, virtualEnd: rowCount, totalHeight: null, offsetY: 0 };
-  }
-
-  const totalHeight = rowCount * rowHeight;
-  const rawStart = Math.floor(scrollTop / rowHeight) - OVERSCAN;
-  const virtualStart = Math.max(0, rawStart);
-  const rawEnd = Math.ceil((scrollTop + viewportHeight) / rowHeight) + OVERSCAN;
-  const virtualEnd = Math.min(rowCount, rawEnd);
-  const offsetY = virtualStart * rowHeight;
-
-  return { virtualStart, virtualEnd, totalHeight, offsetY };
-}
-
-// ─── Column Resize Hook ───────────────────────────────────────────────────────
-// Drag-to-resize: tracks pointer delta and updates per-column width in local state.
-function useColumnResize(
-  columns: { key: string; width?: string }[],
-  storageKey: string
-) {
-  const [colWidths, setColWidths] = useState<Record<string, number>>(() => {
-    try {
-      const saved = localStorage.getItem(`${storageKey}:colWidths`);
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  const dragState = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
-
-  const onResizeStart = useCallback(
-    (e: React.MouseEvent, colKey: string, currentWidth: number) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dragState.current = { key: colKey, startX: e.clientX, startWidth: currentWidth };
-
-      const onMove = (me: MouseEvent) => {
-        if (!dragState.current) return;
-        const delta = me.clientX - dragState.current.startX;
-        const newWidth = Math.max(60, dragState.current.startWidth + delta);
-        setColWidths((prev) => {
-          const next = { ...prev, [dragState.current!.key]: newWidth };
-          try { localStorage.setItem(`${storageKey}:colWidths`, JSON.stringify(next)); } catch {}
-          return next;
-        });
-      };
-
-      const onUp = () => {
-        dragState.current = null;
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup", onUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onUp);
-    },
-    [storageKey]
-  );
-
-  const getColWidth = useCallback(
-    (colKey: string, fallbackWidth?: string): number => {
-      if (colWidths[colKey] !== undefined) return colWidths[colKey];
-      if (fallbackWidth) {
-        const px = parseInt(fallbackWidth, 10);
-        if (!isNaN(px)) return px;
-      }
-      return 140; // default column width in px
-    },
-    [colWidths]
-  );
-
-  return { colWidths, getColWidth, onResizeStart };
-}
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export type SortDirection = "asc" | "desc" | null;
-export type DensityMode = "compact" | "regular" | "relaxed";
-
-export interface ColumnDef<T> {
-  key: string;
-  label: string;
-  render?: (row: T) => ReactNode;
-  sortable?: boolean;
-  width?: string;
-  align?: "left" | "center" | "right";
-  frozen?: boolean;
-  defaultVisible?: boolean;
-}
-
-export interface FilterOption {
-  label: string;
-  value: string;
-}
-export interface FilterConfig {
-  key: string;
-  label: string;
-  options: FilterOption[];
-}
-
-export interface ActionItem<T> {
-  label: string;
-  icon?: string;
-  onClick: (row: T) => void;
-  variant?: "default" | "danger";
-  hidden?: (row: T) => boolean;
-}
-
-export interface BulkAction {
-  label: string;
-  icon?: string;
-  variant?: "default" | "danger";
-  destructive?: boolean;
-  undoable?: boolean;
-  onClick: (selectedKeys: (string | number)[]) => void;
-}
-
-export interface CreateButton {
-  label: string;
-  icon?: string;
-  onClick: () => void;
-  variant?: "primary" | "secondary";
-}
-
-// Saved filter preset — stored in localStorage per table
-export interface FilterPreset {
-  id: string;
-  name: string;
-  search: string;
-  filters: Record<string, string>;
-  sortKey: string | null;
-  sortDir: SortDirection;
-}
-
-export interface DataTableProps<T> {
-  rowKey: keyof T;
-  data: T[];
-  columns: ColumnDef<T>[];
-  actions?: ActionItem<T>[];
-  searchPlaceholder?: string;
-  searchFields?: (keyof T)[];
-  filters?: FilterConfig[];
-  createButtons?: CreateButton[];
-  bulkActions?: BulkAction[];
-  pageSizeOptions?: number[];
-  defaultPageSize?: number;
-  emptyMessage?: string;
-  selectable?: boolean;
-  onSelectionChange?: (selectedKeys: (string | number)[]) => void;
-  className?: string;
-  loading?: boolean;
-  exportable?: boolean;
-  onExport?: (data: T[], columns: ColumnDef<T>[]) => void;
-  columnToggle?: boolean;
-  densityToggle?: boolean;
-
-  // Server-side Pagination & Operations Props
-  serverSide?: boolean;
-  totalCount?: number;
-  onPageChange?: (page: number) => void;
-  onPageSizeChange?: (pageSize: number) => void;
-  onSortChange?: (sortKey: string | null, sortDir: SortDirection) => void;
-  onSearchChange?: (query: string) => void;
-  onFilterChange?: (filters: Record<string, string>) => void;
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -778,231 +595,38 @@ export function DataTable<T>({
   return (
     <div className={`dt-root ${densityClass} ${className}`}>
       {/* ── Toolbar ── */}
-      <div className="dt-toolbar">
-        <div className="dt-toolbar-left">
-          <div className="dt-search-wrap">
-            <SearchBar
-              id="dt-search-input"
-              variant="sm"
-              placeholder={searchPlaceholder}
-              value={search}
-              onChange={handleSearchChange}
-              onClear={() => handleSearchChange("")}
-            />
-          </div>
-
-          {filters.map((f) => (
-            <select
-              key={f.key}
-              className="dt-filter-select"
-              aria-label={f.label}
-              value={activeFilters[f.key] ?? ""}
-              onChange={(e) => handleFilterChange(f.key, e.target.value)}
-            >
-              <option value="">{f.label}</option>
-              {f.options.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          ))}
-
-          {/* ── Active filter count badge ── */}
-          {totalActiveCount > 0 && (
-            <span className="dt-filter-count-badge" aria-label={`${totalActiveCount} active filter${totalActiveCount !== 1 ? 's' : ''}`}>
-              <i className="ti ti-filter" aria-hidden="true" />
-              {totalActiveCount} filter{totalActiveCount !== 1 ? 's' : ''}
-              <button
-                className="dt-filter-count-clear"
-                onClick={clearAllFilters}
-                aria-label="Clear all filters"
-                title="Clear all filters"
-              >
-                <i className="ti ti-x" aria-hidden="true" />
-              </button>
-            </span>
-          )}
-
-          {/* ── Filter Presets panel ── */}
-          {filters.length > 0 && (
-            <div className="dt-preset-wrap" ref={presetPanelRef}>
-              <Button
-                title="Saved filter presets"
-                iconOnly
-                icon="ti-bookmark"
-                variant="ghost"
-                size="sm"
-                aria-haspopup="true"
-                aria-expanded={showPresets}
-                onClick={() => setShowPresets((p) => !p)}
-              />
-              {presets.length > 0 && (
-                <span className="dt-preset-count">{presets.length}</span>
-              )}
-
-              {showPresets && (
-                <div className="dt-preset-panel" role="dialog" aria-label="Filter presets">
-                  <p className="dt-preset-panel-title">
-                    <i className="ti ti-bookmark" aria-hidden="true" /> Saved Presets
-                  </p>
-
-                  {/* Save current as preset */}
-                  <div className="dt-preset-save-row">
-                    <input
-                      type="text"
-                      className="dt-preset-name-input"
-                      placeholder="Name this preset…"
-                      value={presetName}
-                      onChange={(e) => setPresetName(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && savePreset()}
-                      maxLength={40}
-                    />
-                    <Button
-                      title="Save"
-                      icon="ti-plus"
-                      variant="primary"
-                      size="sm"
-                      className="dt-preset-save-btn"
-                      onClick={savePreset}
-                      disabled={!presetName.trim()}
-                    />
-                  </div>
-
-                  {/* Preset list */}
-                  {presets.length === 0 ? (
-                    <p className="dt-preset-empty">No saved presets yet.</p>
-                  ) : (
-                    <ul className="dt-preset-list">
-                      {presets.map((preset) => (
-                        <li key={preset.id} className="dt-preset-item">
-                          <button
-                            className="dt-preset-apply"
-                            onClick={() => applyPreset(preset)}
-                          >
-                            <i className="ti ti-filter" aria-hidden="true" />
-                            <span className="dt-preset-item-name">{preset.name}</span>
-                            {preset.search && (
-                              <span className="dt-preset-item-meta">+search</span>
-                            )}
-                            {Object.keys(preset.filters).length > 0 && (
-                              <span className="dt-preset-item-meta">
-                                {Object.keys(preset.filters).length} filter{Object.keys(preset.filters).length !== 1 ? 's' : ''}
-                              </span>
-                            )}
-                          </button>
-                          <Button
-                            title={`Delete preset ${preset.name}`}
-                            iconOnly
-                            icon="ti-trash"
-                            variant="ghost"
-                            size="sm"
-                            className="dt-preset-delete"
-                            onClick={(e) => deletePreset(preset.id, e)}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="dt-toolbar-right">
-          {densityToggle && (
-            <div className="dt-density-group" role="group" aria-label="Row density">
-              {(["compact", "regular", "relaxed"] as DensityMode[]).map((d) => (
-                <button
-                  key={d}
-                  className={`dt-density-btn${
-                    density === d ? " dt-density-btn--active" : ""
-                  }`}
-                  onClick={() => setDensity(d)}
-                  title={d.charAt(0).toUpperCase() + d.slice(1)}
-                  aria-pressed={density === d}
-                >
-                  {d === "compact" && (
-                    <i className="ti ti-layout-list" aria-hidden="true" />
-                  )}
-                  {d === "regular" && (
-                    <i className="ti ti-layout-rows" aria-hidden="true" />
-                  )}
-                  {d === "relaxed" && (
-                    <i className="ti ti-layout-bottombar" aria-hidden="true" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {columnToggle && (
-            <div className="dt-col-toggle-wrap" ref={colToggleRef}>
-              <Button
-                id="dt-col-toggle-btn"
-                title="Column visibility"
-                iconOnly
-                icon="ti-columns"
-                variant="secondary"
-                size="sm"
-                aria-haspopup="true"
-                aria-expanded={showColToggle}
-                onClick={() => setShowColToggle((p) => !p)}
-              />
-              {showColToggle && (
-                <div
-                  className="dt-col-panel"
-                  role="menu"
-                  aria-labelledby="dt-col-toggle-btn"
-                >
-                  <p className="dt-col-panel-title">Show / Hide Columns</p>
-                  {columns.map((col) => (
-                    <label key={col.key} className="dt-col-item">
-                      <input
-                        type="checkbox"
-                        className="dt-checkbox"
-                        checked={!hiddenCols.has(col.key)}
-                        onChange={() =>
-                          setHiddenCols((prev) => {
-                            const n = new Set(prev);
-                            n.has(col.key) ? n.delete(col.key) : n.add(col.key);
-                            return n;
-                          })
-                        }
-                      />
-                      <span>{col.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {exportable && (
-            <Button
-              id="dt-export-btn"
-              title="Export"
-              icon="ti-download"
-              variant="secondary"
-              size="sm"
-              onClick={handleExport}
-            />
-          )}
-
-          {createButtons.map((btn, i) => (
-            <Button
-              key={i}
-              title={btn.label}
-              icon={btn.icon}
-              variant={btn.variant === "secondary" ? "secondary" : "primary"}
-              size="sm"
-              onClick={btn.onClick}
-            />
-          ))}
-        </div>
-      </div>
-
+      <TableToolbar
+        search={search}
+        searchPlaceholder={searchPlaceholder}
+        handleSearchChange={handleSearchChange}
+        filters={filters}
+        activeFilters={activeFilters}
+        handleFilterChange={handleFilterChange}
+        totalActiveCount={totalActiveCount}
+        clearAllFilters={clearAllFilters}
+        presets={presets}
+        showPresets={showPresets}
+        setShowPresets={setShowPresets}
+        presetPanelRef={presetPanelRef}
+        presetName={presetName}
+        setPresetName={setPresetName}
+        savePreset={savePreset}
+        applyPreset={applyPreset}
+        deletePreset={deletePreset}
+        densityToggle={densityToggle}
+        density={density}
+        setDensity={setDensity}
+        columnToggle={columnToggle}
+        colToggleRef={colToggleRef}
+        showColToggle={showColToggle}
+        setShowColToggle={setShowColToggle}
+        columns={columns}
+        hiddenCols={hiddenCols}
+        setHiddenCols={setHiddenCols}
+        exportable={exportable}
+        handleExport={handleExport}
+        createButtons={createButtons}
+      />
       {/* ── Active filter chips + Sort chip ── */}
       {(hasActiveFilters || sortLabel) && (
         <div className="dt-filter-chips" aria-label="Active filters">
@@ -1352,167 +976,17 @@ export function DataTable<T>({
       </div>
 
       {/* ── Pagination ── */}
-      <nav
-        className="dt-pagination"
-        aria-label="Table pagination"
-        onKeyDown={(e) => {
-          // Keyboard arrow navigation — only when focus is inside pagination nav
-          if (e.key === "ArrowLeft" && page > 1) {
-            e.preventDefault();
-            handlePageChange(page - 1);
-          } else if (e.key === "ArrowRight" && page < totalPages) {
-            e.preventDefault();
-            handlePageChange(page + 1);
-          } else if (e.key === "Home") {
-            e.preventDefault();
-            handlePageChange(1);
-          } else if (e.key === "End") {
-            e.preventDefault();
-            handlePageChange(totalPages);
-          }
-        }}
-      >
-        {/* Record count info */}
-        <span className="dt-page-info">
-          {totalRecords === 0
-            ? "No records"
-            : `Showing ${fromRow}–${toRow} of ${totalRecords.toLocaleString()} records`}
-        </span>
-
-        <div className="dt-pagination-controls">
-          {/* Rows-per-page selector */}
-          <span className="dt-page-size-label">Rows per page</span>
-          <select
-            className="dt-page-size-select"
-            value={pageSize}
-            aria-label="Rows per page"
-            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-          >
-            {pageSizeOptions.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-
-          {/* ── Desktop page buttons ── */}
-          <div className="dt-page-btns" role="group" aria-label="Page navigation">
-            {/* First page */}
-            <button
-              className="dt-page-btn dt-page-btn--icon"
-              disabled={page === 1}
-              onClick={() => handlePageChange(1)}
-              aria-label="First page"
-              title="First page"
-            >
-              <i className="ti ti-chevrons-left" aria-hidden="true" />
-            </button>
-
-            {/* Previous page */}
-            <button
-              className="dt-page-btn dt-page-btn--icon"
-              disabled={page === 1}
-              onClick={() => handlePageChange(page - 1)}
-              aria-label="Previous page"
-              title="Previous page (Left arrow)"
-            >
-              <i className="ti ti-chevron-left" aria-hidden="true" />
-            </button>
-
-            {/* Page number buttons with smart ellipsis */}
-            <span className="dt-page-btns-inner">
-              {buildPageRange().map((p, i) =>
-                p === "..." ? (
-                  <span key={`ellipsis-${i}`} className="dt-page-ellipsis" aria-hidden="true">
-                    &hellip;
-                  </span>
-                ) : (
-                  <button
-                    key={p}
-                    className={`dt-page-btn${p === page ? " dt-page-btn--active" : ""}`}
-                    onClick={() => handlePageChange(p)}
-                    aria-label={`Page ${p}`}
-                    aria-current={p === page ? "page" : undefined}
-                  >
-                    {p}
-                  </button>
-                )
-              )}
-            </span>
-
-            {/* Next page */}
-            <button
-              className="dt-page-btn dt-page-btn--icon"
-              disabled={page === totalPages}
-              onClick={() => handlePageChange(page + 1)}
-              aria-label="Next page"
-              title="Next page (Right arrow)"
-            >
-              <i className="ti ti-chevron-right" aria-hidden="true" />
-            </button>
-
-            {/* Last page */}
-            <button
-              className="dt-page-btn dt-page-btn--icon"
-              disabled={page === totalPages}
-              onClick={() => handlePageChange(totalPages)}
-              aria-label="Last page"
-              title="Last page"
-            >
-              <i className="ti ti-chevrons-right" aria-hidden="true" />
-            </button>
-          </div>
-
-          {/* ── Direct page number input ── */}
-          {totalPages > 1 && (
-            <div className="dt-page-jump" aria-label="Jump to page">
-              <label htmlFor="dt-page-jump-input" className="dt-page-size-label">
-                Go to
-              </label>
-              <input
-                id="dt-page-jump-input"
-                type="number"
-                min={1}
-                max={totalPages}
-                className="dt-page-jump-input"
-                placeholder={String(page)}
-                value={pageInputFocused ? pageInputVal : ""}
-                aria-label={`Go to page (1–${totalPages})`}
-                onFocus={() => { setPageInputFocused(true); setPageInputVal(""); }}
-                onChange={(e) => setPageInputVal(e.target.value)}
-                onBlur={commitPageInput}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") commitPageInput();
-                  if (e.key === "Escape") { setPageInputVal(""); setPageInputFocused(false); }
-                }}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* ── Mobile compact: "Page 3 of 48" with only prev/next ── */}
-        <div className="dt-pagination-mobile" aria-hidden="true">
-          <button
-            className="dt-page-btn dt-page-btn--icon"
-            disabled={page === 1}
-            onClick={() => handlePageChange(page - 1)}
-            aria-label="Previous page"
-          >
-            <i className="ti ti-chevron-left" aria-hidden="true" />
-          </button>
-          <span className="dt-page-mobile-label">
-            Page <strong>{page}</strong> of {totalPages}
-          </span>
-          <button
-            className="dt-page-btn dt-page-btn--icon"
-            disabled={page === totalPages}
-            onClick={() => handlePageChange(page + 1)}
-            aria-label="Next page"
-          >
-            <i className="ti ti-chevron-right" aria-hidden="true" />
-          </button>
-        </div>
-      </nav>
+      <TablePagination
+        page={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        pageSizeOptions={pageSizeOptions}
+        totalRecords={totalRecords}
+        fromRow={fromRow}
+        toRow={toRow}
+        handlePageChange={handlePageChange}
+        handlePageSizeChange={handlePageSizeChange}
+      />
 
       {/* ── Confirm Modal ── */}
       {confirm && (
