@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SystemSelectorPage, { type SystemKey } from '../components/SystemSelectorPage';
 import {
-  parseAuthHash,
+  parseAuthFromUrl,
   getStoredAuthSession,
   saveAuthSession,
   clearAuthSession,
@@ -17,12 +17,12 @@ export const PortalPage: React.FC = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // 1. Check if auth tokens are passed via URL hash
-    const hashTokens = parseAuthHash(window.location.hash);
+    // 1. Check if auth tokens are passed via URL hash or search parameters
+    const urlTokens = parseAuthFromUrl();
 
-    if (hashTokens && hashTokens.authToken) {
+    if (urlTokens && urlTokens.authToken) {
       // Save tokens into localStorage
-      saveAuthSession(hashTokens);
+      saveAuthSession(urlTokens);
 
       // Clean the address bar without triggering page refresh
       window.history.replaceState(null, '', window.location.pathname);
@@ -43,8 +43,9 @@ export const PortalPage: React.FC = () => {
   }, [navigate]);
 
   const handleSystemSelect = (systemKey: SystemKey) => {
-    // Redirect to subsystem with authentication hash
-    redirectToSubsystem(systemKey, session);
+    // Ensure we retrieve latest session data from storage or state
+    const currentSession = session || getStoredAuthSession();
+    redirectToSubsystem(systemKey, currentSession);
   };
 
   const handleLogout = () => {
