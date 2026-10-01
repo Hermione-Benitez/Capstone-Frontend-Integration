@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Speedex Courier and Forwarder: UI prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f4f6fa;--surface:#fff;--ink:#0e1b2e;--muted:#52627a;--line:#d9e0ea;--brand:#0b3a8c;--brand-ink:#fff;--warn-bg:#fff4d6;--warn-line:#e6b422;--warn-ink:#5a4200;--ok:#1b7f4b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1424;--surface:#12203a;--ink:#eaf0fa;--muted:#9fb0c9;--line:#26385a;--brand:#6c9bff;--brand-ink:#08142b;--warn-bg:#352a0a;--warn-line:#b8901d;--warn-ink:#f6dfa0;--ok:#4cc88a}}
+:root[data-theme="dark"]{--bg:#0a1424;--surface:#12203a;--ink:#eaf0fa;--muted:#9fb0c9;--line:#26385a;--brand:#6c9bff;--brand-ink:#08142b;--warn-bg:#352a0a;--warn-line:#b8901d;--warn-ink:#f6dfa0;--ok:#4cc88a}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 "Public Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Familjen Grotesk","Public Sans",system-ui,sans-serif;line-height:1.1;margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--surface);border-bottom:1px solid var(--line);z-index:5}
+.nav{display:flex;align-items:center;gap:20px;height:64px}
+.logo{font:700 22px "Familjen Grotesk",sans-serif;text-decoration:none;color:var(--brand);margin-right:auto}
+.nav a.l{text-decoration:none;font-size:15px;color:var(--muted);font-weight:500}
+.nav a.l:hover{color:var(--ink)}
+.btn{display:inline-block;background:var(--brand);color:var(--brand-ink);border:0;border-radius:8px;padding:11px 20px;font:600 15px "Public Sans",sans-serif;text-decoration:none;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+@media(max-width:760px){.nav a.l{display:none}}
+.alert{background:var(--warn-bg);border-bottom:1px solid var(--warn-line);color:var(--warn-ink);font-size:14px}
+.alert .wrap{display:flex;gap:12px;align-items:center;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.alert b{font-weight:600}
+.alert a{margin-left:auto;font-weight:600}
+.hero{padding:64px 0 72px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr}.hero{padding:40px 0}}
+h1{font-size:clamp(38px,6vw,64px);letter-spacing:-.02em}
+.lead{color:var(--muted);font-size:18px;max-width:46ch;margin:18px 0 26px}
+.facts{display:flex;gap:28px;flex-wrap:wrap;margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}
+.facts div{font-size:14px;color:var(--muted)}
+.facts strong{display:block;font:700 26px "Familjen Grotesk",sans-serif;color:var(--ink)}
+.way{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:0 18px 40px -24px rgba(11,58,140,.45);position:relative}
+.way::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;border-radius:14px 14px 0 0;background:repeating-linear-gradient(90deg,var(--brand) 0 22px,#f5c518 22px 44px,#ce1126 44px 66px)}
+.way h2{font-size:24px;margin:8px 0 4px}
+.way p{margin:0 0 16px;color:var(--muted);font-size:14px}
+.row{display:flex;gap:8px}
+input[type=text],input[type=email],textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.hint{font-size:13px;color:var(--muted);margin-top:8px}
+#res{margin-top:18px}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{position:relative;padding:0 0 18px 30px;font-size:15px}
+.tl li::before{content:"";position:absolute;left:5px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--line)}
+.tl li::after{content:"";position:absolute;left:10px;top:20px;bottom:-4px;width:2px;background:var(--line)}
+.tl li:last-child::after{display:none}
+.tl li.done::before{background:var(--ok)}
+.tl li.now::before{background:var(--brand);box-shadow:0 0 0 5px color-mix(in srgb,var(--brand) 25%,transparent)}
+.tl small{display:block;color:var(--muted)}
+.status{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.status b{font:700 18px "Familjen Grotesk",sans-serif}
+section{padding:64px 0}
+section.alt{background:var(--surface);border-block:1px solid var(--line)}
+h2.t{font-size:clamp(28px,4vw,40px);margin-bottom:10px}
+.sub{color:var(--muted);max-width:60ch;margin:0 0 30px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+@media(max-width:760px){.three{grid-template-columns:1fr;gap:22px}}
+.three h3{font-size:22px;margin-bottom:6px}
+.three p{margin:0;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-bottom:10px}
+section.alt details{background:var(--bg)}
+summary{cursor:pointer;padding:16px 18px;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary span{font-weight:400;color:var(--muted);white-space:nowrap}
+details[open] summary{border-bottom:1px solid var(--line)}
+details .b{padding:16px 18px;color:var(--muted);font-size:15px}
+details .b p{margin:0 0 10px;max-width:70ch}
+.about{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+@media(max-width:860px){.about{grid-template-columns:1fr}}
+.about p{color:var(--muted);margin:0 0 14px;max-width:62ch}
+.obj{margin:0;padding:0;list-style:none}
+.obj li{padding:14px 0;border-bottom:1px solid var(--line)}
+.obj li:first-child{border-top:1px solid var(--line)}
+.contact{display:grid;grid-template-columns:1fr 1.2fr;gap:48px}
+@media(max-width:860px){.contact{grid-template-columns:1fr}}
+.contact dl{margin:0}.contact dt{font-weight:600;margin-top:16px}.contact dd{margin:0;color:var(--muted)}
+form label{display:block;font-size:14px;font-weight:600;margin:0 0 6px}
+form .f{margin-bottom:14px}
+#sent{display:none;color:var(--ok);font-weight:600;margin-top:12px}
+footer{padding:28px 0;font-size:14px;color:var(--muted);border-top:1px solid var(--line)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#top">Speedex</a>
+    <a class="l" href="#top">Home</a><a class="l" href="#advisories">Advisories</a><a class="l" href="#track">Track</a><a class="l" href="#about">About us</a><a class="l" href="#contact">Contact us</a>
+    <a class="btn" href="https://myspeedex.net/login">Log in</a>
+  </div>
+</header>
+<div class="alert"><div class="wrap"><b>Operations advisory, Sept 10, 2026:</b> Heavy rain from the Southwest Monsoon may delay pickups and deliveries in affected areas. All shipments in our custody are safe.<a href="#advisories">Read the full advisory</a></div></div>
+
+<main id="top">
+<div class="hero"><div class="wrap">
+  <div>
+    <h1>Your parcels, across the Philippines, tracked at every stop.</h1>
+    <p class="lead">Speedex couriers are stationed nationwide to deliver documents and parcels quickly and safely, at a fair price.</p>
+    <a class="btn" href="#track">Track a shipment</a> <a class="btn ghost" href="#contact">Talk to us</a>
+    <div class="facts">
+      <div><strong>31 years</strong>in service since 1993</div>
+      <div><strong>100%</strong>Filipino-owned</div>
+      <div><strong>Nationwide</strong>trained couriers</div>
+    </div>
+  </div>
+  <div class="way" id="track">
+    <h2>Track your delivery</h2>
+    <p>Enter your waybill number to see where your parcel is.</p>
+    <form class="row" id="tf"><label for="wb" style="position:absolute;left:-9999px">Waybill number</label><input id="wb" type="text" placeholder="Waybill number" autocomplete="off"><button class="btn" type="submit">Track</button></form>
+    <div class="hint">Prototype: any number shows sample data.</div>
+    <div id="res" aria-live="polite"></div>
+  </div>
+</div></div>
+
+<section class="alt"><div class="wrap">
+  <h2 class="t">Reliable, capable, and fairly priced</h2>
+  <p class="sub">What clients can expect when they send with Speedex.</p>
+  <div class="three">
+    <div><h3>Reliable</h3><p>Seasoned, highly trained personnel stationed across the country.</p></div>
+    <div><h3>Capable</h3><p>Ready to deliver in the quickest time possible.</p></div>
+    <div><h3>Efficient</h3><p>Efficient service without the high cost.</p></div>
+  </div>
+</div></section>
+
+<section id="advisories"><div class="wrap">
+  <h2 class="t">Advisories</h2>
+  <p class="sub">Service updates on weather, holidays, and operations. The latest is open first.</p>
+  <details open><summary>Operations advisory<span>Sept 10, 2026</span></summary><div class="b">
+    <p>In line with the DOST-PAGASA heavy rainfall outlook caused by the Southwest Monsoon, pickups and deliveries may be delayed or temporarily suspended in areas hit by heavy rain or flooding.</p>
+    <p>Shipments in our custody are safe and secure. Normal operations resume in affected areas as soon as conditions permit, and we will post updates here.</p>
+    <p>Expected rainfall today: 100–200 mm in Zambales, and 50–100 mm in Metro Manila, Bulacan, Cavite, Rizal, and other Luzon provinces. Source: PAGASA Weather Advisory No. 74.</p></div></details>
+  <details><summary>Feast of the Immaculate Conception<span>Dec 8, 2025</span></summary><div class="b"><p>Holiday operations notice for the observance of the feast.</p></div></details>
+  <details><summary>National Heroes Day<span>Aug 25, 2025</span></summary><div class="b"><p>Holiday operations notice for National Heroes Day.</p></div></details>
+  <details><summary>Weather report<span>July 21, 2025</span></summary><div class="b"><p>Operations notice based on the latest PAGASA advisory.</p></div></details>
+  <details><summary>Independence Day<span>June 12, 2025</span></summary><div class="b"><p>Holiday operations notice for Independence Day.</p></div></details>
+</div></section>
+
+<section class="alt" id="about"><div class="wrap about">
+  <div>
+    <h2 class="t">A Filipino courier built on trust</h2>
+    <p>Speedex is 100% Filipino-owned and has been registered with the Department of Trade and Industry since October 1993, and with the SEC since October 6, 2009.</p>
+    <p>We evaluate what each customer needs, design the logistics around it, train our people, and deliver goods promptly and securely. Every package is handled with strict confidentiality.</p>
+  </div>
+  <div>
+    <h3 style="font-size:22px;margin-bottom:10px">Our core objectives</h3>
+    <ul class="obj">
+      <li>Deliver excellent service to our clients.</li>
+      <li>Give employees room to grow and develop.</li>
+      <li>Lead the industry with integrity, reliability, and responsibility.</li>
+    </ul>
+  </div>
+</div></section>
+
+<section id="contact"><div class="wrap contact">
+  <div>
+    <h2 class="t">Contact us</h2>
+    <dl><dt>Office</dt><dd>ECF Building, Malate, Manila</dd><dt>Email</dt><dd>admin@myspeedex.net</dd><dt>Phone</dt><dd>02 4004628 to 29</dd></dl>
+  </div>
+  <form id="cf">
+    <div class="f"><label for="n">Your name</label><input id="n" type="text" required></div>
+    <div class="f"><label for="e">Email</label><input id="e" type="email" required></div>
+    <div class="f"><label for="m">Message</label><textarea id="m" rows="4" required></textarea></div>
+    <button class="btn" type="submit">Send message</button>
+    <div id="sent" role="status">Message sent. We will reply by email.</div>
+  </form>
+</div></section>
+</main>
+<footer><div class="wrap">© Speedex Courier and Forwarder, Inc. UI prototype with sample content.</div></footer>
+
+<script>
+document.getElementById('tf').addEventListener('submit',function(e){
+  e.preventDefault();
+  var v=document.getElementById('wb').value.trim();
+  var r=document.getElementById('res');
+  if(!v){r.innerHTML='<div class="hint">Enter a waybill number to track.</div>';return;}
+  var s=document.createElement('span');s.textContent=v;
+  r.innerHTML='<div class="status"><b>In transit</b><span class="hint" style="margin:0">Waybill '+s.innerHTML+'</span></div>'+
+  '<ol class="tl"><li class="done">Picked up in Manila<small>Sample: 8:40 AM</small></li><li class="done">Sorted at the Manila hub<small>Sample: 1:15 PM</small></li><li class="now">On the way to the destination<small>Sample: updated 2 hours ago</small></li><li>Out for delivery<small>Estimated tomorrow</small></li></ol>';
+});
+document.getElementById('cf').addEventListener('submit',function(e){e.preventDefault();document.getElementById('sent').style.display='block';e.target.reset();});
+</script>
+</body>
+</html>

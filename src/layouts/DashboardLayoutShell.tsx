@@ -12,7 +12,7 @@ export const DashboardLayoutShell: React.FC = () => {
   const currentSystem = location.pathname.split('/')[1] || 'dms';
 
   const handleSystemChange = (key: string) => {
-    navigate(`/${key}`);
+    navigate(`/${key}/dashboard`);
   };
 
   return (
@@ -28,6 +28,8 @@ export const DashboardLayoutShell: React.FC = () => {
             systems: SYSTEMS_LIST,
             onSwitch: handleSystemChange,
           }}
+          onLogout={() => navigate('/')}
+          onProfile={() => navigate('/home')}
         />
 
         <main>

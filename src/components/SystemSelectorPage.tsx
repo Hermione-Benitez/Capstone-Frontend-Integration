@@ -77,6 +77,10 @@ export interface SystemSelectorPageProps {
   };
   /** Called with the selected system key after the entry animation. */
   onSelect: (systemKey: SystemKey) => void;
+  /** Optional callback to return to the public website view. */
+  onPublicHome?: () => void;
+  /** Optional callback to log out. */
+  onLogout?: () => void;
 }
 
 const defaultProfile = {
@@ -90,6 +94,8 @@ const defaultProfile = {
 export const SystemSelectorPage: React.FC<SystemSelectorPageProps> = ({
   profile = defaultProfile,
   onSelect,
+  onPublicHome,
+  onLogout,
 }) => {
   const [hoveredSystem, setHoveredSystem] = useState<string | null>(null);
   const [enteringSystem, setEnteringSystem] = useState<string | null>(null);
@@ -121,10 +127,34 @@ export const SystemSelectorPage: React.FC<SystemSelectorPageProps> = ({
           </div>
 
           <div className="sys-sel-topbar-right">
+            {onPublicHome && (
+              <button
+                type="button"
+                className="sys-sel-topbar-btn"
+                onClick={onPublicHome}
+                title="View public portal"
+              >
+                <i className="ti ti-world" aria-hidden="true" />
+                <span>Public Website</span>
+              </button>
+            )}
+
             <span className="sys-sel-admin-badge" aria-label="Administrator access">
               <i className="ti ti-shield-check" aria-hidden="true" />
               Administrator
             </span>
+
+            {onLogout && (
+              <button
+                type="button"
+                className="sys-sel-topbar-btn sys-sel-logout-btn"
+                onClick={onLogout}
+                title="Sign out of portal"
+              >
+                <i className="ti ti-logout" aria-hidden="true" />
+                <span>Log Out</span>
+              </button>
+            )}
           </div>
         </header>
 
