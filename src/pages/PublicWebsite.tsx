@@ -126,6 +126,15 @@ export const PublicWebsite: React.FC = () => {
   const [trackingResult, setTrackingResult] = useState<WaybillResult | null>(null);
   const [trackingError, setTrackingError] = useState<string | null>(null);
   const [openAdvisoryId, setOpenAdvisoryId] = useState<string | null>('adv-1');
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 15);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Contact Form State
   const [contactName, setContactName] = useState('');
@@ -216,7 +225,7 @@ export const PublicWebsite: React.FC = () => {
       )}
 
       {/* ── Main Navigation ── */}
-      <header className="spx-navbar">
+      <header className={`spx-navbar ${isScrolled ? 'is-scrolled' : ''}`}>
         <div className="spx-container spx-nav-inner">
           <a href="#top" className="spx-logo-link">
             <img src="/logo.png" alt="Speedex Logo" className="spx-logo-img" />

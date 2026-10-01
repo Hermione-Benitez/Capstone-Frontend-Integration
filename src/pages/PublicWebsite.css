@@ -12,7 +12,7 @@
   font-family: var(--fb, 'Inter', -apple-system, sans-serif);
   line-height: 1.6;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .spx-pub-root * {
@@ -111,21 +111,22 @@
 }
 
 /* ── Navigation Header ────────────────────────────────────────── */
-/* ── Navigation Header ────────────────────────────────────────── */
 .spx-navbar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 1000;
   background: #0B1437;
   background: rgba(11, 20, 55, 0.96);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  transition: box-shadow 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .spx-navbar.is-scrolled {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  background: rgba(11, 20, 55, 0.99);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(0, 169, 157, 0.25);
 }
 
 .spx-nav-inner {
