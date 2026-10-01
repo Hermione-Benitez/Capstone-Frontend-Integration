@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
-import { getStarsLoginUrl } from '../../utils/auth';
+import { useNavigate } from 'react-router-dom';
+import { saveAuthSession } from '../../utils/auth';
 import './LoginPage.css';
-
-
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const starsUrl = getStarsLoginUrl('/portal');
+  const navigate = useNavigate();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Mock successful authentication
+    saveAuthSession({
+      authToken: 'mock-jwt-token-12345',
+      employeeId: 'EMP-001',
+      employeeName: 'Admin User',
+      userRole: 'Administrator',
+    });
+    // Redirect to subsystem portal
+    navigate('/portal');
+  };
 
   return (
     <div className="lp-root">
@@ -49,10 +61,10 @@ const LoginPage: React.FC = () => {
 
             <hr className="lp-divider" />
 
-            {/* Form — submits to STARS auth */}
+            {/* Form — locally authenticates and redirects to /portal */}
             <form
               className="lp-form"
-              onSubmit={(e) => { e.preventDefault(); window.location.href = starsUrl; }}
+              onSubmit={handleLogin}
               noValidate
             >
               {/* Employee ID */}
