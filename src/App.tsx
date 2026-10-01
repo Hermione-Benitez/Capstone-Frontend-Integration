@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ToastProvider } from "./components";
 import ToastContainer from "./components/ToastContainer";
 import DashboardLayoutShell from "./layouts/DashboardLayoutShell";
@@ -9,6 +9,24 @@ import { getStarsLoginUrl, redirectToStarsLogin } from "./utils/auth";
 const PublicWebsite = lazy(() => import("./pages/PublicWebsite"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const SharedDashboard = lazy(() => import("./pages/SharedDashboard"));
+const LoginPage = lazy(() => import("./pages/LoginPage/LoginPage"));
+
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+
+  React.useEffect(() => {
+    if (hash) {
+      const el = document.getElementById(hash.replace('#', ''));
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname, hash]);
+
+  return null;
+}
 
 function ExternalLoginRedirect() {
   const loginUrl = getStarsLoginUrl('/portal');
@@ -49,8 +67,8 @@ function AppRoutes() {
         <Route path="/selector" element={<PortalPage />} />
         <Route path="/systems" element={<PortalPage />} />
 
-        {/* Authentication Gateway */}
-        <Route path="/login" element={<ExternalLoginRedirect />} />
+        {/* Authentication Gateway — branded split-layout login page */}
+        <Route path="/login" element={<LoginPage />} />
 
         {/* Micro-Frontend Shells (Shared Sidebar/Header) */}
         <Route path="/dms/*" element={<DashboardLayoutShell />}>
@@ -76,6 +94,7 @@ function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <AppRoutes />
       </BrowserRouter>
       <ToastContainer />
