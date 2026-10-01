@@ -1,25 +1,28 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastProvider } from "./components";
 import ToastContainer from "./components/ToastContainer";
-import SystemSelectorPage from "./components/SystemSelectorPage";
-import { ADMIN_PROFILE } from "./data/mockData";
 import DashboardLayoutShell from "./layouts/DashboardLayoutShell";
+import { getStarsLoginUrl, redirectToStarsLogin } from "./utils/auth";
 
-// Lazy-load public website & system dashboards
+// Lazy-load public website, portal & system dashboards
 const PublicWebsite = lazy(() => import("./pages/PublicWebsite"));
+const PortalPage = lazy(() => import("./pages/PortalPage"));
 const SharedDashboard = lazy(() => import("./pages/SharedDashboard"));
 
 function ExternalLoginRedirect() {
+  const loginUrl = getStarsLoginUrl('/portal');
+
   React.useEffect(() => {
-    window.location.href = "https://stars-two-chi.vercel.app/";
+    redirectToStarsLogin('/portal');
   }, []);
+
   return (
     <div style={{ padding: "80px 20px", textAlign: "center", fontFamily: "var(--fb, sans-serif)" }}>
       <h2>Redirecting to Speedex Authentication Portal...</h2>
       <p style={{ color: "var(--tt, #6B7280)" }}>
         If you are not redirected automatically,{" "}
-        <a href="https://stars-two-chi.vercel.app/" style={{ color: "var(--teal, #00A99D)", fontWeight: 600 }}>
+        <a href={loginUrl} style={{ color: "var(--teal, #00A99D)", fontWeight: 600 }}>
           click here to continue
         </a>.
       </p>
@@ -28,12 +31,6 @@ function ExternalLoginRedirect() {
 }
 
 function AppRoutes() {
-  const navigate = useNavigate();
-
-  const handleSystemSelect = (key: string) => {
-    navigate(`/${key}/dashboard`);
-  };
-
   return (
     <Suspense
       fallback={
@@ -46,40 +43,11 @@ function AppRoutes() {
         {/* Public Facing Website (Speedex Landing & Tracking) */}
         <Route path="/" element={<PublicWebsite />} />
 
-        {/* Post-Login System Selector Homepage */}
-        <Route
-          path="/home"
-          element={
-            <SystemSelectorPage
-              profile={ADMIN_PROFILE}
-              onSelect={handleSystemSelect}
-              onPublicHome={() => navigate("/")}
-              onLogout={() => navigate("/")}
-            />
-          }
-        />
-        <Route
-          path="/selector"
-          element={
-            <SystemSelectorPage
-              profile={ADMIN_PROFILE}
-              onSelect={handleSystemSelect}
-              onPublicHome={() => navigate("/")}
-              onLogout={() => navigate("/")}
-            />
-          }
-        />
-        <Route
-          path="/systems"
-          element={
-            <SystemSelectorPage
-              profile={ADMIN_PROFILE}
-              onSelect={handleSystemSelect}
-              onPublicHome={() => navigate("/")}
-              onLogout={() => navigate("/")}
-            />
-          }
-        />
+        {/* Post-Login Subsystem Selector Homepage & Aliases */}
+        <Route path="/portal" element={<PortalPage />} />
+        <Route path="/home" element={<PortalPage />} />
+        <Route path="/selector" element={<PortalPage />} />
+        <Route path="/systems" element={<PortalPage />} />
 
         {/* Authentication Gateway */}
         <Route path="/login" element={<ExternalLoginRedirect />} />

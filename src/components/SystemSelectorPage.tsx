@@ -139,9 +139,9 @@ export const SystemSelectorPage: React.FC<SystemSelectorPageProps> = ({
               </button>
             )}
 
-            <span className="sys-sel-admin-badge" aria-label="Administrator access">
+            <span className="sys-sel-admin-badge" aria-label={`${profile.role || 'Administrator'} access`}>
               <i className="ti ti-shield-check" aria-hidden="true" />
-              Administrator
+              {profile.role || 'Administrator'}
             </span>
 
             {onLogout && (
@@ -167,7 +167,7 @@ export const SystemSelectorPage: React.FC<SystemSelectorPageProps> = ({
           <div className="sys-sel-greeting-text">
             <h1 className="sys-sel-hello">Welcome back, {firstName}!</h1>
             <p className="sys-sel-tagline">
-              You have administrator access to all{' '}
+              Signed in as <strong>{profile.role || 'Staff'}</strong> · Access to all{' '}
               <strong>{SPEEDEX_SYSTEMS.length} systems</strong>. Select one to continue.
             </p>
           </div>

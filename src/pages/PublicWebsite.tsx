@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getStarsLoginUrl } from '../utils/auth';
 import './PublicWebsite.css';
 
 interface WaybillEvent {
@@ -229,10 +230,6 @@ export const PublicWebsite: React.FC = () => {
         <div className="spx-container spx-nav-inner">
           <a href="#top" className="spx-logo-link">
             <img src="/logo.png" alt="Speedex Logo" className="spx-logo-img" />
-            <div className="spx-logo-text-box">
-              <span className="spx-logo-title">Speedex</span>
-              <span className="spx-logo-sub">Courier & Forwarder</span>
-            </div>
           </a>
 
           <nav>
@@ -248,9 +245,8 @@ export const PublicWebsite: React.FC = () => {
           <div className="spx-nav-actions">
             {/* Login button directing to STARS deployed auth system */}
             <a
-              href="https://stars-two-chi.vercel.app/"
+              href={getStarsLoginUrl('/portal')}
               className="spx-btn-login"
-              rel="noopener noreferrer"
             >
               <i className="ti ti-login" aria-hidden="true" />
               <span>Log In</span>
@@ -282,7 +278,7 @@ export const PublicWebsite: React.FC = () => {
                   <i className="ti ti-search" aria-hidden="true" />
                   <span>Track a Shipment</span>
                 </a>
-                <a href="https://stars-two-chi.vercel.app/" className="spx-btn-secondary">
+                <a href={getStarsLoginUrl('/portal')} className="spx-btn-secondary">
                   <i className="ti ti-shield-lock" aria-hidden="true" />
                   <span>Enter Staff Portal</span>
                 </a>
@@ -372,21 +368,20 @@ export const PublicWebsite: React.FC = () => {
                     </div>
 
                     <span
-                      className={`spx-track-status-tag ${
-                        trackingResult.statusType === 'delivered'
-                          ? 'spx-tag-delivered'
-                          : trackingResult.statusType === 'out'
+                      className={`spx-track-status-tag ${trackingResult.statusType === 'delivered'
+                        ? 'spx-tag-delivered'
+                        : trackingResult.statusType === 'out'
                           ? 'spx-tag-out'
                           : 'spx-tag-transit'
-                      }`}
+                        }`}
                     >
                       <i
                         className={
                           trackingResult.statusType === 'delivered'
                             ? 'ti ti-circle-check'
                             : trackingResult.statusType === 'out'
-                            ? 'ti ti-truck-delivery'
-                            : 'ti ti-truck'
+                              ? 'ti ti-truck-delivery'
+                              : 'ti ti-truck'
                         }
                         aria-hidden="true"
                       />
@@ -487,13 +482,12 @@ export const PublicWebsite: React.FC = () => {
                     >
                       <div className="spx-advisory-title-wrap">
                         <span
-                          className={`spx-advisory-badge ${
-                            adv.categoryType === 'weather'
-                              ? 'spx-badge-weather'
-                              : adv.categoryType === 'holiday'
+                          className={`spx-advisory-badge ${adv.categoryType === 'weather'
+                            ? 'spx-badge-weather'
+                            : adv.categoryType === 'holiday'
                               ? 'spx-badge-holiday'
                               : 'spx-badge-ops'
-                          }`}
+                            }`}
                         >
                           {adv.category}
                         </span>
@@ -714,9 +708,9 @@ export const PublicWebsite: React.FC = () => {
             <div>
               <div className="spx-footer-col-title">Subsystem Portals</div>
               <ul className="spx-footer-links">
-                <li><a href="https://stars-two-chi.vercel.app/" className="spx-footer-link">STARS Tasks & Review</a></li>
-                <li><a href="https://stars-two-chi.vercel.app/" className="spx-footer-link">DMS Delivery Operations</a></li>
-                <li><a href="https://stars-two-chi.vercel.app/" className="spx-footer-link">FOMS Financial Ops</a></li>
+                <li><a href={getStarsLoginUrl('/portal')} className="spx-footer-link">STARS Tasks & Review</a></li>
+                <li><a href={getStarsLoginUrl('/portal')} className="spx-footer-link">DMS Delivery Operations</a></li>
+                <li><a href={getStarsLoginUrl('/portal')} className="spx-footer-link">FOMS Financial Ops</a></li>
               </ul>
             </div>
 
