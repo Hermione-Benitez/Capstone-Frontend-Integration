@@ -237,12 +237,6 @@ export const PublicWebsite: React.FC = () => {
           </nav>
 
           <div className="spx-nav-actions">
-            {/* Quick link to the System Selector homepage */}
-            <Link to="/home" className="spx-btn-selector" title="Go to System Hub">
-              <i className="ti ti-layout-grid" aria-hidden="true" />
-              <span>Systems Hub</span>
-            </Link>
-
             {/* Login button directing to STARS deployed auth system */}
             <a
               href="https://stars-two-chi.vercel.app/"
@@ -709,12 +703,11 @@ export const PublicWebsite: React.FC = () => {
             </div>
 
             <div>
-              <div className="spx-footer-col-title">Integrated Portals</div>
+              <div className="spx-footer-col-title">Subsystem Portals</div>
               <ul className="spx-footer-links">
-                <li><a href="https://stars-two-chi.vercel.app/" className="spx-footer-link">STARS Portal (Deployed)</a></li>
-                <li><Link to="/home" className="spx-footer-link">System Selector</Link></li>
-                <li><Link to="/dms/dashboard" className="spx-footer-link">DMS Dashboard</Link></li>
-                <li><Link to="/foms/dashboard" className="spx-footer-link">FOMS Dashboard</Link></li>
+                <li><a href="https://stars-two-chi.vercel.app/" className="spx-footer-link">STARS Tasks & Review</a></li>
+                <li><a href="https://stars-two-chi.vercel.app/" className="spx-footer-link">DMS Delivery Operations</a></li>
+                <li><a href="https://stars-two-chi.vercel.app/" className="spx-footer-link">FOMS Financial Ops</a></li>
               </ul>
             </div>
 
