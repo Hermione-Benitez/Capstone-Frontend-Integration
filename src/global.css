@@ -9,6 +9,28 @@
 
 @layer base {
 
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  @keyframes spx-page-fade {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .spx-pub-root,
+  .lp-root,
+  .sys-sel-root {
+    animation: spx-page-fade 0.28s ease-out;
+  }
+
   :root {
     font-family: var(--fb, 'Inter', -apple-system, sans-serif);
     color: #111827;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useToast } from '../components';
 import { getStarsLoginUrl } from '../utils/auth';
 import './PublicWebsite.css';
 
@@ -122,12 +122,29 @@ const ADVISORIES = [
 ];
 
 export const PublicWebsite: React.FC = () => {
+  const { triggerToast } = useToast();
   const [alertVisible, setAlertVisible] = useState(true);
   const [waybillInput, setWaybillInput] = useState('');
   const [trackingResult, setTrackingResult] = useState<WaybillResult | null>(null);
   const [trackingError, setTrackingError] = useState<string | null>(null);
   const [openAdvisoryId, setOpenAdvisoryId] = useState<string | null>('adv-1');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>('top');
+
+  const handleTrackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    triggerToast(
+      'info',
+      'Tracking Portal Coming Soon',
+      'The public waybill tracking portal is currently being integrated. In the meantime, please contact our dispatch team below for status updates.',
+      'Contact Support',
+      () => {
+        const contactEl = document.getElementById('contact');
+        if (contactEl) contactEl.scrollIntoView({ behavior: 'smooth' });
+      },
+      5000
+    );
+  };
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -135,6 +152,35 @@ export const PublicWebsite: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  React.useEffect(() => {
+    // Sections in top-to-bottom page order
+    const sectionIds = ['advisories', 'about', 'contact'];
+    const handleActiveSection = () => {
+      const scrollY = window.scrollY;
+      const threshold = scrollY + window.innerHeight * 0.35;
+
+      // If near the very top, always highlight Home
+      if (scrollY < 80) {
+        setActiveSection('top');
+        return;
+      }
+
+      // Find the last section whose top has entered the viewport threshold
+      let active = 'top';
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top + scrollY <= threshold) {
+          active = id;
+        }
+      }
+      setActiveSection(active);
+    };
+
+    window.addEventListener('scroll', handleActiveSection, { passive: true });
+    handleActiveSection();
+    return () => window.removeEventListener('scroll', handleActiveSection);
   }, []);
 
   // Contact Form State
@@ -227,23 +273,72 @@ export const PublicWebsite: React.FC = () => {
 
       {/* ── Main Navigation ── */}
       <header className={`spx-navbar ${isScrolled ? 'is-scrolled' : ''}`}>
-        <div className="spx-container spx-nav-inner">
-          <a href="#top" className="spx-logo-link">
+        <div className="spx-nav-inner">
+          <a
+            href="#top"
+            className="spx-logo-link"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.history.pushState(null, '', '#top');
+            }}
+            title="Back to top"
+          >
             <img src="/logo.png" alt="Speedex Logo" className="spx-logo-img" />
           </a>
 
           <nav>
             <ul className="spx-nav-links">
-              <li><a href="#top" className="spx-nav-link">Home</a></li>
-              <li><a href="#advisories" className="spx-nav-link">Advisories</a></li>
-              <li><a href="#track" className="spx-nav-link">Track</a></li>
-              <li><a href="#about" className="spx-nav-link">About Us</a></li>
-              <li><a href="#contact" className="spx-nav-link">Contact</a></li>
+              <li>
+                <a
+                  href="#top"
+                  className={`spx-nav-link${activeSection === 'top' ? ' is-active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.history.pushState(null, '', '#top');
+                  }}
+                >
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="#track" className="spx-nav-link" onClick={handleTrackClick}>
+                  Track
+                </a>
+              </li>
+              <li><a
+                href="#advisories"
+                className={`spx-nav-link${activeSection === 'advisories' ? ' is-active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
+                  window.history.pushState(null, '', '#advisories');
+                }}
+              >Advisories</a></li>
+              <li><a
+                href="#about"
+                className={`spx-nav-link${activeSection === 'about' ? ' is-active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                  window.history.pushState(null, '', '#about');
+                }}
+              >About Us</a></li>
+              <li><a
+                href="#contact"
+                className={`spx-nav-link${activeSection === 'contact' ? ' is-active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                  window.history.pushState(null, '', '#contact');
+                }}
+              >Contact</a></li>
             </ul>
           </nav>
 
           <div className="spx-nav-actions">
-            {/* Login button directing to STARS deployed auth system */}
+            {/* Login button — redirects to STARS authentication portal */}
             <a
               href={getStarsLoginUrl('/portal')}
               className="spx-btn-login"
@@ -260,11 +355,6 @@ export const PublicWebsite: React.FC = () => {
         <section className="spx-hero-section">
           <div className="spx-container spx-hero-grid">
             <div className="spx-hero-content">
-              <div className="spx-hero-pill">
-                <span className="spx-hero-pill-badge">Official Portal</span>
-                <span>🇵🇭 100% Filipino-Owned Logistics · Est. 1993</span>
-              </div>
-
               <h1 className="spx-hero-title">
                 Your parcels, across the Philippines, <span className="spx-hero-highlight">tracked at every stop.</span>
               </h1>
@@ -274,147 +364,40 @@ export const PublicWebsite: React.FC = () => {
               </p>
 
               <div className="spx-hero-buttons">
-                <a href="#track" className="spx-btn-primary">
+                <a href="#track" className="spx-btn-primary" onClick={handleTrackClick}>
                   <i className="ti ti-search" aria-hidden="true" />
                   <span>Track a Shipment</span>
-                </a>
-                <a href={getStarsLoginUrl('/portal')} className="spx-btn-secondary">
-                  <i className="ti ti-shield-lock" aria-hidden="true" />
-                  <span>Enter Staff Portal</span>
                 </a>
                 <a href="#contact" className="spx-btn-secondary">
                   <span>Talk to Us</span>
                 </a>
               </div>
+            </div>
 
-              <div className="spx-hero-facts">
-                <div>
-                  <strong className="spx-fact-number">31 Years</strong>
-                  <span className="spx-fact-label">In service across the Philippines since 1993</span>
+            {/* ── Right Column ── */}
+            <div className="spx-hero-right">
+              <div className="spx-stats-cluster">
+                <div className="spx-stat-circle stat-c1">
+                  <strong>31</strong>
+                  <span>Years of Service</span>
                 </div>
-                <div>
-                  <strong className="spx-fact-number">100%</strong>
-                  <span className="spx-fact-label">Filipino-owned & SEC Registered logistics enterprise</span>
+                <div className="spx-stat-circle stat-c2">
+                  <strong>100%</strong>
+                  <span>Filipino-Owned</span>
                 </div>
-                <div>
-                  <strong className="spx-fact-number">Nationwide</strong>
-                  <span className="spx-fact-label">Trained courier fleet & verified sorting hubs</span>
+                <div className="spx-stat-circle stat-c3">
+                  <strong>70+</strong>
+                  <span>Sorting Hubs</span>
                 </div>
               </div>
             </div>
-
-            {/* ── Tracking Widget (Right Column) ── */}
-            <div className="spx-track-card" id="track">
-              <div className="spx-track-card-head">
-                <div className="spx-track-badge">
-                  <i className="ti ti-map-pin" aria-hidden="true" />
-                  <span>Live Waybill Tracker</span>
-                </div>
-                <h2 className="spx-track-card-title">Track your delivery</h2>
-                <p className="spx-track-card-sub">
-                  Enter your waybill number below to inspect real-time progress.
-                </p>
-              </div>
-
-              <div className="spx-track-presets">
-                <span className="spx-preset-label">Sample waybills:</span>
-                {['SPX-98214', 'SPX-50123', 'SPX-77402'].map((code) => (
-                  <button
-                    key={code}
-                    type="button"
-                    className="spx-preset-chip"
-                    onClick={() => handlePresetClick(code)}
-                  >
-                    {code}
-                  </button>
-                ))}
-              </div>
-
-              <form className="spx-track-form" onSubmit={handleTrackSubmit}>
-                <div className="spx-track-input-wrap">
-                  <i className="ti ti-barcode spx-track-input-icon" aria-hidden="true" />
-                  <input
-                    type="text"
-                    className="spx-track-input"
-                    placeholder="Enter Waybill (e.g. SPX-98214)"
-                    value={waybillInput}
-                    onChange={(e) => setWaybillInput(e.target.value)}
-                    aria-label="Waybill number"
-                  />
-                </div>
-                <button type="submit" className="spx-track-btn">
-                  <i className="ti ti-search" aria-hidden="true" />
-                  <span>Track</span>
-                </button>
-              </form>
-
-              {trackingError && (
-                <div style={{ color: '#DC2626', fontSize: '13px', marginTop: '8px' }}>
-                  {trackingError}
-                </div>
-              )}
-
-              {/* Live Tracking Result */}
-              {trackingResult && (
-                <div className="spx-track-res-box">
-                  <div className="spx-track-res-header">
-                    <div>
-                      <strong style={{ fontSize: '15px', color: 'var(--navy)' }}>
-                        Waybill: {trackingResult.waybillNo}
-                      </strong>
-                      <div style={{ fontSize: '12px', color: 'var(--tt)' }}>
-                        ETA: {trackingResult.eta}
-                      </div>
-                    </div>
-
-                    <span
-                      className={`spx-track-status-tag ${trackingResult.statusType === 'delivered'
-                        ? 'spx-tag-delivered'
-                        : trackingResult.statusType === 'out'
-                          ? 'spx-tag-out'
-                          : 'spx-tag-transit'
-                        }`}
-                    >
-                      <i
-                        className={
-                          trackingResult.statusType === 'delivered'
-                            ? 'ti ti-circle-check'
-                            : trackingResult.statusType === 'out'
-                              ? 'ti ti-truck-delivery'
-                              : 'ti ti-truck'
-                        }
-                        aria-hidden="true"
-                      />
-                      {trackingResult.statusText}
-                    </span>
-                  </div>
-
-                  <div className="spx-track-route-info">
-                    <span>{trackingResult.origin}</span>
-                    <i className="ti ti-arrow-right" style={{ color: 'var(--teal)' }} aria-hidden="true" />
-                    <span>{trackingResult.destination}</span>
-                  </div>
-
-                  <ol className="spx-timeline">
-                    {trackingResult.events.map((evt, idx) => (
-                      <li key={idx} className={`spx-timeline-item ${evt.status}`}>
-                        <span className="spx-timeline-node" aria-hidden="true" />
-                        <span className="spx-timeline-line" aria-hidden="true" />
-                        <div className="spx-timeline-title">{evt.title}</div>
-                        <div className="spx-timeline-meta">
-                          {evt.location} &bull; {evt.time}
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-            </div>
+            
+            
           </div>
         </section>
 
         {/* ── Feature Pillars ── */}
-        <section className="spx-section alt">
+        <section className="spx-section">
           <div className="spx-container">
             <div className="spx-section-header">
               <span className="spx-section-kicker">Why Choose Speedex</span>
@@ -459,7 +442,7 @@ export const PublicWebsite: React.FC = () => {
         </section>
 
         {/* ── Advisories Section ── */}
-        <section className="spx-section" id="advisories">
+        <section className="spx-section alt" id="advisories">
           <div className="spx-container">
             <div className="spx-section-header">
               <span className="spx-section-kicker">Service Bulletins</span>
@@ -473,7 +456,7 @@ export const PublicWebsite: React.FC = () => {
               {ADVISORIES.map((adv) => {
                 const isOpen = openAdvisoryId === adv.id;
                 return (
-                  <div key={adv.id} className={`spx-advisory-item ${isOpen ? 'is-open' : ''}`}>
+                  <div key={adv.id} className={`spx-advisory-item type-${adv.categoryType} ${isOpen ? 'is-open' : ''}`}>
                     <button
                       type="button"
                       className="spx-advisory-summary"
@@ -499,13 +482,15 @@ export const PublicWebsite: React.FC = () => {
                       </div>
                     </button>
 
-                    {isOpen && (
+                    <div className="spx-advisory-body-wrap">
                       <div className="spx-advisory-body">
-                        {adv.paragraphs.map((p, idx) => (
-                          <p key={idx}>{p}</p>
-                        ))}
+                        <div className="spx-advisory-body-inner">
+                          {adv.paragraphs.map((p, idx) => (
+                            <p key={idx}>{p}</p>
+                          ))}
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -514,7 +499,7 @@ export const PublicWebsite: React.FC = () => {
         </section>
 
         {/* ── About Us Section ── */}
-        <section className="spx-section alt" id="about">
+        <section className="spx-section" id="about">
           <div className="spx-container spx-about-grid">
             <div className="spx-about-text">
               <span className="spx-section-kicker">Our Heritage</span>
@@ -560,7 +545,7 @@ export const PublicWebsite: React.FC = () => {
         </section>
 
         {/* ── Contact Section ── */}
-        <section className="spx-section" id="contact">
+        <section className="spx-section alt" id="contact">
           <div className="spx-container spx-contact-grid">
             <div className="spx-contact-info">
               <span className="spx-section-kicker">Get in Touch</span>
@@ -684,7 +669,9 @@ export const PublicWebsite: React.FC = () => {
         <div className="spx-container">
           <div className="spx-footer-grid">
             <div>
-              <div className="spx-footer-brand-title">Speedex Courier and Forwarder</div>
+              <div className="spx-footer-brand-logo">
+                <img src="/logo.png" alt="Speedex Logo" className="spx-footer-logo-img" />
+              </div>
               <p className="spx-footer-brand-desc">
                 Nationwide express parcel delivery, freight forwarding, and supply chain logistics built on Filipino trust.
               </p>
@@ -698,7 +685,7 @@ export const PublicWebsite: React.FC = () => {
               <div className="spx-footer-col-title">Navigation</div>
               <ul className="spx-footer-links">
                 <li><a href="#top" className="spx-footer-link">Home</a></li>
-                <li><a href="#track" className="spx-footer-link">Track Delivery</a></li>
+                <li><a href="#track" className="spx-footer-link" onClick={handleTrackClick}>Track Delivery</a></li>
                 <li><a href="#advisories" className="spx-footer-link">Advisories</a></li>
                 <li><a href="#about" className="spx-footer-link">About Us</a></li>
                 <li><a href="#contact" className="spx-footer-link">Contact</a></li>
@@ -706,11 +693,13 @@ export const PublicWebsite: React.FC = () => {
             </div>
 
             <div>
-              <div className="spx-footer-col-title">Subsystem Portals</div>
+              <div className="spx-footer-col-title">Staff Access</div>
               <ul className="spx-footer-links">
-                <li><a href={getStarsLoginUrl('/portal')} className="spx-footer-link">STARS Tasks & Review</a></li>
-                <li><a href={getStarsLoginUrl('/portal')} className="spx-footer-link">DMS Delivery Operations</a></li>
-                <li><a href={getStarsLoginUrl('/portal')} className="spx-footer-link">FOMS Financial Ops</a></li>
+                <li>
+                  <a href={getStarsLoginUrl('/portal')} className="spx-footer-link">
+                    <i className="ti ti-login" aria-hidden="true" /> Staff Login
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -726,7 +715,11 @@ export const PublicWebsite: React.FC = () => {
 
           <div className="spx-footer-bottom">
             <div>&copy; {new Date().getFullYear()} Speedex Courier and Forwarder, Inc. All rights reserved.</div>
-            <div>Speedex OneUI Integration Shell</div>
+            <div className="spx-footer-bottom-links">
+              <a href="#top" className="spx-footer-link">Privacy Policy</a>
+              <span aria-hidden="true">·</span>
+              <a href="#top" className="spx-footer-link">Terms of Use</a>
+            </div>
           </div>
         </div>
       </footer>
