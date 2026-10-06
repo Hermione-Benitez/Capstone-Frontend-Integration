@@ -252,22 +252,30 @@ export const PublicWebsite: React.FC = () => {
             <div className="spx-alert-content">
               <i className="ti ti-alert-triangle spx-alert-icon" aria-hidden="true" />
               <div className="spx-alert-text">
-                <b>Operations advisory (Sept 10, 2026):</b> Heavy rainfall from the Southwest Monsoon may affect delivery times in selected areas. All packages in Speedex hubs are safe.
+                <span>
+                  <b>Operations advisory (Sept 10, 2026):</b> Heavy rainfall from the Southwest Monsoon may affect delivery times in selected areas. All packages in Speedex hubs are safe.
+                </span>
+                <a
+                  href="#advisories"
+                  className="spx-alert-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
+                    window.history.pushState(null, '', '#advisories');
+                  }}
+                >
+                  Read advisories <i className="ti ti-arrow-down" aria-hidden="true" />
+                </a>
               </div>
             </div>
-            <div className="spx-alert-actions">
-              <a href="#advisories" className="spx-alert-link">
-                Read advisories <i className="ti ti-arrow-down" aria-hidden="true" />
-              </a>
-              <button
-                type="button"
-                className="spx-alert-dismiss"
-                onClick={() => setAlertVisible(false)}
-                aria-label="Dismiss alert"
-              >
-                <i className="ti ti-x" aria-hidden="true" />
-              </button>
-            </div>
+            <button
+              type="button"
+              className="spx-alert-dismiss"
+              onClick={() => setAlertVisible(false)}
+              aria-label="Dismiss alert"
+            >
+              <i className="ti ti-x" aria-hidden="true" />
+            </button>
           </div>
         </div>
       )}
