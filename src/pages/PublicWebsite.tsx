@@ -764,6 +764,8 @@ export const PublicWebsite: React.FC = () => {
               </ul>
             </div>
 
+          </div>{/* end spx-footer-grid */}
+
           <div className="spx-footer-bottom">
             <div>&copy; {new Date().getFullYear()} Speedex Courier and Forwarder, Inc. All rights reserved.</div>
             <div className="spx-footer-bottom-links">
