@@ -449,6 +449,29 @@ export const PublicWebsite: React.FC = () => {
           </div>
         </section>
 
+
+        {/* ── Trusted By ── */}
+        <div className="spx-trusted-bar">
+          <div className="spx-trusted-label">Trusted by leading brands</div>
+          <div className="spx-marquee-wrapper">
+            <div className="spx-marquee-track">
+              {[
+                'PLDT', 'Smart', 'Sun Cellular', 'Cignal', 'Huawei', 'Vivo', 'Starmobile',
+                'Mega Cellular Network', 'MemoXpress', 'MSI-ECS', 'AllCard',
+                'Unison Computer Systems', 'CityLight Telecom', 'Yung Shin Philippines',
+                'Innovista Technologies', 'Golden Eagle Shipping', 'Q-Zine Marketing', 'Michael Mar Phils.',
+                // duplicate for seamless loop
+                'PLDT', 'Smart', 'Sun Cellular', 'Cignal', 'Huawei', 'Vivo', 'Starmobile',
+                'Mega Cellular Network', 'MemoXpress', 'MSI-ECS', 'AllCard',
+                'Unison Computer Systems', 'CityLight Telecom', 'Yung Shin Philippines',
+                'Innovista Technologies', 'Golden Eagle Shipping', 'Q-Zine Marketing', 'Michael Mar Phils.',
+              ].map((name, i) => (
+                <span key={i} className="spx-marquee-item">{name}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ── Feature Pillars ── */}
         <section className="spx-section">
           <div className="spx-container">
