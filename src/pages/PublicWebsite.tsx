@@ -130,6 +130,7 @@ export const PublicWebsite: React.FC = () => {
   const [openAdvisoryId, setOpenAdvisoryId] = useState<string | null>('adv-1');
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('top');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleTrackClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -281,12 +282,14 @@ export const PublicWebsite: React.FC = () => {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: 'smooth' });
               window.history.pushState(null, '', '#top');
+              setMenuOpen(false);
             }}
             title="Back to top"
           >
             <img src="/logo.png" alt="Speedex Logo" className="spx-logo-img" />
           </a>
 
+          {/* Desktop nav links */}
           <nav>
             <ul className="spx-nav-links">
               <li>
@@ -338,13 +341,63 @@ export const PublicWebsite: React.FC = () => {
           </nav>
 
           <div className="spx-nav-actions">
-            {/* Login button — routes to branded login page */}
-            <Link
-              to="/login"
-              className="spx-btn-login"
-            >
+            <Link to="/login" className="spx-btn-login">
               <i className="ti ti-login" aria-hidden="true" />
               <span>Log In</span>
+            </Link>
+            {/* Hamburger — mobile only */}
+            <button
+              className={`spx-hamburger${menuOpen ? ' is-open' : ''}`}
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+            >
+              <span /><span /><span />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile drawer + backdrop */}
+        {menuOpen && (
+          <div
+            className="spx-drawer-backdrop"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+        <div className={`spx-drawer${menuOpen ? ' is-open' : ''}`} role="dialog" aria-modal="true" aria-label="Navigation">
+          <div className="spx-drawer-head">
+            <img src="/logo.png" alt="Speedex" className="spx-drawer-logo" />
+            <button
+              className="spx-drawer-close"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <i className="ti ti-x" />
+            </button>
+          </div>
+          <nav className="spx-drawer-nav">
+            {[
+              { href: '#top',        label: 'Home',       icon: 'ti-home',       section: 'top',        onClick: (e: React.MouseEvent) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setMenuOpen(false); } },
+              { href: '#track',      label: 'Track',      icon: 'ti-map-pin',    section: null,         onClick: (e: React.MouseEvent) => { handleTrackClick(e); setMenuOpen(false); } },
+              { href: '#advisories', label: 'Advisories', icon: 'ti-bell',       section: 'advisories', onClick: (e: React.MouseEvent) => { e.preventDefault(); document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); } },
+              { href: '#about',      label: 'About Us',   icon: 'ti-info-circle',section: 'about',      onClick: (e: React.MouseEvent) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); } },
+              { href: '#contact',    label: 'Contact',    icon: 'ti-mail',       section: 'contact',    onClick: (e: React.MouseEvent) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); } },
+            ].map(({ href, label, icon, section, onClick }) => (
+              <a
+                key={href}
+                href={href}
+                className={`spx-drawer-link${section && activeSection === section ? ' is-active' : ''}`}
+                onClick={onClick}
+              >
+                <i className={`ti ${icon}`} aria-hidden="true" />
+                {label}
+              </a>
+            ))}
+          </nav>
+          <div className="spx-drawer-footer">
+            <Link to="/login" className="spx-drawer-login" onClick={() => setMenuOpen(false)}>
+              <i className="ti ti-login" aria-hidden="true" /> Log In to Portal
             </Link>
           </div>
         </div>
