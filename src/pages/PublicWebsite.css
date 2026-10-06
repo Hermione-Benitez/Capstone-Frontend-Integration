@@ -337,21 +337,21 @@
 
 .spx-btn-secondary {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.75);
   color: #1B254B;
   font-weight: 600; font-size: 14.5px;
   padding: 12px 22px;
   border-radius: var(--spx-r-sm);
   text-decoration: none;
-  border: 1.5px solid #CBD5E1;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  border: 1.5px solid #94A3B8;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, color 0.15s;
   cursor: pointer; backdrop-filter: blur(4px);
 }
 .spx-btn-secondary:hover {
-  background: rgba(255,255,255,0.95);
-  border-color: #94A3B8;
+  background: rgba(255,255,255,0.98);
+  border-color: #00776D;
   transform: translateY(-1px);
-  color: #1B254B;
+  color: #00776D;
 }
 
 /* ── Stats Cluster (Right Column) ────────────────────────────── */

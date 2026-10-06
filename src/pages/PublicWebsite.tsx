@@ -420,7 +420,8 @@ export const PublicWebsite: React.FC = () => {
                   <i className="ti ti-search" aria-hidden="true" />
                   <span>Track a Shipment</span>
                 </a>
-                <a href="#contact" className="spx-btn-secondary">
+                <a href="#contact" className="spx-btn-secondary" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>
+                  <i className="ti ti-message-circle" aria-hidden="true" />
                   <span>Talk to Us</span>
                 </a>
               </div>
