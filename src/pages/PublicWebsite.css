@@ -1104,9 +1104,9 @@
   .spx-hero-section { padding: 36px 0 48px; }
   .spx-hero-title { font-size: clamp(24px, 7.5vw, 34px); line-height: 1.15; }
   .spx-hero-lead { font-size: 14.5px; }
-  .spx-hero-buttons { flex-direction: column; width: 100%; gap: 10px; }
+  .spx-hero-buttons { flex-direction: row; width: 100%; gap: 12px; }
   .spx-btn-primary,
-  .spx-btn-secondary { width: 100%; justify-content: center; padding: 13px 20px; }
+  .spx-btn-secondary { width: 50%; justify-content: center; padding: 12px 10px; font-size: 13px; }
 
   /* Stats cluster (mobile stacked cards instead of circles) */
   .spx-hero-right { min-height: auto; }
