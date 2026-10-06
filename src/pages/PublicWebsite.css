@@ -298,6 +298,7 @@
 }
 
 .spx-hero-highlight {
+  display: inline-block;
   background: linear-gradient(135deg, #00776D 0%, #0284C7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1107,12 +1108,25 @@
   .spx-btn-primary,
   .spx-btn-secondary { width: 100%; justify-content: center; padding: 13px 20px; }
 
-  /* Stats cluster */
-  .spx-hero-right { min-height: 250px; }
-  .spx-stats-cluster { width: 260px; height: 260px; }
-  .spx-stat-circle { width: 115px; height: 115px; }
-  .spx-stat-circle strong { font-size: 26px; margin-bottom: 4px; }
-  .spx-stat-circle span { font-size: 9px; letter-spacing: 0.04em; }
+  /* Stats cluster (mobile stacked cards instead of circles) */
+  .spx-hero-right { min-height: auto; }
+  .spx-stats-cluster { 
+    width: 100%; height: auto; 
+    display: flex; flex-direction: column; gap: 12px; 
+    align-items: center; margin-top: 16px; 
+  }
+  .spx-stat-circle { 
+    position: relative; 
+    width: 100%; max-width: 320px; height: auto; 
+    border-radius: 12px; 
+    flex-direction: row; justify-content: flex-start; text-align: left; 
+    padding: 20px 24px; gap: 20px; 
+  }
+  .spx-stat-circle.stat-c1,
+  .spx-stat-circle.stat-c2,
+  .spx-stat-circle.stat-c3 { top: auto; bottom: auto; left: auto; right: auto; transform: none !important; }
+  .spx-stat-circle strong { font-size: 32px; margin-bottom: 0; }
+  .spx-stat-circle span { font-size: 11px; letter-spacing: 0.05em; }
 
   /* Sections */
   .spx-section { padding: 48px 0; }
