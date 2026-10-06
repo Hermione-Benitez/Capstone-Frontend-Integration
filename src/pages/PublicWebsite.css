@@ -799,8 +799,15 @@
 
 .spx-footer-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 40px; margin-bottom: 48px;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 48px; margin-bottom: 48px;
+}
+
+.spx-footer-contact-item {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.spx-footer-contact-icon {
+  color: #00C4B7; font-size: 15px; flex-shrink: 0; margin-top: 2px;
 }
 
 .spx-footer-brand-logo {
@@ -1024,8 +1031,6 @@
 
 /* ── Small tablet (≤960px) ── */
 @media (max-width: 960px) {
-  .spx-about-grid,
-  .spx-contact-grid { grid-template-columns: 1fr; gap: 40px; }
   .spx-footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
 }
 
