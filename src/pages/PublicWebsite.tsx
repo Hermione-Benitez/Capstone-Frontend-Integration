@@ -132,6 +132,16 @@ export const PublicWebsite: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('top');
   const [menuOpen, setMenuOpen] = useState(false);
 
+  /* ── Sticky-nav–aware smooth scroll ─────────────────────── */
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const navH = 68; // Must match .spx-nav-inner height
+    const top = el.getBoundingClientRect().top + window.scrollY - navH;
+    window.scrollTo({ top, behavior: 'smooth' });
+    window.history.pushState(null, '', `#${id}`);
+  };
+
   const handleTrackClick = (e: React.MouseEvent) => {
     e.preventDefault();
     triggerToast(
@@ -139,10 +149,7 @@ export const PublicWebsite: React.FC = () => {
       'Tracking Portal Coming Soon',
       'The public waybill tracking portal is currently being integrated. In the meantime, please contact our dispatch team below for status updates.',
       'Contact Support',
-      () => {
-        const contactEl = document.getElementById('contact');
-        if (contactEl) contactEl.scrollIntoView({ behavior: 'smooth' });
-      },
+      () => { scrollToSection('contact'); },
       5000
     );
   };
@@ -258,11 +265,7 @@ export const PublicWebsite: React.FC = () => {
                 <a
                   href="#advisories"
                   className="spx-alert-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
-                    window.history.pushState(null, '', '#advisories');
-                  }}
+                  onClick={(e) => { e.preventDefault(); scrollToSection('advisories'); }}
                 >
                   Read advisories <i className="ti ti-arrow-down" aria-hidden="true" />
                 </a>
@@ -321,29 +324,17 @@ export const PublicWebsite: React.FC = () => {
               <li><a
                 href="#advisories"
                 className={`spx-nav-link${activeSection === 'advisories' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#advisories');
-                }}
+                onClick={(e) => { e.preventDefault(); scrollToSection('advisories'); }}
               >Advisories</a></li>
               <li><a
                 href="#about"
                 className={`spx-nav-link${activeSection === 'about' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#about');
-                }}
+                onClick={(e) => { e.preventDefault(); scrollToSection('about'); }}
               >About Us</a></li>
               <li><a
                 href="#contact"
                 className={`spx-nav-link${activeSection === 'contact' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#contact');
-                }}
+                onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}
               >Contact</a></li>
             </ul>
           </nav>
@@ -386,11 +377,11 @@ export const PublicWebsite: React.FC = () => {
           </div>
           <nav className="spx-drawer-nav">
             {[
-              { href: '#top',        label: 'Home',       icon: 'ti-home',       section: 'top',        onClick: (e: React.MouseEvent) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setMenuOpen(false); } },
-              { href: '#track',      label: 'Track',      icon: 'ti-map-pin',    section: null,         onClick: (e: React.MouseEvent) => { handleTrackClick(e); setMenuOpen(false); } },
-              { href: '#advisories', label: 'Advisories', icon: 'ti-bell',       section: 'advisories', onClick: (e: React.MouseEvent) => { e.preventDefault(); document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); } },
-              { href: '#about',      label: 'About Us',   icon: 'ti-info-circle',section: 'about',      onClick: (e: React.MouseEvent) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); } },
-              { href: '#contact',    label: 'Contact',    icon: 'ti-mail',       section: 'contact',    onClick: (e: React.MouseEvent) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); } },
+              { href: '#top',        label: 'Home',       icon: 'ti-home',        section: 'top',        onClick: (e: React.MouseEvent) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setMenuOpen(false); } },
+              { href: '#track',      label: 'Track',      icon: 'ti-map-pin',     section: null,         onClick: (e: React.MouseEvent) => { handleTrackClick(e); setMenuOpen(false); } },
+              { href: '#advisories', label: 'Advisories', icon: 'ti-bell',        section: 'advisories', onClick: (e: React.MouseEvent) => { e.preventDefault(); scrollToSection('advisories'); setMenuOpen(false); } },
+              { href: '#about',      label: 'About Us',   icon: 'ti-info-circle', section: 'about',      onClick: (e: React.MouseEvent) => { e.preventDefault(); scrollToSection('about'); setMenuOpen(false); } },
+              { href: '#contact',    label: 'Contact',    icon: 'ti-mail',        section: 'contact',    onClick: (e: React.MouseEvent) => { e.preventDefault(); scrollToSection('contact'); setMenuOpen(false); } },
             ].map(({ href, label, icon, section, onClick }) => (
               <a
                 key={href}
