@@ -713,9 +713,8 @@
 
 /* ── Contact Section ─────────────────────────────────────────── */
 .spx-contact-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 40px; align-items: start;
-  max-width: 900px; margin: 0 auto;
+  display: grid; grid-template-columns: 0.75fr 1fr;
+  gap: 56px; align-items: start;
 }
 
 .spx-contact-info p { font-size: 14.5px; color: var(--spx-text-muted); margin: 0 0 24px; line-height: 1.65; }
@@ -792,7 +791,7 @@
 .spx-footer {
   background: var(--spx-bg-deep);
   color: #E2E8F0;
-  padding: 64px 0 36px;
+  padding: 48px 0 28px;
   border-top: 1px solid var(--spx-border);
   position: relative; z-index: 1;
 }
@@ -800,7 +799,7 @@
 .spx-footer-grid {
   display: grid;
   grid-template-columns: 1.6fr 1fr 1fr;
-  gap: 48px; margin-bottom: 48px;
+  gap: 40px; margin-bottom: 32px;
 }
 
 .spx-footer-contact-item {

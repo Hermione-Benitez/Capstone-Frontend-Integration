@@ -736,34 +736,33 @@ export const PublicWebsite: React.FC = () => {
             <div>
               <div className="spx-footer-col-title">Navigation</div>
               <ul className="spx-footer-links">
-                <li><a href="#top" className="spx-footer-link">Home</a></li>
+                <li><a href="#top" className="spx-footer-link" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Home</a></li>
                 <li><a href="#track" className="spx-footer-link" onClick={handleTrackClick}>Track Delivery</a></li>
-                <li><a href="#advisories" className="spx-footer-link">Advisories</a></li>
-                <li><a href="#about" className="spx-footer-link">About Us</a></li>
-                <li><a href="#contact" className="spx-footer-link">Contact</a></li>
+                <li><a href="#advisories" className="spx-footer-link" onClick={(e) => { e.preventDefault(); scrollToSection('advisories'); }}>Advisories</a></li>
+                <li><a href="#about" className="spx-footer-link" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }}>About Us</a></li>
+                <li><a href="#contact" className="spx-footer-link" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>Contact</a></li>
+                <li><Link to="/login" className="spx-footer-link"><i className="ti ti-login" aria-hidden="true" /> Staff Login</Link></li>
               </ul>
             </div>
 
+
             <div>
-              <div className="spx-footer-col-title">Staff Access</div>
+              <div className="spx-footer-col-title">Contact &amp; Hub</div>
               <ul className="spx-footer-links">
-                <li>
-                  <Link to="/login" className="spx-footer-link">
-                    <i className="ti ti-login" aria-hidden="true" /> Staff Login
-                  </Link>
+                <li className="spx-footer-contact-item">
+                  <i className="ti ti-map-pin spx-footer-contact-icon" aria-hidden="true" />
+                  <span style={{ color: "#94A3B8" }}>ECF Building, Malate, Manila</span>
+                </li>
+                <li className="spx-footer-contact-item">
+                  <i className="ti ti-mail spx-footer-contact-icon" aria-hidden="true" />
+                  <a href="mailto:admin@myspeedex.net" className="spx-footer-link">admin@myspeedex.net</a>
+                </li>
+                <li className="spx-footer-contact-item">
+                  <i className="ti ti-phone spx-footer-contact-icon" aria-hidden="true" />
+                  <span style={{ color: "#94A3B8" }}>(02) 8400-4628 to 29</span>
                 </li>
               </ul>
             </div>
-
-            <div>
-              <div className="spx-footer-col-title">Contact & Hub</div>
-              <ul className="spx-footer-links">
-                <li style={{ color: '#94A3B8' }}>ECF Building, Malate, Manila</li>
-                <li style={{ color: '#94A3B8' }}>admin@myspeedex.net</li>
-                <li style={{ color: '#94A3B8' }}>(02) 8400-4628 to 29</li>
-              </ul>
-            </div>
-          </div>
 
           <div className="spx-footer-bottom">
             <div>&copy; {new Date().getFullYear()} Speedex Courier and Forwarder, Inc. All rights reserved.</div>
