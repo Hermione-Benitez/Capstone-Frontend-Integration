@@ -1119,14 +1119,14 @@
     position: relative; 
     width: 100%; max-width: 320px; height: auto; 
     border-radius: 12px; 
-    flex-direction: row; justify-content: flex-start; text-align: left; 
-    padding: 20px 24px; gap: 20px; 
+    display: grid; grid-template-columns: 90px 1fr; align-items: center;
+    padding: 16px 20px; gap: 16px; text-align: left;
   }
   .spx-stat-circle.stat-c1,
   .spx-stat-circle.stat-c2,
   .spx-stat-circle.stat-c3 { top: auto; bottom: auto; left: auto; right: auto; transform: none !important; }
-  .spx-stat-circle strong { font-size: 32px; margin-bottom: 0; }
-  .spx-stat-circle span { font-size: 11px; letter-spacing: 0.05em; }
+  .spx-stat-circle strong { font-size: 32px; margin-bottom: 0; text-align: right; }
+  .spx-stat-circle span { font-size: 11px; letter-spacing: 0.05em; text-align: left; }
 
   /* Sections */
   .spx-section { padding: 48px 0; }
@@ -1176,9 +1176,5 @@
 /* ── Small phone (≤360px) ── */
 @media (max-width: 360px) {
   .spx-hero-title { font-size: 22px; }
-  .spx-stats-cluster { width: 230px; height: 230px; }
-  .spx-stat-circle { width: 100px; height: 100px; }
-  .spx-stat-circle strong { font-size: 22px; }
-  .spx-stat-circle span { font-size: 8.5px; }
   .spx-section-title { font-size: 19px; }
 }
