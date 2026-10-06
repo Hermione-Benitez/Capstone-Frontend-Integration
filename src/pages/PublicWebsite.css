@@ -80,8 +80,8 @@
 .spx-alert-bar {
   position: relative;
   z-index: 60;
-  background: rgba(217,119,6,0.1);
-  border-bottom: 1px solid rgba(217,119,6,0.2);
+  background: #FFFBEB;
+  border-bottom: 1px solid #FDE68A;
   color: #92400E;
   font-size: 13.5px;
   font-weight: 500;
@@ -111,7 +111,7 @@
 .spx-alert-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
 
 .spx-alert-link {
-  color: var(--spx-brand);
+  color: #B45309;
   font-weight: 600;
   font-size: 13px;
   text-decoration: underline;
@@ -120,7 +120,7 @@
   display: inline-flex; align-items: center; gap: 4px;
   transition: color 0.15s;
 }
-.spx-alert-link:hover { color: var(--spx-brand-hover); }
+.spx-alert-link:hover { color: #92400E; }
 
 .spx-alert-dismiss {
   background: transparent; border: none;
@@ -450,13 +450,10 @@
 .spx-section {
   padding: 80px 0;
   position: relative;
-  min-height: calc(100vh - 68px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   background: #FFFFFF;
   border-top: 1px solid var(--spx-border);
   border-bottom: 1px solid var(--spx-border);
+  scroll-margin-top: 68px; /* Offset for sticky navbar */
 }
 
 .spx-section.alt {
