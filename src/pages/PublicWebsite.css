@@ -44,7 +44,6 @@
   font-size: 15px;
   line-height: 1.6;
   position: relative;
-  overflow-x: clip;
 }
 
 /* Reset global main constraint so backgrounds stretch to edges */
@@ -251,6 +250,7 @@
 /* ── Hero Section ────────────────────────────────────────────── */
 .spx-hero-section {
   position: relative;
+  overflow: hidden;
   padding: 80px 0 88px;
   min-height: calc(100vh - 68px);
   display: flex;
@@ -1007,7 +1007,7 @@
 /* ══════════════════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
 ══════════════════════════════════════════════════════════════ */
-.spx-pub-root { overflow-x: hidden; }
+/* Removed overflow-x: hidden from .spx-pub-root because it breaks sticky navbar */
 
 /* ── Tablet landscape (≤1024px) ── */
 @media (max-width: 1024px) {
