@@ -3,32 +3,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastProvider } from "./components";
 import ToastContainer from "./components/ToastContainer";
 import DashboardLayoutShell from "./layouts/DashboardLayoutShell";
-import { getStarsLoginUrl, redirectToStarsLogin } from "./utils/auth";
 
 // Lazy-load public website, portal & system dashboards
 const PublicWebsite = lazy(() => import("./pages/PublicWebsite"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const SharedDashboard = lazy(() => import("./pages/SharedDashboard"));
-
-function ExternalLoginRedirect() {
-  const loginUrl = getStarsLoginUrl('/portal');
-
-  React.useEffect(() => {
-    redirectToStarsLogin('/portal');
-  }, []);
-
-  return (
-    <div style={{ padding: "80px 20px", textAlign: "center", fontFamily: "var(--fb, sans-serif)" }}>
-      <h2>Redirecting to Speedex Authentication Portal...</h2>
-      <p style={{ color: "var(--tt, #6B7280)" }}>
-        If you are not redirected automatically,{" "}
-        <a href={loginUrl} style={{ color: "var(--teal, #00A99D)", fontWeight: 600 }}>
-          click here to continue
-        </a>.
-      </p>
-    </div>
-  );
-}
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const PrivacyNoticePage = lazy(() => import("./pages/PrivacyNoticePage"));
+const EmailVerificationPage = lazy(() => import("./pages/EmailVerificationPage"));
 
 function AppRoutes() {
   return (
@@ -43,14 +26,17 @@ function AppRoutes() {
         {/* Public Facing Website (Speedex Landing & Tracking) */}
         <Route path="/" element={<PublicWebsite />} />
 
+        {/* Unified Central Authentication & Onboarding Gateway */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/privacy-notice" element={<PrivacyNoticePage />} />
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
+
         {/* Post-Login Subsystem Selector Homepage & Aliases */}
         <Route path="/portal" element={<PortalPage />} />
         <Route path="/home" element={<PortalPage />} />
         <Route path="/selector" element={<PortalPage />} />
         <Route path="/systems" element={<PortalPage />} />
-
-        {/* Authentication Gateway */}
-        <Route path="/login" element={<ExternalLoginRedirect />} />
 
         {/* Micro-Frontend Shells (Shared Sidebar/Header) */}
         <Route path="/dms/*" element={<DashboardLayoutShell />}>
