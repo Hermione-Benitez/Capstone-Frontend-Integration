@@ -31,3 +31,25 @@ export const SUBSYSTEM_URLS: Record<string, string> = {
   dms: DMS_URL,
   foms: FOMS_URL,
 };
+
+// Backend Azure API Endpoints
+export const STARS_API_URL = normalizeUrl(
+  import.meta.env.VITE_STARS_API_URL,
+  'https://stars-h8bgfbhghzbdc9fd.southeastasia-01.azurewebsites.net'
+);
+
+export const DMS_API_URL = normalizeUrl(
+  import.meta.env.VITE_DMS_API_URL,
+  'https://dts-api-gab-byafd0h2aha6a9c9.japaneast-01.azurewebsites.net'
+);
+
+export const FOMS_API_URL = normalizeUrl(
+  import.meta.env.VITE_FOMS_API_URL,
+  'https://fomsintegration-amfve2fdccbdgbgy.eastasia-01.azurewebsites.net'
+);
+
+export const SUBSYSTEM_API_URLS: Record<string, string> = {
+  stars: STARS_API_URL,
+  dms: DMS_API_URL,
+  foms: FOMS_API_URL,
+};

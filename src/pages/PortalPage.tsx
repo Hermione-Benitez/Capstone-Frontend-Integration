@@ -10,13 +10,31 @@ import {
   getAvatarInitials,
   type AuthSession,
 } from '../utils/auth';
+import { useCentralSessionTimeout } from '../hooks/useCentralSessionTimeout';
 
 export const PortalPage: React.FC = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
+  // 15-minute portal idle timeout monitoring
+  useCentralSessionTimeout(!!session);
+
   useEffect(() => {
+    // 0. Check for Single Logout action in query or hash
+    const searchParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : window.location.hash;
+    const hashParams = new URLSearchParams(hash);
+    const action = searchParams.get('action') || hashParams.get('action');
+
+    if (action === 'logout') {
+      clearAuthSession();
+      const reason = searchParams.get('reason') || hashParams.get('reason') || 'logged_out';
+      const system = searchParams.get('system') || hashParams.get('system') || '';
+      navigate(`/login?action=logout&reason=${encodeURIComponent(reason)}${system ? `&system=${system}` : ''}`, { replace: true });
+      return;
+    }
+
     // 1. Check if auth tokens are passed via URL hash or search parameters
     const urlTokens = parseAuthFromUrl();
 
@@ -32,9 +50,9 @@ export const PortalPage: React.FC = () => {
     const currentSession = getStoredAuthSession();
 
     if (!currentSession || !currentSession.authToken) {
-      // Unauthenticated user - redirect to public landing page
+      // Unauthenticated user - redirect to Central Login
       setIsCheckingAuth(false);
-      navigate('/', { replace: true });
+      navigate('/login', { replace: true });
       return;
     }
 
@@ -50,7 +68,7 @@ export const PortalPage: React.FC = () => {
 
   const handleLogout = () => {
     clearAuthSession();
-    navigate('/', { replace: true });
+    navigate('/login?action=logout&reason=logged_out', { replace: true });
   };
 
   const handlePublicHome = () => {

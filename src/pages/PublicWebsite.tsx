@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useToast } from '../components';
-import { getStarsLoginUrl } from '../utils/auth';
 import './PublicWebsite.css';
 
 interface WaybillEvent {
@@ -338,9 +337,9 @@ export const PublicWebsite: React.FC = () => {
           </nav>
 
           <div className="spx-nav-actions">
-            {/* Login button — redirects to STARS authentication portal */}
+            {/* Login button — redirects to Central Unified Login portal */}
             <a
-              href={getStarsLoginUrl('/portal')}
+              href="/login"
               className="spx-btn-login"
             >
               <i className="ti ti-login" aria-hidden="true" />
@@ -696,7 +695,7 @@ export const PublicWebsite: React.FC = () => {
               <div className="spx-footer-col-title">Staff Access</div>
               <ul className="spx-footer-links">
                 <li>
-                  <a href={getStarsLoginUrl('/portal')} className="spx-footer-link">
+                  <a href="/login" className="spx-footer-link">
                     <i className="ti ti-login" aria-hidden="true" /> Staff Login
                   </a>
                 </li>
