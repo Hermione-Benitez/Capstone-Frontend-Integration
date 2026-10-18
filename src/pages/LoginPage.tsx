@@ -201,7 +201,10 @@ export default function LoginPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            identifier: cleanId,
             employeeNumber: cleanId,
+            employeeId: cleanId,
+            username: cleanId,
             password,
           }),
           signal: abortController.signal,
@@ -223,11 +226,11 @@ export default function LoginPage() {
 
         // Authentication Successful
         resetRateLimit(cleanId);
-        const data = raw.data;
+        const data = raw.data || raw;
         const sessionPayload = {
-          authToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          userRole: data.role,
+          authToken: data.accessToken || data.token || '',
+          refreshToken: data.refreshToken || '',
+          userRole: data.role || 'Staff',
           employeeId: cleanId,
           employeeName: data.fullName || data.userName || cleanId,
         };
@@ -258,6 +261,8 @@ export default function LoginPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             employeeId: cleanId,
+            username: cleanId,
+            identifier: cleanId,
             password,
           }),
           signal: abortController.signal,
@@ -279,12 +284,26 @@ export default function LoginPage() {
 
         // Authentication Successful
         resetRateLimit(cleanId);
+
+        // Decode JWT claims for role & name fallback if not present in root response
+        let role = raw.role;
+        let name = raw.name;
+        if ((!role || !name) && typeof raw.token === 'string' && raw.token.includes('.')) {
+          try {
+            const tokenPayload = JSON.parse(atob(raw.token.split('.')[1]));
+            role = role || tokenPayload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || tokenPayload.role;
+            name = name || tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || tokenPayload.name;
+          } catch {
+            // fallback gracefully
+          }
+        }
+
         const sessionPayload = {
           authToken: raw.token,
           refreshToken: raw.refreshToken || '',
-          userRole: raw.role || 'OP. TEAM',
+          userRole: role || 'OP. TEAM',
           employeeId: cleanId,
-          employeeName: raw.name || cleanId,
+          employeeName: name || cleanId,
         };
         saveAuthSession(sessionPayload);
 
@@ -297,6 +316,9 @@ export default function LoginPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             employeeId: cleanId,
+            employeeNumber: cleanId,
+            username: cleanId,
+            identifier: cleanId,
             password,
           }),
           signal: abortController.signal,
