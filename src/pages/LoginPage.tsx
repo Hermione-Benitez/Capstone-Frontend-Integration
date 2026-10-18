@@ -5,7 +5,6 @@ import {
   Lock,
   User,
   ArrowRight,
-  ArrowLeft,
   Globe,
   AlertTriangle,
   CheckCircle,
@@ -19,6 +18,7 @@ import {
 import { clearAuthSession, saveAuthSession, redirectToSubsystem } from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '../utils/rateLimiter';
 import { prewarmBackend, getActiveBackendUrl } from '../utils/loadBalancer';
+import LegalDocumentModal, { type LegalDocType } from '../components/LegalDocumentModal';
 import './LoginPage.css';
 
 type SystemKey = 'stars' | 'dms' | 'foms';
@@ -84,6 +84,9 @@ export default function LoginPage() {
 
   // Rate limit lockout state
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
+
+  // Legal modal state (Terms of Use / Privacy Statement)
+  const [legalModalType, setLegalModalType] = useState<LegalDocType | null>(null);
 
   // In-flight request controller to cancel duplicate requests on re-submit
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -501,17 +504,6 @@ export default function LoginPage() {
         {/* RIGHT PANEL */}
         <main className="login-right">
           <div className="login-card">
-            {/* Back to Public Website Action */}
-            <button
-              type="button"
-              className="back-to-public-btn"
-              onClick={() => navigate('/')}
-              aria-label="Return to Speedex Public Website"
-            >
-              <ArrowLeft size={14} />
-              <span>Back to Public Website</span>
-            </button>
-
             <div className="card-header">
               <span className="header-badge">CENTRAL ONE-LOGIN</span>
               <h1 className="card-title">Welcome to Speedex</h1>
@@ -660,10 +652,48 @@ export default function LoginPage() {
               </button>
             </div>
 
+            {/* Legal Notice / Terms & Privacy Links */}
+            <div className="login-legal-notice">
+              <span>By signing in, you understand and agree to the Speedex</span>{' '}
+              <button
+                type="button"
+                className="legal-notice-btn"
+                onClick={() => setLegalModalType('terms')}
+              >
+                Terms of Use
+              </button>
+              {' '}and{' '}
+              <button
+                type="button"
+                className="legal-notice-btn"
+                onClick={() => setLegalModalType('privacy')}
+              >
+                Privacy Statement
+              </button>
+              .
+            </div>
+
             <footer className="login-footer">
               <div className="security-note">
                 <Lock size={13} />
                 <span>Protected by Speedex Dual-Layer Rate Limiting &amp; Single Logout (SLO)</span>
+              </div>
+              <div className="login-footer-legal">
+                <button
+                  type="button"
+                  className="footer-legal-link"
+                  onClick={() => setLegalModalType('terms')}
+                >
+                  Terms of Use
+                </button>
+                <span className="footer-legal-dot">·</span>
+                <button
+                  type="button"
+                  className="footer-legal-link"
+                  onClick={() => setLegalModalType('privacy')}
+                >
+                  Privacy Statement
+                </button>
               </div>
               <p className="login-footer-copy">
                 © 2026 <span className="login-footer-company">Speedex Courier &amp; Forwarder, Inc.</span> · All rights reserved.
@@ -672,6 +702,14 @@ export default function LoginPage() {
           </div>
         </main>
       </div>
+
+      {/* ── LEGAL DOCUMENT MODAL (Terms of Use / Privacy Statement) ── */}
+      <LegalDocumentModal
+        isOpen={legalModalType !== null}
+        type={legalModalType || 'terms'}
+        onClose={() => setLegalModalType(null)}
+        onSwitchType={(type) => setLegalModalType(type)}
+      />
     </div>
   );
 }

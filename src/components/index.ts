@@ -22,4 +22,6 @@ export { default as SystemSelectorPage, SPEEDEX_SYSTEMS } from "./SystemSelector
 export type { SystemKey, SpeedexSystem, SystemSelectorPageProps } from "./SystemSelectorPage";
 export type { NotificationItem } from "./notificationTypes";
 export type { SystemSwitcherEntry, SystemSwitcherConfig } from "./GlobalHeader";
+export { default as LegalDocumentModal } from "./LegalDocumentModal";
+export type { LegalDocType, LegalDocumentModalProps } from "./LegalDocumentModal";
 

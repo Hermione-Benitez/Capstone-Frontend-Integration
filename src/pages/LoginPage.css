@@ -644,9 +644,44 @@
   border-radius: 2px;
 }
 
+/* ── LEGAL NOTICE & FOOTER LINKS ── */
+.login-legal-notice {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.legal-notice-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #00A99D;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family: inherit;
+  transition: color 0.15s ease;
+  display: inline;
+}
+
+.legal-notice-btn:hover {
+  color: #00877d;
+}
+
+.legal-notice-btn:focus-visible {
+  outline: 2px solid #00A99D;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ── FOOTER ── */
 .login-footer {
-  margin-top: 26px;
+  margin-top: 24px;
   padding-top: 18px;
   border-top: 1px solid #f1f5f9;
   text-align: center;
@@ -660,6 +695,44 @@
   font-size: 0.74rem;
   color: #64748b;
   margin-bottom: 8px;
+}
+
+.login-footer-legal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.footer-legal-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s ease;
+}
+
+.footer-legal-link:hover {
+  color: #00A99D;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-legal-link:focus-visible {
+  outline: 2px solid #00A99D;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.footer-legal-dot {
+  color: #cbd5e1;
+  font-size: 0.74rem;
 }
 
 .login-footer-copy {
