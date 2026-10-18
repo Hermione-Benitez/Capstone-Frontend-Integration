@@ -280,10 +280,18 @@ export function getSubsystemRedirectUrl(
   }
 
   const queryString = params.toString();
+  const normalizedKey = systemKey.toLowerCase();
+  let targetPath = '/';
+  if (normalizedKey === 'dms') {
+    const isDriver = role.toUpperCase().includes('DRIVER') || role.toUpperCase().includes('COURIER') || role.toUpperCase().includes('RIDER');
+    targetPath = isDriver ? '/driver/dashboard' : '/dashboard';
+  } else if (normalizedKey === 'foms') {
+    targetPath = '/dashboard';
+  }
 
   // Attach params in both query and hash so any subsystem router (BrowserRouter or HashRouter)
   // or auth provider component detects the authentication state immediately upon mount.
-  return `${baseUrl}/?${queryString}#${queryString}`;
+  return `${baseUrl}${targetPath}?${queryString}#${queryString}`;
 }
 
 /**

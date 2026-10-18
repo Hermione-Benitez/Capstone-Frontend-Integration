@@ -12,6 +12,7 @@ import {
   Server,
   Loader2,
   RefreshCw,
+  Package,
 } from 'lucide-react';
 import { clearAuthSession, saveAuthSession, redirectToSubsystem } from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '../utils/rateLimiter';
@@ -24,6 +25,7 @@ interface SystemOption {
   key: SystemKey;
   name: string;
   badge: string;
+  description: string;
   idPlaceholder: string;
 }
 
@@ -32,18 +34,21 @@ const SYSTEM_OPTIONS: SystemOption[] = [
     key: 'stars',
     name: 'STARS — Tracking & Audit System',
     badge: 'STARS',
+    description: 'Task tracking & audit trails',
     idPlaceholder: 'e.g. MGR001 or 0000',
   },
   {
     key: 'dms',
     name: 'DMS — Delivery Management System',
     badge: 'DMS',
+    description: 'Shipment tracking & courier dispatch',
     idPlaceholder: 'e.g. EMP-001 or DRV-001',
   },
   {
     key: 'foms',
     name: 'FOMS — Financial Operations System',
     badge: 'FOMS',
+    description: 'Invoicing & payment collections',
     idPlaceholder: 'e.g. EMP-001 or accountant',
   },
 ];
@@ -372,165 +377,258 @@ export default function LoginPage() {
   const activeOption = SYSTEM_OPTIONS.find((s) => s.key === selectedSystem) || SYSTEM_OPTIONS[0];
 
   return (
-    <div className="login-root">
-      <div className="login-card-wrapper">
-        <div className="login-card">
-          <header className="login-header">
-            <div className="brand-badge">
-              <Shield size={14} />
-              Central Gateway
+    <div className="login-page-container">
+      {/* ── TOP NAV BAR ── */}
+      <header className="speedex-system-header">
+        <div className="speedex-header-inner">
+          <a href="/portal" className="speedex-header-brand" title="Speedex Portal Directory">
+            <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
+            <div className="speedex-header-text">
+              <span className="brand-name">Speedex</span>
+              <span className="brand-sub">COURIER &amp; FORWARDER, INC.</span>
             </div>
-            <h1 className="brand-title">
-              Speedex <span className="accent">One-Login</span>
-            </h1>
-            <p className="brand-subtitle">
-              Unified authentication for Speedex operational systems
-            </p>
-          </header>
-
-          {/* Contextual Alert Banner */}
-          {bannerAlert && (
-            <div className={`alert-banner ${bannerAlert.type}`}>
-              {bannerAlert.type === 'warning' && <AlertTriangle size={18} />}
-              {bannerAlert.type === 'success' && <CheckCircle size={18} />}
-              <div>{bannerAlert.message}</div>
-            </div>
-          )}
-
-          {/* Error Message Alert */}
-          {errorMessage && (
-            <div className="alert-banner danger">
-              <AlertTriangle size={18} />
-              <div>{errorMessage}</div>
-            </div>
-          )}
-
-          {/* Rate Limit Lockout Banner */}
-          {lockoutSeconds > 0 && (
-            <div className="alert-banner warning">
-              <RefreshCw size={18} className="spinner" />
-              <div>
-                <strong>Rate Limit Active:</strong> Please wait {lockoutSeconds} seconds before submitting your next attempt.
-              </div>
-            </div>
-          )}
-
-          <form className="login-form" onSubmit={handleSubmit} noValidate>
-            {/* 1. Target System Manual Dropdown Selector */}
-            <div className="form-group">
-              <label htmlFor="system-select" className="form-label">
-                Target Operational System
-              </label>
-              <div className="input-wrapper">
-                <span className="input-icon">
-                  <Server size={18} />
-                </span>
-                <select
-                  id="system-select"
-                  className="form-select"
-                  value={selectedSystem}
-                  onChange={handleSystemChange}
-                  disabled={isSubmitting || lockoutSeconds > 0}
-                >
-                  {SYSTEM_OPTIONS.map((opt) => (
-                    <option key={opt.key} value={opt.key}>
-                      {opt.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* 2. Employee ID / Username */}
-            <div className="form-group">
-              <label htmlFor="employee-id" className="form-label">
-                Employee ID or Username
-              </label>
-              <div className="input-wrapper">
-                <span className="input-icon">
-                  <User size={18} />
-                </span>
-                <input
-                  id="employee-id"
-                  type="text"
-                  className="form-input"
-                  placeholder={activeOption.idPlaceholder}
-                  value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value)}
-                  disabled={isSubmitting || lockoutSeconds > 0}
-                  autoComplete="username"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* 3. Password */}
-            <div className="form-group">
-              <label htmlFor="password-input" className="form-label">
-                Password
-              </label>
-              <div className="input-wrapper">
-                <span className="input-icon">
-                  <Lock size={18} />
-                </span>
-                <input
-                  id="password-input"
-                  type={showPassword ? 'text' : 'password'}
-                  className="form-input"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isSubmitting || lockoutSeconds > 0}
-                  autoComplete="current-password"
-                  required
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={isSubmitting || lockoutSeconds > 0}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={18} className="spinner" />
-                  <span>Authenticating...</span>
-                </>
-              ) : lockoutSeconds > 0 ? (
-                <span>Locked ({lockoutSeconds}s)</span>
-              ) : (
-                <>
-                  <span>Sign In to {activeOption.badge}</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </form>
-
-          <footer className="login-footer">
-            <div>
-              Need to access a different service?{' '}
-              <a href="/portal" className="footer-link">
-                View Central Portal Directory
-              </a>
-            </div>
-            <div className="security-note">
-              <Lock size={12} />
-              Protected by Speedex Dual-Layer Sliding Window &amp; Token Invalidation
-            </div>
-          </footer>
+          </a>
+          <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
+            <a href="/portal" className="speedex-nav-link">
+              Portal Directory
+            </a>
+          </nav>
         </div>
+      </header>
+
+      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
+      <div className="login-page-split">
+        {/* LEFT PANEL */}
+        <aside className="login-left">
+          <div className="login-decorative-circle circle-1" />
+          <div className="login-decorative-circle circle-2" />
+          <div className="login-left-content">
+            <div className="login-brand-badge">
+              <div className="brand-icon-box">
+                <Package size={22} />
+              </div>
+              <div>
+                <span className="brand-title-badge">Speedex One-Login</span>
+                <span className="brand-sub-badge">CENTRAL GATEWAY</span>
+              </div>
+            </div>
+
+            <div className="login-headline">
+              <h2>
+                Fast deliveries,<br />
+                <span className="headline-accent">smarter logistics.</span>
+              </h2>
+              <p className="headline-body">
+                Single sign-on access across Speedex tracking, delivery dispatching,
+                and financial operations.
+              </p>
+            </div>
+
+            <div className="feature-list">
+              <div
+                className={`feature-item ${selectedSystem === 'dms' ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedSystem('dms');
+                  localStorage.setItem(LAST_SYSTEM_KEY, 'dms');
+                  setErrorMessage(null);
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="feature-num">1</div>
+                <div className="feature-text">
+                  <strong>Delivery Management System (DMS)</strong>
+                  <p>Real-time shipment tracking, dispatch, and proof of delivery.</p>
+                </div>
+              </div>
+
+              <div
+                className={`feature-item ${selectedSystem === 'stars' ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedSystem('stars');
+                  localStorage.setItem(LAST_SYSTEM_KEY, 'stars');
+                  setErrorMessage(null);
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="feature-num">2</div>
+                <div className="feature-text">
+                  <strong>Tracking &amp; Audit System (STARS)</strong>
+                  <p>Task tracking, employee scheduling, and audit trail compliance.</p>
+                </div>
+              </div>
+
+              <div
+                className={`feature-item ${selectedSystem === 'foms' ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedSystem('foms');
+                  localStorage.setItem(LAST_SYSTEM_KEY, 'foms');
+                  setErrorMessage(null);
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="feature-num">3</div>
+                <div className="feature-text">
+                  <strong>Financial Operations System (FOMS)</strong>
+                  <p>Accounts receivable, billing, invoices, and payment collections.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* RIGHT PANEL */}
+        <main className="login-right">
+          <div className="login-card">
+            <div className="card-header">
+              <span className="header-badge">CENTRAL ONE-LOGIN</span>
+              <h1 className="card-title">Welcome to Speedex</h1>
+              <p className="card-subtitle">
+                Select your operational system and sign in to continue.
+              </p>
+            </div>
+
+            {/* Contextual Alert Banner */}
+            {bannerAlert && (
+              <div className={`alert-banner ${bannerAlert.type}`}>
+                {bannerAlert.type === 'warning' && <AlertTriangle size={18} />}
+                {bannerAlert.type === 'success' && <CheckCircle size={18} />}
+                <div>{bannerAlert.message}</div>
+              </div>
+            )}
+
+            {/* Error Message Alert */}
+            {errorMessage && (
+              <div className="alert-banner danger">
+                <AlertTriangle size={18} />
+                <div>{errorMessage}</div>
+              </div>
+            )}
+
+            {/* Rate Limit Lockout Banner */}
+            {lockoutSeconds > 0 && (
+              <div className="alert-banner warning">
+                <RefreshCw size={18} className="spinner" />
+                <div>
+                  <strong>Rate Limit Active:</strong> Please wait {lockoutSeconds} seconds before submitting your next attempt.
+                </div>
+              </div>
+            )}
+
+            {/* Subsystem Selection Interactive Tabs */}
+            <div className="subsystem-selector-wrapper">
+              <label className="field-label">Target Operational System <span style={{ color: '#E31A1A' }}>*</span></label>
+              <div className="subsystem-chips" role="radiogroup">
+                {SYSTEM_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    className={`subsystem-chip ${selectedSystem === opt.key ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedSystem(opt.key);
+                      localStorage.setItem(LAST_SYSTEM_KEY, opt.key);
+                      setErrorMessage(null);
+                    }}
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                  >
+                    <span className="chip-badge">{opt.badge}</span>
+                    <span className="chip-desc">{opt.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <form className="login-form" onSubmit={handleSubmit} noValidate>
+              {/* Employee ID / Username */}
+              <div className="field-group">
+                <label htmlFor="employee-id" className="field-label">
+                  Employee ID or Identifier <span style={{ color: '#E31A1A' }}>*</span>
+                </label>
+                <div className="field-wrapper">
+                  <span className="field-icon">
+                    <User size={16} />
+                  </span>
+                  <input
+                    id="employee-id"
+                    type="text"
+                    className="field-input"
+                    placeholder={activeOption.idPlaceholder}
+                    value={employeeId}
+                    onChange={(e) => setEmployeeId(e.target.value)}
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                    autoComplete="username"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="field-group">
+                <label htmlFor="password-input" className="field-label">
+                  Password <span style={{ color: '#E31A1A' }}>*</span>
+                </label>
+                <div className="field-wrapper">
+                  <span className="field-icon">
+                    <Lock size={16} />
+                  </span>
+                  <input
+                    id="password-input"
+                    type={showPassword ? 'text' : 'password'}
+                    className="field-input"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                    autoComplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="toggle-pw"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={isSubmitting || lockoutSeconds > 0}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={18} className="spinner" />
+                    <span>Authenticating...</span>
+                  </>
+                ) : lockoutSeconds > 0 ? (
+                  <span>Locked ({lockoutSeconds}s)</span>
+                ) : (
+                  <>
+                    <span>Sign In to {activeOption.badge}</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <footer className="login-footer">
+              <div className="security-note">
+                <Lock size={13} />
+                <span>Protected by Speedex Dual-Layer Rate Limiting &amp; Single Logout (SLO)</span>
+              </div>
+              <p className="login-footer-copy">
+                © 2026 <span className="login-footer-company">Speedex Courier &amp; Forwarder, Inc.</span> · All rights reserved.
+              </p>
+            </footer>
+          </div>
+        </main>
       </div>
     </div>
   );
