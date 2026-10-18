@@ -5,6 +5,8 @@ import {
   Lock,
   User,
   ArrowRight,
+  ArrowLeft,
+  Globe,
   AlertTriangle,
   CheckCircle,
   Eye,
@@ -381,7 +383,15 @@ export default function LoginPage() {
       {/* ── TOP NAV BAR ── */}
       <header className="speedex-system-header">
         <div className="speedex-header-inner">
-          <a href="/portal" className="speedex-header-brand" title="Speedex Portal Directory">
+          <a
+            href="/"
+            className="speedex-header-brand"
+            title="Speedex Public Portal"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/');
+            }}
+          >
             <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
             <div className="speedex-header-text">
               <span className="brand-name">Speedex</span>
@@ -389,7 +399,19 @@ export default function LoginPage() {
             </div>
           </a>
           <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
-            <a href="/portal" className="speedex-nav-link">
+            <a
+              href="/"
+              className="speedex-nav-link speedex-nav-link-public"
+              title="Return to Public Website"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+              }}
+            >
+              <Globe size={14} />
+              <span>Public Website</span>
+            </a>
+            <a href="/portal" className="speedex-nav-link" title="Speedex Portal Directory">
               Portal Directory
             </a>
           </nav>
@@ -482,6 +504,17 @@ export default function LoginPage() {
         {/* RIGHT PANEL */}
         <main className="login-right">
           <div className="login-card">
+            {/* Back to Public Website Action */}
+            <button
+              type="button"
+              className="back-to-public-btn"
+              onClick={() => navigate('/')}
+              aria-label="Return to Speedex Public Website"
+            >
+              <ArrowLeft size={14} />
+              <span>Back to Public Website</span>
+            </button>
+
             <div className="card-header">
               <span className="header-badge">CENTRAL ONE-LOGIN</span>
               <h1 className="card-title">Welcome to Speedex</h1>
@@ -617,6 +650,18 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
+
+            {/* Prompt for Public Portal tracking/advisories */}
+            <div className="public-portal-prompt">
+              <span>Looking to track a parcel or view advisories?</span>{' '}
+              <button
+                type="button"
+                className="public-portal-prompt-link"
+                onClick={() => navigate('/')}
+              >
+                Return to Public Portal &rarr;
+              </button>
+            </div>
 
             <footer className="login-footer">
               <div className="security-note">

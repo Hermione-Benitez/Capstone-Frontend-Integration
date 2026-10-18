@@ -101,6 +101,21 @@
   color: #38bdf8;
 }
 
+.speedex-nav-link-public {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(0, 169, 157, 0.14);
+  border-color: rgba(0, 169, 157, 0.32);
+  color: #2dd4bf;
+}
+
+.speedex-nav-link-public:hover {
+  background: rgba(0, 169, 157, 0.24);
+  border-color: rgba(0, 169, 157, 0.55);
+  color: #5eead4;
+}
+
 /* ── 2-COLUMN SPLIT LAYOUT ── */
 .login-page-split {
   display: flex;
@@ -552,6 +567,75 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ── BACK TO PUBLIC WEBSITE BUTTON ── */
+.back-to-public-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  transition: all 0.18s ease;
+  align-self: flex-start;
+  font-family: inherit;
+}
+
+.back-to-public-btn:hover {
+  color: #0f172a;
+  background: #f1f5f9;
+  transform: translateX(-3px);
+}
+
+.back-to-public-btn:focus-visible {
+  outline: 2px solid #00a99d;
+  outline-offset: 2px;
+}
+
+/* ── PUBLIC PORTAL PROMPT ── */
+.public-portal-prompt {
+  margin-top: 18px;
+  padding: 11px 14px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.public-portal-prompt-link {
+  background: none;
+  border: none;
+  color: #0284c7;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+  display: inline;
+}
+
+.public-portal-prompt-link:hover {
+  color: #0369a1;
+}
+
+.public-portal-prompt-link:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* ── FOOTER ── */
