@@ -17,7 +17,7 @@ export const STARS_URL = normalizeUrl(
 // Delivery Management System (DMS) URL
 export const DMS_URL = normalizeUrl(
   import.meta.env.VITE_DMS_URL,
-  'http://localhost:5174'
+  'https://delivery-system-capstone-beige.vercel.app'
 );
 
 // Financial Operations Management System (FOMS) URL
