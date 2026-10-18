@@ -316,10 +316,13 @@
 
 .card-header {
   margin-bottom: 24px;
+  text-align: center;
 }
 
 .header-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px 12px;
   border-radius: 9999px;
   background: #e0f2fe;
@@ -328,7 +331,8 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin: 0 auto 12px auto;
+  text-align: center;
 }
 
 .card-title {
@@ -337,13 +341,15 @@
   color: #0f172a;
   margin: 0 0 6px 0;
   letter-spacing: -0.025em;
+  text-align: center;
 }
 
 .card-subtitle {
   font-size: 0.9rem;
   color: #64748b;
-  margin: 0;
+  margin: 0 auto;
   line-height: 1.45;
+  text-align: center;
 }
 
 /* ── SUBSYSTEM INTERACTIVE TABS ── */

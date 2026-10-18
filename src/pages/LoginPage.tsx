@@ -411,9 +411,6 @@ export default function LoginPage() {
               <Globe size={14} />
               <span>Public Website</span>
             </a>
-            <a href="/portal" className="speedex-nav-link" title="Speedex Portal Directory">
-              Portal Directory
-            </a>
           </nav>
         </div>
       </header>
