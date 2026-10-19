@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { MailCheck, CheckCircle2, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { STARS_API_URL } from '../config/env';
+import './LoginPage.css';
 import './OnboardingPage.css';
 
 export default function EmailVerificationPage() {

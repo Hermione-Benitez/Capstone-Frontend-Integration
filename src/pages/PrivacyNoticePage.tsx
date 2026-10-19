@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, Loader2, FileText, CheckCircle2 } from 'lucide-react';
 import { getStoredAuthSession, redirectToSubsystem } from '../utils/auth';
 import { STARS_API_URL } from '../config/env';
+import './LoginPage.css';
 import './OnboardingPage.css';
 
 export default function PrivacyNoticePage() {

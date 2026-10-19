@@ -303,8 +303,24 @@ export default function LoginPage() {
 
         // Check if Onboarding is required (temporary password not yet changed)
         if (data.isPasswordChanged === false && cleanId !== '0000') {
+          const profileData = {
+            firstName: data.firstName || '',
+            middleName: data.middleName || '',
+            lastName: data.lastName || '',
+            suffix: data.suffix || '',
+            contactNumber: data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone || '',
+            employeeId: cleanId,
+            fullName: data.fullName || data.userName || '',
+          };
+          try {
+            sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
+          } catch {
+            // ignore
+          }
           startTransition(() => {
-            navigate(`/onboarding?system=stars&employeeId=${encodeURIComponent(cleanId)}`);
+            navigate(`/onboarding?system=stars&employeeId=${encodeURIComponent(cleanId)}`, {
+              state: { profile: profileData },
+            });
           });
           return;
         }
@@ -377,6 +393,7 @@ export default function LoginPage() {
         const starsBaseUrl = getActiveBackendUrl('stars');
         let dmsNeedsOnboarding = false;
         let dmsNeedsPrivacy = false;
+        let dmsStatusData: Record<string, any> | null = null;
         try {
           const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
             signal: abortController.signal,
@@ -384,6 +401,7 @@ export default function LoginPage() {
           if (statusRes.ok) {
             const statusRaw = await statusRes.json();
             const statusData = statusRaw?.data || statusRaw;
+            dmsStatusData = statusData;
             if (statusData) {
               if (statusData.allowedSystems && cleanId !== '0000') {
                 const allowed = statusData.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
@@ -405,8 +423,24 @@ export default function LoginPage() {
         }
 
         if (dmsNeedsOnboarding) {
+          const profileData = {
+            firstName: dmsStatusData?.firstName || '',
+            middleName: dmsStatusData?.middleName || '',
+            lastName: dmsStatusData?.lastName || '',
+            suffix: dmsStatusData?.suffix || '',
+            contactNumber: dmsStatusData?.contactNumber || dmsStatusData?.mobileNumber || dmsStatusData?.phoneNumber || dmsStatusData?.phone || '',
+            employeeId: cleanId,
+            fullName: dmsStatusData?.fullName || name || cleanId,
+          };
+          try {
+            sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
+          } catch {
+            // ignore
+          }
           startTransition(() => {
-            navigate(`/onboarding?system=dms&employeeId=${encodeURIComponent(cleanId)}`);
+            navigate(`/onboarding?system=dms&employeeId=${encodeURIComponent(cleanId)}`, {
+              state: { profile: profileData },
+            });
           });
           return;
         }
@@ -470,6 +504,7 @@ export default function LoginPage() {
         const starsBaseUrl = getActiveBackendUrl('stars');
         let fomsNeedsOnboarding = false;
         let fomsNeedsPrivacy = false;
+        let fomsStatusData: Record<string, any> | null = null;
         try {
           const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
             signal: abortController.signal,
@@ -477,6 +512,7 @@ export default function LoginPage() {
           if (statusRes.ok) {
             const statusRaw = await statusRes.json();
             const statusData = statusRaw?.data || statusRaw;
+            fomsStatusData = statusData;
             if (statusData) {
               if (statusData.allowedSystems && cleanId !== '0000') {
                 const allowed = statusData.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
@@ -498,8 +534,24 @@ export default function LoginPage() {
         }
 
         if (fomsNeedsOnboarding) {
+          const profileData = {
+            firstName: fomsStatusData?.firstName || '',
+            middleName: fomsStatusData?.middleName || '',
+            lastName: fomsStatusData?.lastName || '',
+            suffix: fomsStatusData?.suffix || '',
+            contactNumber: fomsStatusData?.contactNumber || fomsStatusData?.mobileNumber || fomsStatusData?.phoneNumber || fomsStatusData?.phone || '',
+            employeeId: cleanId,
+            fullName: fomsStatusData?.fullName || user.fullName || user.name || cleanId,
+          };
+          try {
+            sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
+          } catch {
+            // ignore
+          }
           startTransition(() => {
-            navigate(`/onboarding?system=foms&employeeId=${encodeURIComponent(cleanId)}`);
+            navigate(`/onboarding?system=foms&employeeId=${encodeURIComponent(cleanId)}`, {
+              state: { profile: profileData },
+            });
           });
           return;
         }

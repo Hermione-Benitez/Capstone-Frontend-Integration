@@ -15,6 +15,7 @@ import {
   KeyRound,
 } from 'lucide-react';
 import { STARS_API_URL } from '../config/env';
+import './LoginPage.css';
 import './ResetPasswordPage.css';
 
 /* ── OWASP password rules ── */

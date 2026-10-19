@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { STARS_API_URL } from '../config/env';
+import './LoginPage.css';
 import './ForgotPasswordPage.css';
 
 type SystemKey = 'stars' | 'dms' | 'foms';
