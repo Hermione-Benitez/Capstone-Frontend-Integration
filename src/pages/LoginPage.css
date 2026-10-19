@@ -488,6 +488,60 @@
   color: #475569;
 }
 
+/* ── REMEMBER ME & FORGOT PASSWORD OPTIONS ── */
+.login-form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -6px;
+  margin-bottom: 18px;
+  font-size: 0.85rem;
+}
+
+.remember-me-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-me-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  accent-color: #0f1936;
+  cursor: pointer;
+}
+
+.forgot-password-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0f1936;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease, text-decoration 0.15s ease;
+  font-family: inherit;
+}
+
+.forgot-password-link:hover {
+  color: #E31A1A;
+  text-decoration: underline;
+}
+
+.forgot-password-link:focus-visible {
+  outline: 2px solid #0f1936;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ── SUBMIT BUTTON ── */
 .submit-btn {
   width: 100%;

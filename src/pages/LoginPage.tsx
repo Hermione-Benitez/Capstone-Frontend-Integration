@@ -56,6 +56,15 @@ const SYSTEM_OPTIONS: SystemOption[] = [
 ];
 
 const LAST_SYSTEM_KEY = 'speedex_last_selected_system';
+const REMEMBER_ME_KEY = 'speedex_remember_me';
+const REMEMBERED_ID_KEY = 'speedex_remembered_employee_id';
+
+function getRememberedId(system: SystemKey): string {
+  if (typeof window === 'undefined') return '';
+  const isRemembered = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+  if (!isRemembered) return '';
+  return localStorage.getItem(`${REMEMBERED_ID_KEY}_${system}`) || localStorage.getItem(REMEMBERED_ID_KEY) || '';
+}
 
 export default function LoginPage() {
   const location = useLocation();
@@ -73,9 +82,45 @@ export default function LoginPage() {
     return saved && ['stars', 'dms', 'foms'].includes(saved) ? saved : 'stars';
   });
 
-  const [employeeId, setEmployeeId] = useState('');
+  const [rememberMe, setRememberMe] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+  });
+
+  const [employeeId, setEmployeeId] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const idParam = params.get('id') || params.get('employeeId') || '';
+    if (idParam) return idParam;
+    const sysParam = params.get('system')?.toLowerCase() as SystemKey;
+    const initialSys = sysParam && ['stars', 'dms', 'foms'].includes(sysParam)
+      ? sysParam
+      : (localStorage.getItem(LAST_SYSTEM_KEY) as SystemKey) || 'stars';
+    return getRememberedId(initialSys);
+  });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  // Auto-populate remembered employee ID when switching subsystems
+  useEffect(() => {
+    if (rememberMe) {
+      const remembered = getRememberedId(selectedSystem);
+      if (remembered) {
+        setEmployeeId(remembered);
+      }
+    }
+  }, [selectedSystem, rememberMe]);
+
+  const handleRememberMeSave = (id: string, system: SystemKey) => {
+    if (rememberMe) {
+      localStorage.setItem(REMEMBER_ME_KEY, 'true');
+      localStorage.setItem(`${REMEMBERED_ID_KEY}_${system}`, id.trim());
+      localStorage.setItem(REMEMBERED_ID_KEY, id.trim());
+    } else {
+      localStorage.removeItem(REMEMBER_ME_KEY);
+      localStorage.removeItem(`${REMEMBERED_ID_KEY}_${system}`);
+      localStorage.removeItem(REMEMBERED_ID_KEY);
+    }
+  };
 
   // Status and loading states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -236,6 +281,7 @@ export default function LoginPage() {
 
         // Authentication Successful
         resetRateLimit(cleanId);
+        handleRememberMeSave(cleanId, 'stars');
         const data = raw.data || raw;
         const sessionPayload = {
           authToken: data.accessToken || data.token || '',
@@ -294,6 +340,7 @@ export default function LoginPage() {
 
         // Authentication Successful
         resetRateLimit(cleanId);
+        handleRememberMeSave(cleanId, 'dms');
 
         // Decode JWT claims for role & name fallback if not present in root response
         let role = raw.role;
@@ -350,6 +397,7 @@ export default function LoginPage() {
 
         // Authentication Successful
         resetRateLimit(cleanId);
+        handleRememberMeSave(cleanId, 'foms');
         const accessToken = raw.accessToken || raw.tokens?.accessToken;
         const refreshToken = raw.refreshToken || raw.tokens?.refreshToken || '';
         const user = raw.user || {};
@@ -616,6 +664,39 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+              </div>
+
+              {/* Remember Me and Forgot Password Form Options */}
+              <div className="login-form-options">
+                <label className="remember-me-label">
+                  <input
+                    type="checkbox"
+                    className="remember-me-checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setRememberMe(checked);
+                      if (!checked) {
+                        localStorage.removeItem(REMEMBER_ME_KEY);
+                        localStorage.removeItem(`${REMEMBERED_ID_KEY}_${selectedSystem}`);
+                        localStorage.removeItem(REMEMBERED_ID_KEY);
+                      }
+                    }}
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                  />
+                  <span>Remember me</span>
+                </label>
+                <button
+                  type="button"
+                  className="forgot-password-link"
+                  onClick={() => {
+                    const idQuery = employeeId.trim() ? `&id=${encodeURIComponent(employeeId.trim())}` : '';
+                    navigate(`/forgot-password?system=${selectedSystem}${idQuery}`);
+                  }}
+                  disabled={isSubmitting}
+                >
+                  Forgot password?
+                </button>
               </div>
 
               {/* Submit Button */}
