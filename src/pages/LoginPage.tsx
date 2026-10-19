@@ -755,10 +755,6 @@ export default function LoginPage() {
             </div>
 
             <footer className="login-footer">
-              <div className="security-note">
-                <Lock size={13} />
-                <span>Protected by Speedex Dual-Layer Rate Limiting &amp; Single Logout (SLO)</span>
-              </div>
               <div className="login-footer-legal">
                 <button
                   type="button"
