@@ -751,43 +751,7 @@
   margin-bottom: 8px;
 }
 
-.login-footer-legal {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
 
-.footer-legal-link {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  color: #64748b;
-  font-size: 0.74rem;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color 0.15s ease;
-}
-
-.footer-legal-link:hover {
-  color: #00A99D;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.footer-legal-link:focus-visible {
-  outline: 2px solid #00A99D;
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-.footer-legal-dot {
-  color: #cbd5e1;
-  font-size: 0.74rem;
-}
 
 .login-footer-copy {
   font-size: 0.74rem;

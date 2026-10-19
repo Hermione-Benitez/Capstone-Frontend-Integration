@@ -755,23 +755,6 @@ export default function LoginPage() {
             </div>
 
             <footer className="login-footer">
-              <div className="login-footer-legal">
-                <button
-                  type="button"
-                  className="footer-legal-link"
-                  onClick={() => setLegalModalType('terms')}
-                >
-                  Terms of Use
-                </button>
-                <span className="footer-legal-dot">·</span>
-                <button
-                  type="button"
-                  className="footer-legal-link"
-                  onClick={() => setLegalModalType('privacy')}
-                >
-                  Privacy Statement
-                </button>
-              </div>
               <p className="login-footer-copy">
                 © 2026 <span className="login-footer-company">Speedex Courier &amp; Forwarder, Inc.</span> · All rights reserved.
               </p>
