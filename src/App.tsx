@@ -4,8 +4,9 @@ import { ToastProvider } from "./components";
 import ToastContainer from "./components/ToastContainer";
 import DashboardLayoutShell from "./layouts/DashboardLayoutShell";
 
-// Lazy-load public website, portal & system dashboards
-const PublicWebsite = lazy(() => import("./pages/PublicWebsite"));
+import PublicWebsite from "./pages/PublicWebsite";
+
+// Lazy-load internal portal, auth & system dashboards
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const SharedDashboard = lazy(() => import("./pages/SharedDashboard"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));

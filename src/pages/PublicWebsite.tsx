@@ -129,21 +129,44 @@ export const PublicWebsite: React.FC = () => {
   const [openAdvisoryId, setOpenAdvisoryId] = useState<string | null>('adv-1');
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('top');
+  const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleTrackClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    triggerToast(
-      'info',
-      'Tracking Portal Coming Soon',
-      'The public waybill tracking portal is currently being integrated. In the meantime, please contact our dispatch team below for status updates.',
-      'Contact Support',
-      () => {
-        const contactEl = document.getElementById('contact');
-        if (contactEl) contactEl.scrollIntoView({ behavior: 'smooth' });
-      },
-      5000
-    );
+  const handleOpenTrackModal = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setIsTrackModalOpen(true);
+    setIsMobileMenuOpen(false);
+    if (!trackingResult && !waybillInput) {
+      setWaybillInput('SPX-98214');
+      setTrackingResult(SAMPLE_TRACKING_DATA['SPX-98214']);
+    }
   };
+
+  const handleCloseTrackModal = () => {
+    setIsTrackModalOpen(false);
+  };
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsTrackModalOpen(false);
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  React.useEffect(() => {
+    if (isTrackModalOpen || isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isTrackModalOpen, isMobileMenuOpen]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -302,7 +325,7 @@ export const PublicWebsite: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="#track" className="spx-nav-link" onClick={handleTrackClick}>
+                <a href="#track" className="spx-nav-link" onClick={handleOpenTrackModal}>
                   Track
                 </a>
               </li>
@@ -345,8 +368,119 @@ export const PublicWebsite: React.FC = () => {
               <i className="ti ti-login" aria-hidden="true" />
               <span>Log In</span>
             </a>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              type="button"
+              className="spx-menu-toggle"
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              <i className={`ti ${isMobileMenuOpen ? 'ti-x' : 'ti-menu-2'}`} aria-hidden="true" />
+            </button>
           </div>
         </div>
+
+        {/* ── Mobile Navigation Drawer ── */}
+        {isMobileMenuOpen && (
+          <div className="spx-mobile-drawer-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
+            <div className="spx-mobile-drawer" onClick={(e) => e.stopPropagation()}>
+              <div className="spx-mobile-drawer-header">
+                <span className="spx-mobile-drawer-title">Navigation</span>
+                <button
+                  type="button"
+                  className="spx-mobile-drawer-close"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <i className="ti ti-x" aria-hidden="true" />
+                </button>
+              </div>
+              <ul className="spx-mobile-nav-links">
+                <li>
+                  <a
+                    href="#top"
+                    className={`spx-mobile-nav-link ${activeSection === 'top' ? 'is-active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      window.history.pushState(null, '', '#top');
+                    }}
+                  >
+                    <i className="ti ti-home" aria-hidden="true" />
+                    <span>Home</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#track"
+                    className="spx-mobile-nav-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleOpenTrackModal();
+                    }}
+                  >
+                    <i className="ti ti-search" aria-hidden="true" />
+                    <span>Track a Shipment</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#advisories"
+                    className={`spx-mobile-nav-link ${activeSection === 'advisories' ? 'is-active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsMobileMenuOpen(false);
+                      document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
+                      window.history.pushState(null, '', '#advisories');
+                    }}
+                  >
+                    <i className="ti ti-bell-ringing" aria-hidden="true" />
+                    <span>Advisories</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#about"
+                    className={`spx-mobile-nav-link ${activeSection === 'about' ? 'is-active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsMobileMenuOpen(false);
+                      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                      window.history.pushState(null, '', '#about');
+                    }}
+                  >
+                    <i className="ti ti-info-circle" aria-hidden="true" />
+                    <span>About Us</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#contact"
+                    className={`spx-mobile-nav-link ${activeSection === 'contact' ? 'is-active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsMobileMenuOpen(false);
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                      window.history.pushState(null, '', '#contact');
+                    }}
+                  >
+                    <i className="ti ti-mail" aria-hidden="true" />
+                    <span>Contact</span>
+                  </a>
+                </li>
+              </ul>
+              <div className="spx-mobile-drawer-footer">
+                <a href="/login" className="spx-btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                  <i className="ti ti-login" aria-hidden="true" />
+                  <span>Staff Login</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main>
@@ -363,7 +497,7 @@ export const PublicWebsite: React.FC = () => {
               </p>
 
               <div className="spx-hero-buttons">
-                <a href="#track" className="spx-btn-primary" onClick={handleTrackClick}>
+                <a href="#track" className="spx-btn-primary" onClick={handleOpenTrackModal}>
                   <i className="ti ti-search" aria-hidden="true" />
                   <span>Track a Shipment</span>
                 </a>
@@ -684,7 +818,7 @@ export const PublicWebsite: React.FC = () => {
               <div className="spx-footer-col-title">Navigation</div>
               <ul className="spx-footer-links">
                 <li><a href="#top" className="spx-footer-link">Home</a></li>
-                <li><a href="#track" className="spx-footer-link" onClick={handleTrackClick}>Track Delivery</a></li>
+                <li><a href="#track" className="spx-footer-link" onClick={handleOpenTrackModal}>Track Delivery</a></li>
                 <li><a href="#advisories" className="spx-footer-link">Advisories</a></li>
                 <li><a href="#about" className="spx-footer-link">About Us</a></li>
                 <li><a href="#contact" className="spx-footer-link">Contact</a></li>
@@ -722,6 +856,216 @@ export const PublicWebsite: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* ── Dedicated Track a Shipment Modal ── */}
+      {isTrackModalOpen && (
+        <div
+          className="spx-modal-overlay"
+          onClick={handleCloseTrackModal}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="track-modal-title"
+        >
+          <div
+            className="spx-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="spx-modal-header">
+              <div className="spx-modal-header-icon">
+                <i className="ti ti-truck-delivery" aria-hidden="true" />
+              </div>
+              <div className="spx-modal-header-text">
+                <h2 id="track-modal-title" className="spx-modal-title">Track a Shipment</h2>
+                <p className="spx-modal-sub">Real-time express parcel tracking across nationwide Speedex hubs.</p>
+              </div>
+              <button
+                type="button"
+                className="spx-modal-close-btn"
+                onClick={handleCloseTrackModal}
+                aria-label="Close tracking modal"
+              >
+                <i className="ti ti-x" aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="spx-modal-body">
+              {/* Search Form */}
+              <form onSubmit={handleTrackSubmit} className="spx-track-modal-form">
+                <div className="spx-track-input-wrapper">
+                  <i className="ti ti-search spx-track-search-icon" aria-hidden="true" />
+                  <input
+                    type="text"
+                    className="spx-track-input"
+                    placeholder="Enter waybill number (e.g. SPX-98214)"
+                    value={waybillInput}
+                    onChange={(e) => setWaybillInput(e.target.value)}
+                    autoFocus
+                  />
+                  {waybillInput && (
+                    <button
+                      type="button"
+                      className="spx-track-clear-btn"
+                      onClick={() => {
+                        setWaybillInput('');
+                        setTrackingError(null);
+                      }}
+                      aria-label="Clear input"
+                    >
+                      <i className="ti ti-x" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+                <button type="submit" className="spx-btn-primary spx-track-submit-btn">
+                  <i className="ti ti-arrow-right" aria-hidden="true" />
+                  <span>Track</span>
+                </button>
+              </form>
+
+              {/* Quick Presets */}
+              <div className="spx-track-presets">
+                <span className="spx-presets-label">Quick samples:</span>
+                <div className="spx-preset-chips">
+                  <button
+                    type="button"
+                    className={`spx-preset-chip ${waybillInput === 'SPX-98214' ? 'is-active' : ''}`}
+                    onClick={() => handlePresetClick('SPX-98214')}
+                  >
+                    SPX-98214 (In Transit)
+                  </button>
+                  <button
+                    type="button"
+                    className={`spx-preset-chip ${waybillInput === 'SPX-50123' ? 'is-active' : ''}`}
+                    onClick={() => handlePresetClick('SPX-50123')}
+                  >
+                    SPX-50123 (Out for Delivery)
+                  </button>
+                  <button
+                    type="button"
+                    className={`spx-preset-chip ${waybillInput === 'SPX-77402' ? 'is-active' : ''}`}
+                    onClick={() => handlePresetClick('SPX-77402')}
+                  >
+                    SPX-77402 (Delivered)
+                  </button>
+                </div>
+              </div>
+
+              {/* Error message */}
+              {trackingError && (
+                <div className="spx-track-error-alert" role="alert">
+                  <i className="ti ti-alert-circle" aria-hidden="true" />
+                  <span>{trackingError}</span>
+                </div>
+              )}
+
+              {/* Result view */}
+              {trackingResult && (
+                <div className="spx-track-result-card">
+                  {/* Summary Bar */}
+                  <div className="spx-track-summary-bar">
+                    <div>
+                      <span className="spx-track-wb-label">WAYBILL NUMBER</span>
+                      <div className="spx-track-wb-number">
+                        <span>{trackingResult.waybillNo}</span>
+                        <button
+                          type="button"
+                          className="spx-track-copy-btn"
+                          onClick={() => {
+                            navigator.clipboard?.writeText(trackingResult.waybillNo);
+                            triggerToast('success', 'Copied!', `Waybill ${trackingResult.waybillNo} copied to clipboard.`);
+                          }}
+                          title="Copy waybill number"
+                        >
+                          <i className="ti ti-copy" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="spx-track-badge-group">
+                      <span
+                        className={`spx-track-status-tag ${
+                          trackingResult.statusType === 'delivered'
+                            ? 'spx-tag-delivered'
+                            : trackingResult.statusType === 'out'
+                            ? 'spx-tag-out'
+                            : 'spx-tag-transit'
+                        }`}
+                      >
+                        <i
+                          className={
+                            trackingResult.statusType === 'delivered'
+                              ? 'ti ti-circle-check'
+                              : trackingResult.statusType === 'out'
+                              ? 'ti ti-truck-delivery'
+                              : 'ti ti-truck'
+                          }
+                          aria-hidden="true"
+                        />
+                        <span>{trackingResult.statusText}</span>
+                      </span>
+                      <span className="spx-track-eta">ETA: {trackingResult.eta}</span>
+                    </div>
+                  </div>
+
+                  {/* Route */}
+                  <div className="spx-track-route-row">
+                    <div className="spx-route-hub">
+                      <i className="ti ti-building" aria-hidden="true" />
+                      <div>
+                        <span className="spx-route-label">Origin</span>
+                        <strong>{trackingResult.origin}</strong>
+                      </div>
+                    </div>
+                    <div className="spx-route-arrow">
+                      <i className="ti ti-arrow-right" aria-hidden="true" />
+                    </div>
+                    <div className="spx-route-hub">
+                      <i className="ti ti-map-pin" aria-hidden="true" />
+                      <div>
+                        <span className="spx-route-label">Destination</span>
+                        <strong>{trackingResult.destination}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Events Timeline */}
+                  <div className="spx-timeline-wrap">
+                    <h4 className="spx-timeline-heading">Delivery History</h4>
+                    <ol className="spx-timeline">
+                      {trackingResult.events.map((evt, idx) => (
+                        <li key={idx} className={`spx-timeline-item ${evt.status}`}>
+                          <span className="spx-timeline-node" aria-hidden="true" />
+                          <span className="spx-timeline-line" aria-hidden="true" />
+                          <div className="spx-timeline-title">{evt.title}</div>
+                          <div className="spx-timeline-meta">
+                            <span>{evt.location}</span>
+                            <span className="spx-timeline-dot">·</span>
+                            <span>{evt.time}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="spx-modal-footer">
+              <span className="spx-modal-footer-note">
+                <i className="ti ti-shield-check" aria-hidden="true" /> Verified with Speedex Central Tracking Dispatch
+              </span>
+              <button
+                type="button"
+                className="spx-btn-secondary"
+                onClick={handleCloseTrackModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
