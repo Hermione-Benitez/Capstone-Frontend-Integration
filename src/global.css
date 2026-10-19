@@ -25,10 +25,9 @@
     }
   }
 
-  .spx-pub-root,
   .lp-root,
   .sys-sel-root {
-    animation: spx-page-fade 0.28s ease-out;
+    animation: spx-page-fade 0.18s ease-out;
   }
 
   :root {
