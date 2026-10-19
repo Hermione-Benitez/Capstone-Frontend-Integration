@@ -14,7 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { getStoredAuthSession, saveAuthSession } from '../utils/auth';
-import { STARS_API_URL } from '../config/env';
+import { STARS_API_URL, DMS_API_URL } from '../config/env';
 import './OnboardingPage.css';
 
 const PH_MOBILE_REGEX = /^09\d{9}$/;
@@ -121,6 +121,25 @@ export default function OnboardingPage() {
         const raw = await res.json().catch(() => null);
         if (!res.ok || (raw && raw.isSuccess === false)) {
           setError(raw?.message || 'Failed to update password. Please check your current password.');
+          setIsSubmitting(false);
+          return;
+        }
+      } else if (system === 'dms') {
+        const res = await fetch(`${DMS_API_URL}/api/auth/change-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+          }),
+        });
+
+        const raw = await res.json().catch(() => null);
+        if (!res.ok) {
+          setError(raw?.message || 'Failed to update DMS password. Please verify your current temporary password.');
           setIsSubmitting(false);
           return;
         }
