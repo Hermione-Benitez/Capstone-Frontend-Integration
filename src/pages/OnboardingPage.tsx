@@ -32,6 +32,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const system = searchParams.get('system') || 'stars';
+  const employeeIdParam = searchParams.get('employeeId') || searchParams.get('id') || '';
   const session = getStoredAuthSession();
 
   const [step, setStep] = useState<'profile' | 'password'>('profile');
@@ -103,46 +104,29 @@ export default function OnboardingPage() {
     setIsSubmitting(true);
 
     try {
-      const token = session?.authToken;
-      if (system === 'stars') {
-        const res = await fetch(`${STARS_API_URL}/api/Auth/change-password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            currentPassword,
-            newPassword,
-            confirmPassword,
-          }),
-        });
+      const empId = (employeeIdParam || session?.employeeId || '').trim();
 
-        const raw = await res.json().catch(() => null);
-        if (!res.ok || (raw && raw.isSuccess === false)) {
-          setError(raw?.message || 'Failed to update password. Please check your current password.');
-          setIsSubmitting(false);
-          return;
-        }
-      } else if (system === 'dms') {
-        const res = await fetch(`${DMS_API_URL}/api/auth/change-password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            currentPassword,
-            newPassword,
-          }),
-        });
+      // Master centralized onboarding & password synchronization across all provisioned systems
+      const res = await fetch(`${STARS_API_URL}/api/Auth/complete-onboarding`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          employeeNumber: empId,
+          currentPassword,
+          newPassword,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          contactNumber: contactNumber.trim(),
+        }),
+      });
 
-        const raw = await res.json().catch(() => null);
-        if (!res.ok) {
-          setError(raw?.message || 'Failed to update DMS password. Please verify your current temporary password.');
-          setIsSubmitting(false);
-          return;
-        }
+      const raw = await res.json().catch(() => null);
+      if (!res.ok || (raw && raw.isSuccess === false)) {
+        setError(raw?.message || 'Failed to update password. Please check your current temporary password.');
+        setIsSubmitting(false);
+        return;
       }
 
       // Record profile and password completion in session

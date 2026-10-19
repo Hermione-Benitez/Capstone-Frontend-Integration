@@ -292,6 +292,15 @@ export default function LoginPage() {
         };
         saveAuthSession(sessionPayload);
 
+        // Check if account is permitted for STARS
+        if (data.allowedSystems && cleanId !== '0000') {
+          const allowed = data.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
+          if (!allowed.includes('STARS')) {
+            setErrorMessage('Access Denied: Your account has not been provisioned for STARS.');
+            return;
+          }
+        }
+
         // Check if Onboarding is required (temporary password not yet changed)
         if (data.isPasswordChanged === false && cleanId !== '0000') {
           startTransition(() => {
@@ -364,6 +373,51 @@ export default function LoginPage() {
         };
         saveAuthSession(sessionPayload);
 
+        // Probe master onboarding status from STARS
+        const starsBaseUrl = getActiveBackendUrl('stars');
+        let dmsNeedsOnboarding = false;
+        let dmsNeedsPrivacy = false;
+        try {
+          const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
+            signal: abortController.signal,
+          });
+          if (statusRes.ok) {
+            const statusRaw = await statusRes.json();
+            const statusData = statusRaw?.data || statusRaw;
+            if (statusData) {
+              if (statusData.allowedSystems && cleanId !== '0000') {
+                const allowed = statusData.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
+                if (!allowed.includes('DMS')) {
+                  setErrorMessage('Access Denied: Your account has not been provisioned for DMS.');
+                  return;
+                }
+              }
+              if (statusData.isPasswordChanged === false && cleanId !== '0000') {
+                dmsNeedsOnboarding = true;
+              }
+              if (statusData.hasAcceptedTerms === false) {
+                dmsNeedsPrivacy = true;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Could not probe master onboarding status from STARS for DMS:', e);
+        }
+
+        if (dmsNeedsOnboarding) {
+          startTransition(() => {
+            navigate(`/onboarding?system=dms&employeeId=${encodeURIComponent(cleanId)}`);
+          });
+          return;
+        }
+
+        if (dmsNeedsPrivacy) {
+          startTransition(() => {
+            navigate(`/privacy-notice?system=dms&employeeId=${encodeURIComponent(cleanId)}`);
+          });
+          return;
+        }
+
         // Direct handoff to DMS Dashboard
         redirectToSubsystem('dms', sessionPayload);
       } else if (selectedSystem === 'foms') {
@@ -383,7 +437,7 @@ export default function LoginPage() {
 
         const raw = await response.json().catch(() => null);
 
-        if (!response.ok || (!raw?.accessToken && !raw?.tokens?.accessToken)) {
+        if (!response.ok || (!raw?.accessToken && !raw?.tokens?.accessToken && !raw?.data?.accessToken)) {
           const errMsg = raw?.message || raw?.error || 'Invalid FOMS credentials.';
           const failStatus = recordFailedAttempt(cleanId);
           if (failStatus.isLocked) {
@@ -398,18 +452,64 @@ export default function LoginPage() {
         // Authentication Successful
         resetRateLimit(cleanId);
         handleRememberMeSave(cleanId, 'foms');
-        const accessToken = raw.accessToken || raw.tokens?.accessToken;
-        const refreshToken = raw.refreshToken || raw.tokens?.refreshToken || '';
-        const user = raw.user || {};
+        const authData = raw.data || raw;
+        const accessToken = authData.accessToken || authData.tokens?.accessToken || '';
+        const refreshToken = authData.refreshToken || authData.tokens?.refreshToken || '';
+        const user = authData.user || authData.profile || {};
 
         const sessionPayload = {
           authToken: accessToken,
           refreshToken,
           userRole: user.role || 'Accountant',
           employeeId: user.employeeId || cleanId,
-          employeeName: user.fullName || cleanId,
+          employeeName: user.fullName || user.name || cleanId,
         };
         saveAuthSession(sessionPayload);
+
+        // Probe master onboarding status from STARS
+        const starsBaseUrl = getActiveBackendUrl('stars');
+        let fomsNeedsOnboarding = false;
+        let fomsNeedsPrivacy = false;
+        try {
+          const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
+            signal: abortController.signal,
+          });
+          if (statusRes.ok) {
+            const statusRaw = await statusRes.json();
+            const statusData = statusRaw?.data || statusRaw;
+            if (statusData) {
+              if (statusData.allowedSystems && cleanId !== '0000') {
+                const allowed = statusData.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
+                if (!allowed.includes('FOMS')) {
+                  setErrorMessage('Access Denied: Your account has not been provisioned for FOMS.');
+                  return;
+                }
+              }
+              if (statusData.isPasswordChanged === false && cleanId !== '0000') {
+                fomsNeedsOnboarding = true;
+              }
+              if (statusData.hasAcceptedTerms === false) {
+                fomsNeedsPrivacy = true;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Could not probe master onboarding status from STARS for FOMS:', e);
+        }
+
+        if (fomsNeedsOnboarding) {
+          startTransition(() => {
+            navigate(`/onboarding?system=foms&employeeId=${encodeURIComponent(cleanId)}`);
+          });
+          return;
+        }
+
+        if (fomsNeedsPrivacy) {
+          startTransition(() => {
+            navigate(`/privacy-notice?system=foms&employeeId=${encodeURIComponent(cleanId)}`);
+          });
+          return;
+        }
 
         // Direct handoff to FOMS Dashboard
         redirectToSubsystem('foms', sessionPayload);
