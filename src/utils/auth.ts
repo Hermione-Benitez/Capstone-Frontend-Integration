@@ -7,6 +7,7 @@ export interface AuthSession {
   employeeId: string;
   employeeName: string;
   allowedSystems?: string[];
+  contactNumber?: string;
 }
 
 export const AUTH_STORAGE_KEYS = {
@@ -19,6 +20,7 @@ export const AUTH_STORAGE_KEYS = {
   EMPLOYEE_ID: 'employeeId',
   EMPLOYEE_NAME: 'employeeName',
   ALLOWED_SYSTEMS: 'allowedSystems',
+  CONTACT_NUMBER: 'contactNumber',
 } as const;
 
 /**
@@ -258,6 +260,19 @@ export function getStoredAuthSession(): AuthSession | null {
     allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['STARS'];
   }
 
+  const contactNumber =
+    localStorage.getItem(AUTH_STORAGE_KEYS.CONTACT_NUMBER) ||
+    localStorage.getItem('contactNumber') ||
+    localStorage.getItem('contact_number') ||
+    localStorage.getItem('phoneNumber') ||
+    localStorage.getItem('phone_number') ||
+    localStorage.getItem('mobileNumber') ||
+    localStorage.getItem('mobile_number') ||
+    localStorage.getItem('contact') ||
+    localStorage.getItem('phone') ||
+    localStorage.getItem('mobile') ||
+    '';
+
   return {
     authToken,
     refreshToken,
@@ -265,6 +280,7 @@ export function getStoredAuthSession(): AuthSession | null {
     employeeId,
     employeeName,
     allowedSystems,
+    contactNumber: normalizePhMobile(contactNumber),
   };
 }
 
@@ -299,6 +315,16 @@ export function saveAuthSession(data: Partial<AuthSession>): void {
   if (data.allowedSystems && Array.isArray(data.allowedSystems)) {
     localStorage.setItem(AUTH_STORAGE_KEYS.ALLOWED_SYSTEMS, data.allowedSystems.join(','));
   }
+  if (data.contactNumber !== undefined && data.contactNumber !== null) {
+    const normalized = normalizePhMobile(data.contactNumber);
+    if (normalized) {
+      localStorage.setItem(AUTH_STORAGE_KEYS.CONTACT_NUMBER, normalized);
+      localStorage.setItem('contactNumber', normalized);
+      localStorage.setItem('phoneNumber', normalized);
+      localStorage.setItem('mobileNumber', normalized);
+      localStorage.setItem('contact', normalized);
+    }
+  }
 }
 
 /**
@@ -321,6 +347,16 @@ export function clearAuthSession(): void {
   localStorage.removeItem('employee_name');
   localStorage.removeItem('name');
   localStorage.removeItem(AUTH_STORAGE_KEYS.ALLOWED_SYSTEMS);
+  localStorage.removeItem(AUTH_STORAGE_KEYS.CONTACT_NUMBER);
+  localStorage.removeItem('contactNumber');
+  localStorage.removeItem('contact_number');
+  localStorage.removeItem('phoneNumber');
+  localStorage.removeItem('phone_number');
+  localStorage.removeItem('mobileNumber');
+  localStorage.removeItem('mobile_number');
+  localStorage.removeItem('contact');
+  localStorage.removeItem('phone');
+  localStorage.removeItem('mobile');
 }
 
 /**
@@ -339,6 +375,7 @@ export function getSubsystemRedirectUrl(
     employeeId: '',
     employeeName: '',
     allowedSystems: ['STARS'],
+    contactNumber: '',
     ...(getStoredAuthSession() || {}),
     ...(session || {}),
   };

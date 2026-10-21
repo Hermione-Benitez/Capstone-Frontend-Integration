@@ -4,7 +4,7 @@ import {
   Lock,
   User,
   ArrowRight,
-  Globe,
+  Home,
   AlertTriangle,
   CheckCircle,
   Eye,
@@ -243,6 +243,7 @@ export default function LoginPage() {
             employeeId: cleanId,
             employeeName: fullName || cleanId,
             allowedSystems: allowedList,
+            contactNumber: profileData.contactNumber,
           };
         } else if (rawStars?.message) {
           failureReason = rawStars.message;
@@ -414,23 +415,19 @@ export default function LoginPage() {
             }}
           >
             <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
-            <div className="speedex-header-text">
-              <span className="brand-name">Speedex</span>
-              <span className="brand-sub">COURIER &amp; FORWARDER, INC.</span>
-            </div>
           </a>
           <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
             <a
               href="/"
               className="speedex-nav-link speedex-nav-link-public"
-              title="Return to Public Website"
+              title="Back to Home"
               onClick={(e) => {
                 e.preventDefault();
                 navigate('/');
               }}
             >
-              <Globe size={14} />
-              <span>Public Website</span>
+              <Home size={14} />
+              <span>Back to Home</span>
             </a>
           </nav>
         </div>
@@ -640,17 +637,6 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Prompt for Public Portal tracking/advisories */}
-            <div className="public-portal-prompt">
-              <span>Looking to track a parcel or view advisories?</span>{' '}
-              <button
-                type="button"
-                className="public-portal-prompt-link"
-                onClick={() => navigate('/')}
-              >
-                Return to Public Portal &rarr;
-              </button>
-            </div>
 
             {/* Legal Notice / Terms & Privacy Links */}
             <div className="login-legal-notice">

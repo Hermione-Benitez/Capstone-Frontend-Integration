@@ -106,6 +106,18 @@ export default function OnboardingPage() {
   useEffect(() => {
     const empId = employeeIdParam || session?.employeeId;
 
+    // Query params fallback (e.g. if redirected with ?phone= or ?contactNumber=)
+    const urlContact =
+      searchParams.get('contactNumber') ||
+      searchParams.get('phoneNumber') ||
+      searchParams.get('mobileNumber') ||
+      searchParams.get('phone') ||
+      searchParams.get('mobile') ||
+      searchParams.get('contact');
+
+    const urlFirstName = searchParams.get('firstName') || searchParams.get('first_name');
+    const urlLastName = searchParams.get('lastName') || searchParams.get('last_name');
+
     // 1. Check navigation state from login
     const navState = (location.state as { profile?: Record<string, string> } | null)?.profile;
 
@@ -119,20 +131,22 @@ export default function OnboardingPage() {
     }
 
     const candidate = navState || storedProfile;
-    let contactResolved = '';
 
     if (candidate) {
-      if (candidate.firstName) setFirstName(candidate.firstName);
-      if (candidate.middleName) setMiddleName(candidate.middleName);
-      if (candidate.lastName) setLastName(candidate.lastName);
-      if (candidate.suffix) setSuffix(candidate.suffix);
-
-      contactResolved = extractContactNumber(candidate);
-      if (contactResolved) {
-        setContactNumber(contactResolved);
+      if (candidate.firstName || (candidate as any).FirstName) {
+        setFirstName(candidate.firstName || (candidate as any).FirstName);
+      }
+      if (candidate.middleName || (candidate as any).MiddleName) {
+        setMiddleName(candidate.middleName || (candidate as any).MiddleName);
+      }
+      if (candidate.lastName || (candidate as any).LastName) {
+        setLastName(candidate.lastName || (candidate as any).LastName);
+      }
+      if (candidate.suffix || (candidate as any).Suffix) {
+        setSuffix(candidate.suffix || (candidate as any).Suffix);
       }
 
-      if (!candidate.firstName && candidate.fullName) {
+      if (!candidate.firstName && !(candidate as any).FirstName && candidate.fullName) {
         const parsed = parseFullName(candidate.fullName);
         if (parsed.firstName) setFirstName(parsed.firstName);
         if (parsed.middleName) setMiddleName(parsed.middleName);
@@ -142,8 +156,29 @@ export default function OnboardingPage() {
       setIsPrefilled(true);
     }
 
-    // 3. Probe from STARS onboarding-status API if employeeId is available (especially if contact is missing or needs fresh data)
-    if (empId) {
+    if (urlFirstName) setFirstName((prev) => prev || urlFirstName);
+    if (urlLastName) setLastName((prev) => prev || urlLastName);
+
+    // Resolve contact number from ALL possible persistent & passed sources
+    const initialContact =
+      extractContactNumber(candidate) ||
+      extractContactNumber(urlContact) ||
+      extractContactNumber(session?.contactNumber) ||
+      extractContactNumber(localStorage.getItem('contactNumber')) ||
+      extractContactNumber(localStorage.getItem('phoneNumber')) ||
+      extractContactNumber(localStorage.getItem('mobileNumber')) ||
+      extractContactNumber(localStorage.getItem('contact')) ||
+      extractContactNumber(sessionStorage.getItem('contactNumber')) ||
+      extractContactNumber(sessionStorage.getItem('phoneNumber')) ||
+      extractContactNumber(sessionStorage.getItem('contact'));
+
+    if (initialContact) {
+      setContactNumber(initialContact);
+      setIsPrefilled(true);
+    }
+
+    // 3. Probe from STARS backend APIs if employeeId or authToken is available
+    if (empId || session?.authToken) {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -151,47 +186,100 @@ export default function OnboardingPage() {
         headers['Authorization'] = `Bearer ${session.authToken}`;
       }
 
-      fetch(`${STARS_API_URL}/api/Auth/onboarding-status/${encodeURIComponent(empId)}`, { headers })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((raw) => {
-          const data = raw?.data || raw;
-          if (data && typeof data === 'object') {
-            if (data.firstName) setFirstName((prev) => prev || data.firstName);
-            if (data.middleName) setMiddleName((prev) => prev || data.middleName);
-            if (data.lastName) setLastName((prev) => prev || data.lastName);
-            if (data.suffix) setSuffix((prev) => prev || data.suffix);
+      // Probe A: /api/profile/view-profile (Returns full profile with ContactNumber in STARS)
+      if (session?.authToken && system === 'stars') {
+        fetch(`${STARS_API_URL}/api/profile/view-profile`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((raw) => {
+            const data = raw?.data || raw;
+            if (data && typeof data === 'object') {
+              if (data.firstName || data.FirstName) {
+                setFirstName((prev) => prev || data.firstName || data.FirstName);
+              }
+              if (data.middleName || data.MiddleName) {
+                setMiddleName((prev) => prev || data.middleName || data.MiddleName);
+              }
+              if (data.lastName || data.LastName) {
+                setLastName((prev) => prev || data.lastName || data.LastName);
+              }
+              if (data.suffix || data.Suffix) {
+                setSuffix((prev) => prev || data.suffix || data.Suffix);
+              }
 
-            const fetchedPhone = extractContactNumber(data);
-            if (fetchedPhone) {
-              setContactNumber(fetchedPhone);
+              const fetchedPhone = extractContactNumber(data);
+              if (fetchedPhone) {
+                setContactNumber((prev) => prev || fetchedPhone);
+                saveAuthSession({ contactNumber: fetchedPhone });
+              }
+              setIsPrefilled(true);
             }
+          })
+          .catch(() => {
+            // ignore
+          });
+      }
 
-            if (!data.firstName && (data.fullName || data.name)) {
-              const parsed = parseFullName(data.fullName || data.name);
+      // Probe B: onboarding-status
+      if (empId) {
+        fetch(`${STARS_API_URL}/api/Auth/onboarding-status/${encodeURIComponent(empId)}`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((raw) => {
+            const data = raw?.data || raw;
+            if (data && typeof data === 'object') {
+              if (data.firstName || data.FirstName) {
+                setFirstName((prev) => prev || data.firstName || data.FirstName);
+              }
+              if (data.middleName || data.MiddleName) {
+                setMiddleName((prev) => prev || data.middleName || data.MiddleName);
+              }
+              if (data.lastName || data.LastName) {
+                setLastName((prev) => prev || data.lastName || data.LastName);
+              }
+              if (data.suffix || data.Suffix) {
+                setSuffix((prev) => prev || data.suffix || data.Suffix);
+              }
+
+              const fetchedPhone = extractContactNumber(data);
+              if (fetchedPhone) {
+                setContactNumber((prev) => prev || fetchedPhone);
+              }
+
+              if (!data.firstName && !data.FirstName && (data.fullName || data.name)) {
+                const parsed = parseFullName(data.fullName || data.name);
+                if (parsed.firstName) setFirstName((prev) => prev || parsed.firstName);
+                if (parsed.middleName) setMiddleName((prev) => prev || parsed.middleName);
+                if (parsed.lastName) setLastName((prev) => prev || parsed.lastName);
+                if (parsed.suffix) setSuffix((prev) => prev || parsed.suffix);
+              }
+              setIsPrefilled(true);
+            }
+          })
+          .catch(() => {
+            // fallback to session employeeName if still not set
+            if (session?.employeeName && session.employeeName !== 'Speedex Staff') {
+              const parsed = parseFullName(session.employeeName);
               if (parsed.firstName) setFirstName((prev) => prev || parsed.firstName);
-              if (parsed.middleName) setMiddleName((prev) => prev || parsed.middleName);
               if (parsed.lastName) setLastName((prev) => prev || parsed.lastName);
-              if (parsed.suffix) setSuffix((prev) => prev || parsed.suffix);
+              setIsPrefilled(true);
             }
-            setIsPrefilled(true);
-          }
-        })
-        .catch(() => {
-          // fallback to session employeeName if still not set
-          if (session?.employeeName && session.employeeName !== 'Speedex Staff') {
-            const parsed = parseFullName(session.employeeName);
-            if (parsed.firstName) setFirstName((prev) => prev || parsed.firstName);
-            if (parsed.lastName) setLastName((prev) => prev || parsed.lastName);
-            setIsPrefilled(true);
-          }
-        });
+          });
+      }
     } else if (session?.employeeName && session.employeeName !== 'Speedex Staff') {
       const parsed = parseFullName(session.employeeName);
       if (parsed.firstName) setFirstName((prev) => prev || parsed.firstName);
       if (parsed.lastName) setLastName((prev) => prev || parsed.lastName);
       setIsPrefilled(true);
     }
-  }, [location.state, employeeIdParam, session]);
+  }, [
+    location.state,
+    employeeIdParam,
+    session?.authToken,
+    session?.employeeId,
+    session?.employeeName,
+    session?.contactNumber,
+    system,
+    searchParams,
+  ]);
 
   // Check if Step 1 is valid (all required fields filled, middleName and suffix are optional)
   const isStep1Complete =
@@ -300,6 +388,7 @@ export default function OnboardingPage() {
       // Record profile and password completion in session
       saveAuthSession({
         employeeName: `${firstName} ${lastName}`.trim(),
+        contactNumber: contactNumber.trim(),
       });
 
       // Clear temporary onboarding cache
