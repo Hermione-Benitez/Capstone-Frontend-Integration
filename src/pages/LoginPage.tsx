@@ -400,31 +400,70 @@ export default function LoginPage() {
 
   return (
     <div className="login-page-container">
-      <div className="login-card-wrapper">
+      {/* ── TOP NAV BAR ── */}
+      <header className="speedex-system-header">
+        <div className="speedex-header-inner">
+          <a
+            href="/"
+            className="speedex-header-brand"
+            title="Speedex Public Portal"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/');
+            }}
+          >
+            <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
+            <div className="speedex-header-text">
+              <span className="brand-name">Speedex</span>
+              <span className="brand-sub">COURIER &amp; FORWARDER, INC.</span>
+            </div>
+          </a>
+          <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
+            <a
+              href="/"
+              className="speedex-nav-link speedex-nav-link-public"
+              title="Return to Public Website"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+              }}
+            >
+              <Globe size={14} />
+              <span>Public Website</span>
+            </a>
+          </nav>
+        </div>
+      </header>
+
+      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
+      <div className="login-page-split">
         {/* LEFT PANEL */}
         <aside className="login-left">
-          <div className="brand-header">
-            <div className="brand-logo-icon">
-              <Package size={28} color="#FFFFFF" strokeWidth={2.2} />
-            </div>
-            <div>
-              <span className="brand-badge">ENTERPRISE PLATFORM</span>
-              <h2 className="brand-title">SPEEDEX</h2>
-              <p className="brand-tagline">Integrated Operations Management</p>
-            </div>
-          </div>
-
+          <div className="login-decorative-circle circle-1" />
+          <div className="login-decorative-circle circle-2" />
           <div className="login-left-content">
-            <h3 className="left-headline">
-              One Secure Account. <br />
-              <span className="text-highlight">All Enterprise Systems.</span>
-            </h3>
-            <p className="left-subtext">
-              Speedex Enterprise Central Authentication provides single sign-on access across our entire
-              ecosystem with role-based access governance and audit logging.
-            </p>
+            <div className="login-brand-badge">
+              <div className="brand-icon-box">
+                <Package size={22} />
+              </div>
+              <div>
+                <span className="brand-title-badge">Speedex One-Login</span>
+                <span className="brand-sub-badge">CENTRAL GATEWAY</span>
+              </div>
+            </div>
 
-            <div className="features-list">
+            <div className="login-headline">
+              <h2>
+                One Secure Account.<br />
+                <span className="headline-accent">All Enterprise Systems.</span>
+              </h2>
+              <p className="headline-body">
+                Speedex Enterprise Central Authentication provides single sign-on access across our entire ecosystem with role-based access governance and audit logging.
+              </p>
+            </div>
+
+            {/* Ecosystem Feature Cards */}
+            <div className="feature-list">
               <div className="feature-item">
                 <div className="feature-num">1</div>
                 <div className="feature-text">
