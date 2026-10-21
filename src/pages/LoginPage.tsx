@@ -121,7 +121,7 @@ export default function LoginPage() {
 
     const cleanId = employeeId.trim();
     if (!cleanId) {
-      setErrorMessage('Please enter your Employee ID or Username.');
+      setErrorMessage('Please enter your Employee ID.');
       return;
     }
     if (!password) {
@@ -530,10 +530,10 @@ export default function LoginPage() {
             )}
 
             <form className="login-form" onSubmit={handleSubmit} noValidate>
-              {/* Employee ID / Username */}
+              {/* Employee ID */}
               <div className="field-group">
                 <label htmlFor="employee-id" className="field-label">
-                  Employee ID or Identifier <span style={{ color: '#E31A1A' }}>*</span>
+                  Employee ID <span style={{ color: '#E31A1A' }}>*</span>
                 </label>
                 <div className="field-wrapper">
                   <span className="field-icon">
@@ -543,7 +543,7 @@ export default function LoginPage() {
                     id="employee-id"
                     type="text"
                     className="field-input"
-                    placeholder="e.g. MGR001, EMP-001, or Username"
+                    placeholder="Enter your Employee ID"
                     value={employeeId}
                     onChange={(e) => setEmployeeId(e.target.value)}
                     disabled={isSubmitting || lockoutSeconds > 0}
