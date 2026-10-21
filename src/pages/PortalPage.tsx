@@ -110,11 +110,13 @@ export const PortalPage: React.FC = () => {
     name: session.employeeName || 'Staff Member',
     role: session.userRole || 'Staff',
     avatarInitials: getAvatarInitials(session.employeeName),
+    employeeId: session.employeeId,
   };
 
   return (
     <SystemSelectorPage
       profile={profile}
+      allowedSystems={session.allowedSystems}
       onSelect={handleSystemSelect}
       onPublicHome={handlePublicHome}
       onLogout={handleLogout}

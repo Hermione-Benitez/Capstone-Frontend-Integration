@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   Building2,
 } from 'lucide-react';
-import { getStoredAuthSession, redirectToSubsystem } from '../utils/auth';
+import { getStoredAuthSession } from '../utils/auth';
 import { STARS_API_URL } from '../config/env';
 import './LoginPage.css';
 import './OnboardingPage.css';
@@ -56,12 +56,12 @@ export default function PrivacyNoticePage() {
         });
       }
 
-      // Launch into target subsystem dashboard
-      redirectToSubsystem(system, session);
+      // Route to Central Landing Page /portal
+      navigate('/portal', { replace: true });
     } catch (err) {
       console.error('Accept terms error:', err);
-      // Still proceed into subsystem since user signed off
-      redirectToSubsystem(system, session);
+      // Still proceed into portal since user accepted terms
+      navigate('/portal', { replace: true });
     } finally {
       setIsSubmitting(false);
     }

@@ -6,6 +6,7 @@ export interface AuthSession {
   userRole: string;
   employeeId: string;
   employeeName: string;
+  allowedSystems?: string[];
 }
 
 export const AUTH_STORAGE_KEYS = {
@@ -17,6 +18,7 @@ export const AUTH_STORAGE_KEYS = {
   ROLE: 'role',
   EMPLOYEE_ID: 'employeeId',
   EMPLOYEE_NAME: 'employeeName',
+  ALLOWED_SYSTEMS: 'allowedSystems',
 } as const;
 
 /**
@@ -168,7 +170,17 @@ export function parseAuthFromUrl(customUrl?: string): Partial<AuthSession> | nul
     getParam('userName') ||
     getParam('fullName');
 
-  if (!token && !role && !employeeId && !rawName) {
+  const rawSystems =
+    getParam('allowedSystems') ||
+    getParam('allowed_systems') ||
+    getParam('systems') ||
+    getParam('targetSystems');
+
+  const allowedSystems = rawSystems
+    ? rawSystems.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
+    : undefined;
+
+  if (!token && !role && !employeeId && !rawName && !allowedSystems) {
     return null;
   }
 
@@ -185,6 +197,7 @@ export function parseAuthFromUrl(customUrl?: string): Partial<AuthSession> | nul
     userRole: role || '',
     employeeId: employeeId || '',
     employeeName: employeeName || '',
+    ...(allowedSystems ? { allowedSystems } : {}),
   };
 }
 
@@ -230,12 +243,28 @@ export function getStoredAuthSession(): AuthSession | null {
     localStorage.getItem('name') ||
     'Speedex Staff';
 
+  const rawAllowed = localStorage.getItem(AUTH_STORAGE_KEYS.ALLOWED_SYSTEMS);
+  let allowedSystems: string[] = [];
+  if (rawAllowed) {
+    try {
+      allowedSystems = rawAllowed.startsWith('[')
+        ? JSON.parse(rawAllowed)
+        : rawAllowed.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
+    } catch {
+      allowedSystems = rawAllowed.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
+    }
+  } else {
+    // Legacy / existing accounts without explicit allowedSystems default to STARS (or all systems for root 0000)
+    allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['STARS'];
+  }
+
   return {
     authToken,
     refreshToken,
     userRole,
     employeeId,
     employeeName,
+    allowedSystems,
   };
 }
 
@@ -267,6 +296,9 @@ export function saveAuthSession(data: Partial<AuthSession>): void {
     localStorage.setItem('employee_name', data.employeeName);
     localStorage.setItem('name', data.employeeName);
   }
+  if (data.allowedSystems && Array.isArray(data.allowedSystems)) {
+    localStorage.setItem(AUTH_STORAGE_KEYS.ALLOWED_SYSTEMS, data.allowedSystems.join(','));
+  }
 }
 
 /**
@@ -288,6 +320,7 @@ export function clearAuthSession(): void {
   localStorage.removeItem(AUTH_STORAGE_KEYS.EMPLOYEE_NAME);
   localStorage.removeItem('employee_name');
   localStorage.removeItem('name');
+  localStorage.removeItem(AUTH_STORAGE_KEYS.ALLOWED_SYSTEMS);
 }
 
 /**
@@ -305,6 +338,7 @@ export function getSubsystemRedirectUrl(
     userRole: '',
     employeeId: '',
     employeeName: '',
+    allowedSystems: ['STARS'],
     ...(getStoredAuthSession() || {}),
     ...(session || {}),
   };
@@ -315,6 +349,7 @@ export function getSubsystemRedirectUrl(
   const role = currentSession.userRole || '';
   const employeeId = currentSession.employeeId || '';
   const employeeName = currentSession.employeeName || '';
+  const allowedSystems = currentSession.allowedSystems || [];
 
   const params = new URLSearchParams();
   if (authToken) {
@@ -340,6 +375,9 @@ export function getSubsystemRedirectUrl(
     params.set('employeeName', employeeName);
     params.set('employee_name', employeeName);
     params.set('name', employeeName);
+  }
+  if (allowedSystems.length > 0) {
+    params.set('allowedSystems', allowedSystems.join(','));
   }
 
   const queryString = params.toString();

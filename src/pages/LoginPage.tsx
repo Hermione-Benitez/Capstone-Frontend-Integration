@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useTransition } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  Shield,
   Lock,
   User,
   ArrowRight,
@@ -10,77 +9,30 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
-  Server,
   Loader2,
   RefreshCw,
   Package,
 } from 'lucide-react';
-import { clearAuthSession, saveAuthSession, redirectToSubsystem, extractContactNumber } from '../utils/auth';
+import { clearAuthSession, saveAuthSession, extractContactNumber, type AuthSession } from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '../utils/rateLimiter';
 import { prewarmBackend, getActiveBackendUrl } from '../utils/loadBalancer';
 import LegalDocumentModal, { type LegalDocType } from '../components/LegalDocumentModal';
 import './LoginPage.css';
 
-type SystemKey = 'stars' | 'dms' | 'foms';
-
-interface SystemOption {
-  key: SystemKey;
-  name: string;
-  badge: string;
-  description: string;
-  idPlaceholder: string;
-}
-
-const SYSTEM_OPTIONS: SystemOption[] = [
-  {
-    key: 'stars',
-    name: 'STARS — Tracking & Audit System',
-    badge: 'STARS',
-    description: 'Task tracking & audit trails',
-    idPlaceholder: 'e.g. MGR001 or 0000',
-  },
-  {
-    key: 'dms',
-    name: 'DMS — Delivery Management System',
-    badge: 'DMS',
-    description: 'Shipment tracking & courier dispatch',
-    idPlaceholder: 'e.g. EMP-001 or DRV-001',
-  },
-  {
-    key: 'foms',
-    name: 'FOMS — Financial Operations System',
-    badge: 'FOMS',
-    description: 'Invoicing & payment collections',
-    idPlaceholder: 'e.g. EMP-001 or accountant',
-  },
-];
-
-const LAST_SYSTEM_KEY = 'speedex_last_selected_system';
 const REMEMBER_ME_KEY = 'speedex_remember_me';
 const REMEMBERED_ID_KEY = 'speedex_remembered_employee_id';
 
-function getRememberedId(system: SystemKey): string {
+function getRememberedId(): string {
   if (typeof window === 'undefined') return '';
   const isRemembered = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
   if (!isRemembered) return '';
-  return localStorage.getItem(`${REMEMBERED_ID_KEY}_${system}`) || localStorage.getItem(REMEMBERED_ID_KEY) || '';
+  return localStorage.getItem(REMEMBERED_ID_KEY) || '';
 }
 
 export default function LoginPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [, startTransition] = useTransition();
-
-  // Selected system state (restores last selection or query parameter)
-  const [selectedSystem, setSelectedSystem] = useState<SystemKey>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const systemParam = params.get('system')?.toLowerCase() as SystemKey;
-    if (systemParam && ['stars', 'dms', 'foms'].includes(systemParam)) {
-      return systemParam;
-    }
-    const saved = localStorage.getItem(LAST_SYSTEM_KEY) as SystemKey;
-    return saved && ['stars', 'dms', 'foms'].includes(saved) ? saved : 'stars';
-  });
 
   const [rememberMe, setRememberMe] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -91,36 +43,10 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const idParam = params.get('id') || params.get('employeeId') || '';
     if (idParam) return idParam;
-    const sysParam = params.get('system')?.toLowerCase() as SystemKey;
-    const initialSys = sysParam && ['stars', 'dms', 'foms'].includes(sysParam)
-      ? sysParam
-      : (localStorage.getItem(LAST_SYSTEM_KEY) as SystemKey) || 'stars';
-    return getRememberedId(initialSys);
+    return getRememberedId();
   });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  // Auto-populate remembered employee ID when switching subsystems
-  useEffect(() => {
-    if (rememberMe) {
-      const remembered = getRememberedId(selectedSystem);
-      if (remembered) {
-        setEmployeeId(remembered);
-      }
-    }
-  }, [selectedSystem, rememberMe]);
-
-  const handleRememberMeSave = (id: string, system: SystemKey) => {
-    if (rememberMe) {
-      localStorage.setItem(REMEMBER_ME_KEY, 'true');
-      localStorage.setItem(`${REMEMBERED_ID_KEY}_${system}`, id.trim());
-      localStorage.setItem(REMEMBERED_ID_KEY, id.trim());
-    } else {
-      localStorage.removeItem(REMEMBER_ME_KEY);
-      localStorage.removeItem(`${REMEMBERED_ID_KEY}_${system}`);
-      localStorage.removeItem(REMEMBERED_ID_KEY);
-    }
-  };
 
   // Status and loading states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,10 +62,12 @@ export default function LoginPage() {
   // In-flight request controller to cancel duplicate requests on re-submit
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Trigger silent Azure App Service pre-warming on mount and when system changes
+  // Trigger silent Azure App Service pre-warming for backends on mount
   useEffect(() => {
-    prewarmBackend(selectedSystem);
-  }, [selectedSystem]);
+    prewarmBackend('stars');
+    prewarmBackend('dms');
+    prewarmBackend('foms');
+  }, []);
 
   // Handle Single Logout (SLO) interception from query params
   useEffect(() => {
@@ -149,48 +77,27 @@ export default function LoginPage() {
 
     const action = searchParams.get('action') || hashParams.get('action');
     const reason = searchParams.get('reason') || hashParams.get('reason');
-    const system = searchParams.get('system') || hashParams.get('system');
-
-    if (system && ['stars', 'dms', 'foms'].includes(system.toLowerCase())) {
-      setSelectedSystem(system.toLowerCase() as SystemKey);
-      localStorage.setItem(LAST_SYSTEM_KEY, system.toLowerCase());
-    }
 
     if (action === 'logout') {
       clearAuthSession();
-
       if (reason === 'inactivity') {
         setBannerAlert({
           type: 'warning',
-          message: 'Your session expired due to inactivity. Please sign in again with your credentials.',
+          message: 'Your session expired due to inactivity. Please sign in again to continue.',
         });
       } else if (reason === 'session_expired') {
         setBannerAlert({
           type: 'warning',
-          message: 'Your security session has expired. Please enter your credentials to continue.',
-        });
-      } else if (reason === 'email_verified') {
-        setBannerAlert({
-          type: 'success',
-          message: 'Email verified successfully! You may now sign in.',
+          message: 'Your session has expired. Please sign in again.',
         });
       } else {
         setBannerAlert({
           type: 'success',
-          message: 'You have been logged out successfully.',
+          message: 'You have been securely signed out.',
         });
       }
     }
   }, [location.search]);
-
-  // Check rate limits when employeeId changes or on tick
-  useEffect(() => {
-    if (!employeeId.trim()) return;
-    const status = checkRateLimit(employeeId.trim());
-    if (status.isLocked) {
-      setLockoutSeconds(status.remainingSeconds);
-    }
-  }, [employeeId]);
 
   // Live countdown timer for lockout
   useEffect(() => {
@@ -207,14 +114,6 @@ export default function LoginPage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [lockoutSeconds]);
-
-  const handleSystemChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const sys = e.target.value as SystemKey;
-    setSelectedSystem(sys);
-    localStorage.setItem(LAST_SYSTEM_KEY, sys);
-    setErrorMessage(null);
-    prewarmBackend(sys);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,11 +147,20 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const backendUrl = getActiveBackendUrl(selectedSystem);
+      const starsUrl = getActiveBackendUrl('stars');
+      const dmsUrl = getActiveBackendUrl('dms');
+      const fomsUrl = getActiveBackendUrl('foms');
 
-      if (selectedSystem === 'stars') {
-        // Authenticate against STARS Backend API
-        const response = await fetch(`${backendUrl}/api/Auth/login`, {
+      let authSuccess = false;
+      let sessionPayload: AuthSession | null = null;
+      let isPasswordChanged: boolean | undefined = true;
+      let hasAcceptedTerms: boolean | undefined = true;
+      let profileData: Record<string, any> | null = null;
+      let failureReason = 'Invalid Employee ID or password.';
+
+      // 1. Primary Central Identity: Authenticate via STARS Backend
+      try {
+        const starsRes = await fetch(`${starsUrl}/api/Auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -265,44 +173,25 @@ export default function LoginPage() {
           signal: abortController.signal,
         });
 
-        const raw = await response.json().catch(() => null);
+        const rawStars = await starsRes.json().catch(() => null);
 
-        if (!response.ok || !raw?.isSuccess) {
-          const errMsg = raw?.message || 'Invalid Employee ID or password.';
-          const failStatus = recordFailedAttempt(cleanId);
-          if (failStatus.isLocked) {
-            setLockoutSeconds(failStatus.remainingSeconds);
-            setErrorMessage(`Account locked due to repeated failures. Please wait ${failStatus.remainingSeconds}s.`);
-          } else {
-            setErrorMessage(`${errMsg} (${failStatus.attemptsLeft} attempts remaining)`);
+        if (starsRes.ok && rawStars?.isSuccess) {
+          const data = rawStars.data || rawStars;
+          authSuccess = true;
+          isPasswordChanged = data.isPasswordChanged;
+          hasAcceptedTerms = data.hasAcceptedTerms;
+
+          // Parse allowed systems
+          let allowedList: string[] = ['STARS'];
+          if (cleanId === '0000') {
+            allowedList = ['STARS', 'DMS', 'FOMS'];
+          } else if (data.allowedSystems) {
+            allowedList = data.allowedSystems
+              .split(',')
+              .map((s: string) => s.trim().toUpperCase())
+              .filter(Boolean);
           }
-          return;
-        }
 
-        // Authentication Successful
-        resetRateLimit(cleanId);
-        handleRememberMeSave(cleanId, 'stars');
-        const data = raw.data || raw;
-        const sessionPayload = {
-          authToken: data.accessToken || data.token || '',
-          refreshToken: data.refreshToken || '',
-          userRole: data.role || 'Staff',
-          employeeId: cleanId,
-          employeeName: data.fullName || data.userName || cleanId,
-        };
-        saveAuthSession(sessionPayload);
-
-        // Check if account is permitted for STARS
-        if (data.allowedSystems && cleanId !== '0000') {
-          const allowed = data.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
-          if (!allowed.includes('STARS')) {
-            setErrorMessage('Access Denied: Your account has not been provisioned for STARS.');
-            return;
-          }
-        }
-
-        // Check if Onboarding is required (temporary password not yet changed)
-        if (data.isPasswordChanged === false && cleanId !== '0000') {
           let contact = extractContactNumber(data);
           let firstName = data.firstName || '';
           let middleName = data.middleName || '';
@@ -313,11 +202,10 @@ export default function LoginPage() {
           // If contact or name fields are missing from direct login response, query onboarding-status
           if (!contact || !firstName || !lastName) {
             try {
-              const starsBaseUrl = getActiveBackendUrl('stars') || backendUrl;
-              const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
+              const statusRes = await fetch(`${starsUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
                 signal: abortController.signal,
                 headers: {
-                  ...(sessionPayload.authToken ? { Authorization: `Bearer ${sessionPayload.authToken}` } : {}),
+                  ...(data.accessToken || data.token ? { Authorization: `Bearer ${data.accessToken || data.token}` } : {}),
                 },
               });
               if (statusRes.ok) {
@@ -337,394 +225,223 @@ export default function LoginPage() {
             }
           }
 
-          const profileData = {
+          profileData = {
             firstName,
             middleName,
             lastName,
             suffix,
-            contactNumber: contact,
+            contactNumber: contact || data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone || '',
             employeeId: cleanId,
-            fullName,
+            fullName: fullName || cleanId,
           };
-          try {
-            sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
-          } catch {
-            // ignore
-          }
-          startTransition(() => {
-            navigate(`/onboarding?system=stars&employeeId=${encodeURIComponent(cleanId)}`, {
-              state: { profile: profileData },
-            });
-          });
-          return;
-        }
 
-        // Check if Terms / Privacy acceptance is required
-        if (data.hasAcceptedTerms === false) {
-          startTransition(() => {
-            navigate(`/privacy-notice?system=stars&employeeId=${encodeURIComponent(cleanId)}`);
-          });
-          return;
-        }
-
-        // Direct handoff to STARS Dashboard
-        redirectToSubsystem('stars', sessionPayload);
-      } else if (selectedSystem === 'dms') {
-        // Authenticate against DMS Backend API
-        const response = await fetch(`${backendUrl}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+          sessionPayload = {
+            authToken: data.accessToken || data.token || '',
+            refreshToken: data.refreshToken || '',
+            userRole: data.role || 'Staff',
             employeeId: cleanId,
-            username: cleanId,
-            identifier: cleanId,
-            password,
-          }),
-          signal: abortController.signal,
-        });
-
-        const raw = await response.json().catch(() => null);
-
-        if (!response.ok || !raw?.token) {
-          const errMsg = raw?.message || 'Invalid DMS Employee ID or password.';
-          const failStatus = recordFailedAttempt(cleanId);
-          if (failStatus.isLocked) {
-            setLockoutSeconds(failStatus.remainingSeconds);
-            setErrorMessage(`Account locked due to repeated failures. Please wait ${failStatus.remainingSeconds}s.`);
-          } else {
-            setErrorMessage(`${errMsg} (${failStatus.attemptsLeft} attempts remaining)`);
-          }
-          return;
-        }
-
-        // Authentication Successful
-        resetRateLimit(cleanId);
-        handleRememberMeSave(cleanId, 'dms');
-
-        // Decode JWT claims for role & name fallback if not present in root response
-        let role = raw.role;
-        let name = raw.name;
-        if ((!role || !name) && typeof raw.token === 'string' && raw.token.includes('.')) {
-          try {
-            const tokenPayload = JSON.parse(atob(raw.token.split('.')[1]));
-            role = role || tokenPayload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || tokenPayload.role;
-            name = name || tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || tokenPayload.name;
-          } catch {
-            // fallback gracefully
-          }
-        }
-
-        const sessionPayload = {
-          authToken: raw.token,
-          refreshToken: raw.refreshToken || '',
-          userRole: role || 'OP. TEAM',
-          employeeId: cleanId,
-          employeeName: name || cleanId,
-        };
-        saveAuthSession(sessionPayload);
-
-        // Probe master onboarding status from STARS
-        const starsBaseUrl = getActiveBackendUrl('stars');
-        let dmsNeedsOnboarding = false;
-        let dmsNeedsPrivacy = false;
-        let dmsStatusData: Record<string, any> | null = null;
-        try {
-          const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
-            signal: abortController.signal,
-          });
-          if (statusRes.ok) {
-            const statusRaw = await statusRes.json();
-            const statusData = statusRaw?.data || statusRaw;
-            dmsStatusData = statusData;
-            if (statusData) {
-              if (statusData.allowedSystems && cleanId !== '0000') {
-                const allowed = statusData.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
-                if (!allowed.includes('DMS')) {
-                  setErrorMessage('Access Denied: Your account has not been provisioned for DMS.');
-                  return;
-                }
-              }
-              if (statusData.isPasswordChanged === false && cleanId !== '0000') {
-                dmsNeedsOnboarding = true;
-              }
-              if (statusData.hasAcceptedTerms === false) {
-                dmsNeedsPrivacy = true;
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('Could not probe master onboarding status from STARS for DMS:', e);
-        }
-
-        if (dmsNeedsOnboarding) {
-          const profileData = {
-            firstName: dmsStatusData?.firstName || '',
-            middleName: dmsStatusData?.middleName || '',
-            lastName: dmsStatusData?.lastName || '',
-            suffix: dmsStatusData?.suffix || '',
-            contactNumber: extractContactNumber(dmsStatusData) || extractContactNumber(raw),
-            employeeId: cleanId,
-            fullName: dmsStatusData?.fullName || name || cleanId,
+            employeeName: fullName || cleanId,
+            allowedSystems: allowedList,
           };
-          try {
-            sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
-          } catch {
-            // ignore
-          }
-          startTransition(() => {
-            navigate(`/onboarding?system=dms&employeeId=${encodeURIComponent(cleanId)}`, {
-              state: { profile: profileData },
-            });
-          });
-          return;
+        } else if (rawStars?.message) {
+          failureReason = rawStars.message;
         }
-
-        if (dmsNeedsPrivacy) {
-          startTransition(() => {
-            navigate(`/privacy-notice?system=dms&employeeId=${encodeURIComponent(cleanId)}`);
-          });
-          return;
-        }
-
-        // Direct handoff to DMS Dashboard
-        redirectToSubsystem('dms', sessionPayload);
-      } else if (selectedSystem === 'foms') {
-        // Authenticate against FOMS Backend API
-        const response = await fetch(`${backendUrl}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            employeeId: cleanId,
-            employeeNumber: cleanId,
-            username: cleanId,
-            identifier: cleanId,
-            password,
-          }),
-          signal: abortController.signal,
-        });
-
-        const raw = await response.json().catch(() => null);
-
-        if (!response.ok || (!raw?.accessToken && !raw?.tokens?.accessToken && !raw?.data?.accessToken)) {
-          const errMsg = raw?.message || raw?.error || 'Invalid FOMS credentials.';
-          const failStatus = recordFailedAttempt(cleanId);
-          if (failStatus.isLocked) {
-            setLockoutSeconds(failStatus.remainingSeconds);
-            setErrorMessage(`Account locked due to repeated failures. Please wait ${failStatus.remainingSeconds}s.`);
-          } else {
-            setErrorMessage(`${errMsg} (${failStatus.attemptsLeft} attempts remaining)`);
-          }
-          return;
-        }
-
-        // Authentication Successful
-        resetRateLimit(cleanId);
-        handleRememberMeSave(cleanId, 'foms');
-        const authData = raw.data || raw;
-        const accessToken = authData.accessToken || authData.tokens?.accessToken || '';
-        const refreshToken = authData.refreshToken || authData.tokens?.refreshToken || '';
-        const user = authData.user || authData.profile || {};
-
-        const sessionPayload = {
-          authToken: accessToken,
-          refreshToken,
-          userRole: user.role || 'Accountant',
-          employeeId: user.employeeId || cleanId,
-          employeeName: user.fullName || user.name || cleanId,
-        };
-        saveAuthSession(sessionPayload);
-
-        // Probe master onboarding status from STARS
-        const starsBaseUrl = getActiveBackendUrl('stars');
-        let fomsNeedsOnboarding = false;
-        let fomsNeedsPrivacy = false;
-        let fomsStatusData: Record<string, any> | null = null;
-        try {
-          const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
-            signal: abortController.signal,
-          });
-          if (statusRes.ok) {
-            const statusRaw = await statusRes.json();
-            const statusData = statusRaw?.data || statusRaw;
-            fomsStatusData = statusData;
-            if (statusData) {
-              if (statusData.allowedSystems && cleanId !== '0000') {
-                const allowed = statusData.allowedSystems.toUpperCase().split(',').map((s: string) => s.trim());
-                if (!allowed.includes('FOMS')) {
-                  setErrorMessage('Access Denied: Your account has not been provisioned for FOMS.');
-                  return;
-                }
-              }
-              if (statusData.isPasswordChanged === false && cleanId !== '0000') {
-                fomsNeedsOnboarding = true;
-              }
-              if (statusData.hasAcceptedTerms === false) {
-                fomsNeedsPrivacy = true;
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('Could not probe master onboarding status from STARS for FOMS:', e);
-        }
-
-        if (fomsNeedsOnboarding) {
-          const profileData = {
-            firstName: fomsStatusData?.firstName || '',
-            middleName: fomsStatusData?.middleName || '',
-            lastName: fomsStatusData?.lastName || '',
-            suffix: fomsStatusData?.suffix || '',
-            contactNumber: extractContactNumber(fomsStatusData) || extractContactNumber(authData),
-            employeeId: cleanId,
-            fullName: fomsStatusData?.fullName || user.fullName || user.name || cleanId,
-          };
-          try {
-            sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
-          } catch {
-            // ignore
-          }
-          startTransition(() => {
-            navigate(`/onboarding?system=foms&employeeId=${encodeURIComponent(cleanId)}`, {
-              state: { profile: profileData },
-            });
-          });
-          return;
-        }
-
-        if (fomsNeedsPrivacy) {
-          startTransition(() => {
-            navigate(`/privacy-notice?system=foms&employeeId=${encodeURIComponent(cleanId)}`);
-          });
-          return;
-        }
-
-        // Direct handoff to FOMS Dashboard
-        redirectToSubsystem('foms', sessionPayload);
+      } catch (err: unknown) {
+        if ((err as Error)?.name === 'AbortError') return;
+        console.warn('STARS central auth check error:', err);
       }
+
+      // 2. Fallback: Authenticate via DMS for legacy accounts not yet synced
+      if (!authSuccess) {
+        try {
+          const dmsRes = await fetch(`${dmsUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employeeId: cleanId,
+              username: cleanId,
+              identifier: cleanId,
+              password,
+            }),
+            signal: abortController.signal,
+          });
+
+          const rawDms = await dmsRes.json().catch(() => null);
+
+          if (dmsRes.ok && rawDms?.token) {
+            authSuccess = true;
+            let role = rawDms.role;
+            let name = rawDms.name;
+            if ((!role || !name) && typeof rawDms.token === 'string' && rawDms.token.includes('.')) {
+              try {
+                const tokenPayload = JSON.parse(atob(rawDms.token.split('.')[1]));
+                role = role || tokenPayload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || tokenPayload.role;
+                name = name || tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || tokenPayload.name;
+              } catch {
+                // ignore
+              }
+            }
+
+            sessionPayload = {
+              authToken: rawDms.token,
+              refreshToken: rawDms.refreshToken || '',
+              userRole: role || 'Staff',
+              employeeId: cleanId,
+              employeeName: name || cleanId,
+              allowedSystems: ['DMS'],
+            };
+          } else if (rawDms?.message) {
+            failureReason = rawDms.message;
+          }
+        } catch (err) {
+          console.warn('DMS fallback auth check error:', err);
+        }
+      }
+
+      // 3. Fallback: Authenticate via FOMS for legacy accounts not yet synced
+      if (!authSuccess) {
+        try {
+          const fomsRes = await fetch(`${fomsUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employeeId: cleanId,
+              employeeNumber: cleanId,
+              username: cleanId,
+              identifier: cleanId,
+              password,
+            }),
+            signal: abortController.signal,
+          });
+
+          const rawFoms = await fomsRes.json().catch(() => null);
+          const fomsData = rawFoms?.data || rawFoms;
+          const token = fomsData?.accessToken || fomsData?.tokens?.accessToken;
+
+          if (fomsRes.ok && token) {
+            authSuccess = true;
+            const user = fomsData.user || fomsData.profile || {};
+            sessionPayload = {
+              authToken: token,
+              refreshToken: fomsData.refreshToken || fomsData.tokens?.refreshToken || '',
+              userRole: user.role || 'Accountant',
+              employeeId: user.employeeId || cleanId,
+              employeeName: user.fullName || user.name || cleanId,
+              allowedSystems: ['FOMS'],
+            };
+          } else if (rawFoms?.message || rawFoms?.error) {
+            failureReason = rawFoms.message || rawFoms.error;
+          }
+        } catch (err) {
+          console.warn('FOMS fallback auth check error:', err);
+        }
+      }
+
+      if (!authSuccess || !sessionPayload) {
+        const failStatus = recordFailedAttempt(cleanId);
+        if (failStatus.isLocked) {
+          setLockoutSeconds(failStatus.remainingSeconds);
+          setErrorMessage(`Account locked due to repeated failures. Please wait ${failStatus.remainingSeconds}s.`);
+        } else {
+          setErrorMessage(`${failureReason} (${failStatus.attemptsLeft} attempts remaining)`);
+        }
+        return;
+      }
+
+      // Authentication Successful
+      resetRateLimit(cleanId);
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_ME_KEY, 'true');
+        localStorage.setItem(REMEMBERED_ID_KEY, cleanId);
+      } else {
+        localStorage.removeItem(REMEMBER_ME_KEY);
+        localStorage.removeItem(REMEMBERED_ID_KEY);
+      }
+
+      saveAuthSession(sessionPayload);
+
+      // Check if Onboarding is required (temporary password not yet changed)
+      if (isPasswordChanged === false && cleanId !== '0000') {
+        if (profileData) {
+          try {
+            sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
+          } catch {
+            // ignore
+          }
+        }
+        startTransition(() => {
+          navigate(`/onboarding?employeeId=${encodeURIComponent(cleanId)}`, {
+            state: { profile: profileData },
+          });
+        });
+        return;
+      }
+
+      // Check if Privacy Agreement is required
+      if (hasAcceptedTerms === false) {
+        startTransition(() => {
+          navigate(`/privacy-notice?employeeId=${encodeURIComponent(cleanId)}`);
+        });
+        return;
+      }
+
+      // Fully onboarded user: Navigate to Central Landing Page (/portal)
+      startTransition(() => {
+        navigate('/portal');
+      });
     } catch (err: unknown) {
       if ((err as Error)?.name === 'AbortError') return;
-      console.error('Authentication request error:', err);
-      // Differentiate network failure from bad credentials: do NOT burn rate limit on server/network timeouts
-      setErrorMessage(
-        `Unable to reach the ${selectedSystem.toUpperCase()} authentication server. Please check your connection or wait a moment while the server initializes.`
-      );
+      console.error('Login error:', err);
+      setErrorMessage('Unable to connect to authentication servers. Please verify your internet connection.');
     } finally {
       setIsSubmitting(false);
-      abortControllerRef.current = null;
     }
   };
 
-  const activeOption = SYSTEM_OPTIONS.find((s) => s.key === selectedSystem) || SYSTEM_OPTIONS[0];
-
   return (
     <div className="login-page-container">
-      {/* ── TOP NAV BAR ── */}
-      <header className="speedex-system-header">
-        <div className="speedex-header-inner">
-          <a
-            href="/"
-            className="speedex-header-brand"
-            title="Speedex Public Portal"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate('/');
-            }}
-          >
-            <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
-            <div className="speedex-header-text">
-              <span className="brand-name">Speedex</span>
-              <span className="brand-sub">COURIER &amp; FORWARDER, INC.</span>
-            </div>
-          </a>
-          <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
-            <a
-              href="/"
-              className="speedex-nav-link speedex-nav-link-public"
-              title="Return to Public Website"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/');
-              }}
-            >
-              <Globe size={14} />
-              <span>Public Website</span>
-            </a>
-          </nav>
-        </div>
-      </header>
-
-      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
-      <div className="login-page-split">
+      <div className="login-card-wrapper">
         {/* LEFT PANEL */}
         <aside className="login-left">
-          <div className="login-decorative-circle circle-1" />
-          <div className="login-decorative-circle circle-2" />
+          <div className="brand-header">
+            <div className="brand-logo-icon">
+              <Package size={28} color="#FFFFFF" strokeWidth={2.2} />
+            </div>
+            <div>
+              <span className="brand-badge">ENTERPRISE PLATFORM</span>
+              <h2 className="brand-title">SPEEDEX</h2>
+              <p className="brand-tagline">Integrated Operations Management</p>
+            </div>
+          </div>
+
           <div className="login-left-content">
-            <div className="login-brand-badge">
-              <div className="brand-icon-box">
-                <Package size={22} />
-              </div>
-              <div>
-                <span className="brand-title-badge">Speedex One-Login</span>
-                <span className="brand-sub-badge">CENTRAL GATEWAY</span>
-              </div>
-            </div>
+            <h3 className="left-headline">
+              One Secure Account. <br />
+              <span className="text-highlight">All Enterprise Systems.</span>
+            </h3>
+            <p className="left-subtext">
+              Speedex Enterprise Central Authentication provides single sign-on access across our entire
+              ecosystem with role-based access governance and audit logging.
+            </p>
 
-            <div className="login-headline">
-              <h2>
-                Fast deliveries,<br />
-                <span className="headline-accent">smarter logistics.</span>
-              </h2>
-              <p className="headline-body">
-                Single sign-on access across Speedex tracking, delivery dispatching,
-                and financial operations.
-              </p>
-            </div>
-
-            <div className="feature-list">
-              <div
-                className={`feature-item ${selectedSystem === 'dms' ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedSystem('dms');
-                  localStorage.setItem(LAST_SYSTEM_KEY, 'dms');
-                  setErrorMessage(null);
-                }}
-                role="button"
-                tabIndex={0}
-              >
+            <div className="features-list">
+              <div className="feature-item">
                 <div className="feature-num">1</div>
                 <div className="feature-text">
-                  <strong>Delivery Management System (DMS)</strong>
-                  <p>Real-time shipment tracking, dispatch, and proof of delivery.</p>
+                  <strong>Smart Tracking &amp; Routing System (STARS)</strong>
+                  <p>Real-time vehicle tracking, route optimization, and operational analytics.</p>
                 </div>
               </div>
 
-              <div
-                className={`feature-item ${selectedSystem === 'stars' ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedSystem('stars');
-                  localStorage.setItem(LAST_SYSTEM_KEY, 'stars');
-                  setErrorMessage(null);
-                }}
-                role="button"
-                tabIndex={0}
-              >
+              <div className="feature-item">
                 <div className="feature-num">2</div>
                 <div className="feature-text">
-                  <strong>Tracking &amp; Audit System (STARS)</strong>
-                  <p>Task tracking, employee scheduling, and audit trail compliance.</p>
+                  <strong>Delivery Management System (DMS)</strong>
+                  <p>Driver task dispatching, run-sheet management, and proof of delivery.</p>
                 </div>
               </div>
 
-              <div
-                className={`feature-item ${selectedSystem === 'foms' ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedSystem('foms');
-                  localStorage.setItem(LAST_SYSTEM_KEY, 'foms');
-                  setErrorMessage(null);
-                }}
-                role="button"
-                tabIndex={0}
-              >
+              <div className="feature-item">
                 <div className="feature-num">3</div>
                 <div className="feature-text">
                   <strong>Financial Operations System (FOMS)</strong>
@@ -742,7 +459,7 @@ export default function LoginPage() {
               <span className="header-badge">CENTRAL ONE-LOGIN</span>
               <h1 className="card-title">Welcome to Speedex</h1>
               <p className="card-subtitle">
-                Select your operational system and sign in to continue.
+                Sign in with your employee credentials to access your authorized systems.
               </p>
             </div>
 
@@ -773,29 +490,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Subsystem Selection Interactive Tabs */}
-            <div className="subsystem-selector-wrapper">
-              <label className="field-label">Target Operational System <span style={{ color: '#E31A1A' }}>*</span></label>
-              <div className="subsystem-chips" role="radiogroup">
-                {SYSTEM_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    className={`subsystem-chip ${selectedSystem === opt.key ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedSystem(opt.key);
-                      localStorage.setItem(LAST_SYSTEM_KEY, opt.key);
-                      setErrorMessage(null);
-                    }}
-                    disabled={isSubmitting || lockoutSeconds > 0}
-                  >
-                    <span className="chip-badge">{opt.badge}</span>
-                    <span className="chip-desc">{opt.description}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <form className="login-form" onSubmit={handleSubmit} noValidate>
               {/* Employee ID / Username */}
               <div className="field-group">
@@ -810,7 +504,7 @@ export default function LoginPage() {
                     id="employee-id"
                     type="text"
                     className="field-input"
-                    placeholder={activeOption.idPlaceholder}
+                    placeholder="e.g. MGR001, EMP-001, or Username"
                     value={employeeId}
                     onChange={(e) => setEmployeeId(e.target.value)}
                     disabled={isSubmitting || lockoutSeconds > 0}
@@ -864,7 +558,6 @@ export default function LoginPage() {
                       setRememberMe(checked);
                       if (!checked) {
                         localStorage.removeItem(REMEMBER_ME_KEY);
-                        localStorage.removeItem(`${REMEMBERED_ID_KEY}_${selectedSystem}`);
                         localStorage.removeItem(REMEMBERED_ID_KEY);
                       }
                     }}
@@ -876,8 +569,8 @@ export default function LoginPage() {
                   type="button"
                   className="forgot-password-link"
                   onClick={() => {
-                    const idQuery = employeeId.trim() ? `&id=${encodeURIComponent(employeeId.trim())}` : '';
-                    navigate(`/forgot-password?system=${selectedSystem}${idQuery}`);
+                    const idQuery = employeeId.trim() ? `?id=${encodeURIComponent(employeeId.trim())}` : '';
+                    navigate(`/forgot-password${idQuery}`);
                   }}
                   disabled={isSubmitting}
                 >
@@ -900,7 +593,7 @@ export default function LoginPage() {
                   <span>Locked ({lockoutSeconds}s)</span>
                 ) : (
                   <>
-                    <span>Sign In to {activeOption.badge}</span>
+                    <span>Sign In to Speedex</span>
                     <ArrowRight size={18} />
                   </>
                 )}
