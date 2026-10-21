@@ -20,7 +20,7 @@ import {
   KeyRound,
   FileText,
 } from 'lucide-react';
-import { getStoredAuthSession, saveAuthSession } from '../utils/auth';
+import { getStoredAuthSession, saveAuthSession, extractContactNumber, normalizePhMobile } from '../utils/auth';
 import { STARS_API_URL } from '../config/env';
 import './LoginPage.css';
 import './OnboardingPage.css';
@@ -104,6 +104,8 @@ export default function OnboardingPage() {
 
   // Pre-fill profile based on manager registration information
   useEffect(() => {
+    const empId = employeeIdParam || session?.employeeId;
+
     // 1. Check navigation state from login
     const navState = (location.state as { profile?: Record<string, string> } | null)?.profile;
 
@@ -117,71 +119,88 @@ export default function OnboardingPage() {
     }
 
     const candidate = navState || storedProfile;
+    let contactResolved = '';
+
     if (candidate) {
-      let filled = false;
-      if (candidate.firstName) { setFirstName(candidate.firstName); filled = true; }
-      if (candidate.middleName) { setMiddleName(candidate.middleName); filled = true; }
-      if (candidate.lastName) { setLastName(candidate.lastName); filled = true; }
-      if (candidate.suffix) { setSuffix(candidate.suffix); filled = true; }
-      if (candidate.contactNumber) { setContactNumber(candidate.contactNumber); filled = true; }
+      if (candidate.firstName) setFirstName(candidate.firstName);
+      if (candidate.middleName) setMiddleName(candidate.middleName);
+      if (candidate.lastName) setLastName(candidate.lastName);
+      if (candidate.suffix) setSuffix(candidate.suffix);
+
+      contactResolved = extractContactNumber(candidate);
+      if (contactResolved) {
+        setContactNumber(contactResolved);
+      }
 
       if (!candidate.firstName && candidate.fullName) {
         const parsed = parseFullName(candidate.fullName);
-        if (parsed.firstName) { setFirstName(parsed.firstName); filled = true; }
-        if (parsed.middleName) { setMiddleName(parsed.middleName); }
-        if (parsed.lastName) { setLastName(parsed.lastName); }
-        if (parsed.suffix) { setSuffix(parsed.suffix); }
+        if (parsed.firstName) setFirstName(parsed.firstName);
+        if (parsed.middleName) setMiddleName(parsed.middleName);
+        if (parsed.lastName) setLastName(parsed.lastName);
+        if (parsed.suffix) setSuffix(parsed.suffix);
       }
-      if (filled) {
-        setIsPrefilled(true);
-        return;
-      }
+      setIsPrefilled(true);
     }
 
-    // 3. Probe from STARS onboarding-status API if employeeId is available
-    const empId = employeeIdParam || session?.employeeId;
+    // 3. Probe from STARS onboarding-status API if employeeId is available (especially if contact is missing or needs fresh data)
     if (empId) {
-      fetch(`${STARS_API_URL}/api/Auth/onboarding-status/${encodeURIComponent(empId)}`)
-        .then((res) => res.json())
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (session?.authToken) {
+        headers['Authorization'] = `Bearer ${session.authToken}`;
+      }
+
+      fetch(`${STARS_API_URL}/api/Auth/onboarding-status/${encodeURIComponent(empId)}`, { headers })
+        .then((res) => (res.ok ? res.json() : null))
         .then((raw) => {
           const data = raw?.data || raw;
           if (data && typeof data === 'object') {
-            let hasAny = false;
-            if (data.firstName) { setFirstName(data.firstName); hasAny = true; }
-            if (data.middleName) { setMiddleName(data.middleName); hasAny = true; }
-            if (data.lastName) { setLastName(data.lastName); hasAny = true; }
-            if (data.suffix) { setSuffix(data.suffix); hasAny = true; }
-            const phone = data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone;
-            if (phone) { setContactNumber(phone); hasAny = true; }
+            if (data.firstName) setFirstName((prev) => prev || data.firstName);
+            if (data.middleName) setMiddleName((prev) => prev || data.middleName);
+            if (data.lastName) setLastName((prev) => prev || data.lastName);
+            if (data.suffix) setSuffix((prev) => prev || data.suffix);
+
+            const fetchedPhone = extractContactNumber(data);
+            if (fetchedPhone) {
+              setContactNumber(fetchedPhone);
+            }
 
             if (!data.firstName && (data.fullName || data.name)) {
               const parsed = parseFullName(data.fullName || data.name);
-              if (parsed.firstName) { setFirstName(parsed.firstName); hasAny = true; }
-              if (parsed.middleName) { setMiddleName(parsed.middleName); }
-              if (parsed.lastName) { setLastName(parsed.lastName); }
-              if (parsed.suffix) { setSuffix(parsed.suffix); }
+              if (parsed.firstName) setFirstName((prev) => prev || parsed.firstName);
+              if (parsed.middleName) setMiddleName((prev) => prev || parsed.middleName);
+              if (parsed.lastName) setLastName((prev) => prev || parsed.lastName);
+              if (parsed.suffix) setSuffix((prev) => prev || parsed.suffix);
             }
-            if (hasAny) {
-              setIsPrefilled(true);
-            }
+            setIsPrefilled(true);
           }
         })
         .catch(() => {
-          // fallback to session employeeName
+          // fallback to session employeeName if still not set
           if (session?.employeeName && session.employeeName !== 'Speedex Staff') {
             const parsed = parseFullName(session.employeeName);
-            if (parsed.firstName) setFirstName(parsed.firstName);
-            if (parsed.lastName) setLastName(parsed.lastName);
+            if (parsed.firstName) setFirstName((prev) => prev || parsed.firstName);
+            if (parsed.lastName) setLastName((prev) => prev || parsed.lastName);
             setIsPrefilled(true);
           }
         });
     } else if (session?.employeeName && session.employeeName !== 'Speedex Staff') {
       const parsed = parseFullName(session.employeeName);
-      if (parsed.firstName) setFirstName(parsed.firstName);
-      if (parsed.lastName) setLastName(parsed.lastName);
+      if (parsed.firstName) setFirstName((prev) => prev || parsed.firstName);
+      if (parsed.lastName) setLastName((prev) => prev || parsed.lastName);
       setIsPrefilled(true);
     }
   }, [location.state, employeeIdParam, session]);
+
+  // Check if Step 1 is valid (all required fields filled, middleName and suffix are optional)
+  const isStep1Complete =
+    firstName.trim().length > 0 &&
+    NAME_REGEX.test(firstName.trim()) &&
+    lastName.trim().length > 0 &&
+    NAME_REGEX.test(lastName.trim()) &&
+    contactNumber.trim().length > 0 &&
+    PH_MOBILE_REGEX.test(contactNumber.trim());
 
   // Validate Step 1
   const handleProfileNext = (e: React.FormEvent) => {
@@ -189,15 +208,33 @@ export default function OnboardingPage() {
     setTouchedStep1(true);
     setError(null);
 
-    if (!firstName.trim() || !NAME_REGEX.test(firstName.trim())) {
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
+    const trimmedContact = contactNumber.trim();
+
+    if (!trimmedFirst) {
+      setError('First name is required. Please fill in your first name.');
+      return;
+    }
+    if (!NAME_REGEX.test(trimmedFirst)) {
       setError('Please provide a valid first name (letters, spaces, hyphens only).');
       return;
     }
-    if (!lastName.trim() || !NAME_REGEX.test(lastName.trim())) {
-      setError('Please provide a valid last name.');
+
+    if (!trimmedLast) {
+      setError('Last name is required. Please fill in your last name.');
       return;
     }
-    if (!PH_MOBILE_REGEX.test(contactNumber.trim())) {
+    if (!NAME_REGEX.test(trimmedLast)) {
+      setError('Please provide a valid last name (letters, spaces, hyphens only).');
+      return;
+    }
+
+    if (!trimmedContact) {
+      setError('Mobile number is required. Please enter your 11-digit Philippine mobile number.');
+      return;
+    }
+    if (!PH_MOBILE_REGEX.test(trimmedContact)) {
       setError('Please enter a valid 11-digit Philippine mobile number starting with 09 (e.g. 09171234567).');
       return;
     }
@@ -613,7 +650,12 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Continue to Step 2 Button */}
-                <button type="submit" className="submit-btn onboarding-submit-btn">
+                <button
+                  type="submit"
+                  className="submit-btn onboarding-submit-btn"
+                  disabled={!isStep1Complete}
+                  title={!isStep1Complete ? 'Please fill in all required fields (First Name, Last Name, Mobile Number) before proceeding' : undefined}
+                >
                   <span>Next: Password Setup</span>
                   <ArrowRight size={18} />
                 </button>
@@ -800,13 +842,7 @@ export default function OnboardingPage() {
               </form>
             )}
 
-            <footer className="login-footer onboarding-footer">
-              <div className="security-note">
-                <Lock size={13} />
-                <span>Synchronized via Speedex PBKDF2 Master Authentication Engine</span>
-              </div>
-            </footer>
-          </div>
+            </div>
         </main>
       </div>
     </div>

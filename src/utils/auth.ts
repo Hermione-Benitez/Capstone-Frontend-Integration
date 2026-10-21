@@ -32,6 +32,69 @@ export function getAvatarInitials(name?: string): string {
 }
 
 /**
+ * Normalizes any Philippine mobile phone number into standard 11-digit 09XXXXXXXXX format.
+ * Handles '+639171234567', '639171234567', '9171234567', etc.
+ */
+export function normalizePhMobile(raw?: string | null): string {
+  if (!raw) return '';
+  let digits = String(raw).replace(/\D/g, '');
+  if (digits.startsWith('639') && digits.length === 12) {
+    digits = '0' + digits.slice(2);
+  } else if (digits.startsWith('9') && digits.length === 10) {
+    digits = '0' + digits;
+  }
+  return digits.slice(0, 11);
+}
+
+/**
+ * Aggressively scans an API response object for contact/mobile numbers across common field aliases.
+ */
+export function extractContactNumber(obj?: any): string {
+  if (!obj || typeof obj !== 'object') return '';
+  const rawCandidate =
+    obj.contactNumber ||
+    obj.contactNo ||
+    obj.contact_number ||
+    obj.contact_no ||
+    obj.mobileNumber ||
+    obj.mobileNo ||
+    obj.mobile_number ||
+    obj.mobile_no ||
+    obj.phoneNumber ||
+    obj.phoneNo ||
+    obj.phone_number ||
+    obj.phone_no ||
+    obj.phone ||
+    obj.mobile ||
+    obj.cellphone ||
+    obj.cellphoneNumber ||
+    obj.telephone ||
+    obj.tel ||
+    obj.user?.contactNumber ||
+    obj.user?.contactNo ||
+    obj.user?.contact_number ||
+    obj.user?.mobileNumber ||
+    obj.user?.mobileNo ||
+    obj.user?.phoneNumber ||
+    obj.user?.phone ||
+    obj.user?.mobile ||
+    obj.employee?.contactNumber ||
+    obj.employee?.contactNo ||
+    obj.employee?.contact_number ||
+    obj.employee?.mobileNumber ||
+    obj.employee?.mobileNo ||
+    obj.employee?.phoneNumber ||
+    obj.employee?.phone ||
+    obj.profile?.contactNumber ||
+    obj.profile?.contactNo ||
+    obj.profile?.mobileNumber ||
+    obj.profile?.phone ||
+    '';
+
+  return normalizePhMobile(rawCandidate);
+}
+
+/**
  * Constructs the STARS login redirect URL with a return destination parameter.
  */
 export function getStarsLoginUrl(returnRoute: string = '/portal'): string {

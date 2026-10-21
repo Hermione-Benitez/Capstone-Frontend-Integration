@@ -15,7 +15,7 @@ import {
   RefreshCw,
   Package,
 } from 'lucide-react';
-import { clearAuthSession, saveAuthSession, redirectToSubsystem } from '../utils/auth';
+import { clearAuthSession, saveAuthSession, redirectToSubsystem, extractContactNumber } from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '../utils/rateLimiter';
 import { prewarmBackend, getActiveBackendUrl } from '../utils/loadBalancer';
 import LegalDocumentModal, { type LegalDocType } from '../components/LegalDocumentModal';
@@ -303,14 +303,48 @@ export default function LoginPage() {
 
         // Check if Onboarding is required (temporary password not yet changed)
         if (data.isPasswordChanged === false && cleanId !== '0000') {
+          let contact = extractContactNumber(data);
+          let firstName = data.firstName || '';
+          let middleName = data.middleName || '';
+          let lastName = data.lastName || '';
+          let suffix = data.suffix || '';
+          let fullName = data.fullName || data.userName || '';
+
+          // If contact or name fields are missing from direct login response, query onboarding-status
+          if (!contact || !firstName || !lastName) {
+            try {
+              const starsBaseUrl = getActiveBackendUrl('stars') || backendUrl;
+              const statusRes = await fetch(`${starsBaseUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
+                signal: abortController.signal,
+                headers: {
+                  ...(sessionPayload.authToken ? { Authorization: `Bearer ${sessionPayload.authToken}` } : {}),
+                },
+              });
+              if (statusRes.ok) {
+                const statusRaw = await statusRes.json();
+                const statusData = statusRaw?.data || statusRaw;
+                if (statusData) {
+                  contact = contact || extractContactNumber(statusData);
+                  firstName = firstName || statusData.firstName || '';
+                  middleName = middleName || statusData.middleName || '';
+                  lastName = lastName || statusData.lastName || '';
+                  suffix = suffix || statusData.suffix || '';
+                  fullName = fullName || statusData.fullName || statusData.name || '';
+                }
+              }
+            } catch (e) {
+              console.warn('Could not probe onboarding status for STARS:', e);
+            }
+          }
+
           const profileData = {
-            firstName: data.firstName || '',
-            middleName: data.middleName || '',
-            lastName: data.lastName || '',
-            suffix: data.suffix || '',
-            contactNumber: data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone || '',
+            firstName,
+            middleName,
+            lastName,
+            suffix,
+            contactNumber: contact,
             employeeId: cleanId,
-            fullName: data.fullName || data.userName || '',
+            fullName,
           };
           try {
             sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
@@ -428,7 +462,7 @@ export default function LoginPage() {
             middleName: dmsStatusData?.middleName || '',
             lastName: dmsStatusData?.lastName || '',
             suffix: dmsStatusData?.suffix || '',
-            contactNumber: dmsStatusData?.contactNumber || dmsStatusData?.mobileNumber || dmsStatusData?.phoneNumber || dmsStatusData?.phone || '',
+            contactNumber: extractContactNumber(dmsStatusData) || extractContactNumber(raw),
             employeeId: cleanId,
             fullName: dmsStatusData?.fullName || name || cleanId,
           };
@@ -539,7 +573,7 @@ export default function LoginPage() {
             middleName: fomsStatusData?.middleName || '',
             lastName: fomsStatusData?.lastName || '',
             suffix: fomsStatusData?.suffix || '',
-            contactNumber: fomsStatusData?.contactNumber || fomsStatusData?.mobileNumber || fomsStatusData?.phoneNumber || fomsStatusData?.phone || '',
+            contactNumber: extractContactNumber(fomsStatusData) || extractContactNumber(authData),
             employeeId: cleanId,
             fullName: fomsStatusData?.fullName || user.fullName || user.name || cleanId,
           };
