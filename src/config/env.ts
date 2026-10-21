@@ -23,7 +23,7 @@ export const DMS_URL = normalizeUrl(
 // Financial Operations Management System (FOMS) URL
 export const FOMS_URL = normalizeUrl(
   import.meta.env.VITE_FOMS_URL,
-  'http://localhost:5175'
+  'https://fomsfrontend.vercel.app'
 );
 
 export const SUBSYSTEM_URLS: Record<string, string> = {
