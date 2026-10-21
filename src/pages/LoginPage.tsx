@@ -118,6 +118,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setBannerAlert(null);
 
     const cleanId = employeeId.trim();
     if (!cleanId) {
@@ -502,32 +503,26 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* Contextual Alert Banner */}
-            {bannerAlert && (
-              <div className={`alert-banner ${bannerAlert.type}`}>
-                {bannerAlert.type === 'warning' && <AlertTriangle size={18} />}
-                {bannerAlert.type === 'success' && <CheckCircle size={18} />}
-                <div>{bannerAlert.message}</div>
-              </div>
-            )}
-
-            {/* Error Message Alert */}
-            {errorMessage && (
-              <div className="alert-banner danger">
-                <AlertTriangle size={18} />
-                <div>{errorMessage}</div>
-              </div>
-            )}
-
-            {/* Rate Limit Lockout Banner */}
-            {lockoutSeconds > 0 && (
+            {/* Unified Alert Banner Slot (Replaces instead of stacking) */}
+            {lockoutSeconds > 0 ? (
               <div className="alert-banner warning">
                 <RefreshCw size={18} className="spinner" />
                 <div>
                   <strong>Rate Limit Active:</strong> Please wait {lockoutSeconds} seconds before submitting your next attempt.
                 </div>
               </div>
-            )}
+            ) : errorMessage ? (
+              <div className="alert-banner danger">
+                <AlertTriangle size={18} />
+                <div>{errorMessage}</div>
+              </div>
+            ) : bannerAlert ? (
+              <div className={`alert-banner ${bannerAlert.type}`}>
+                {bannerAlert.type === 'warning' && <AlertTriangle size={18} />}
+                {bannerAlert.type === 'success' && <CheckCircle size={18} />}
+                <div>{bannerAlert.message}</div>
+              </div>
+            ) : null}
 
             <form className="login-form" onSubmit={handleSubmit} noValidate>
               {/* Employee ID */}
@@ -545,7 +540,10 @@ export default function LoginPage() {
                     className="field-input"
                     placeholder="Enter your Employee ID"
                     value={employeeId}
-                    onChange={(e) => setEmployeeId(e.target.value)}
+                    onChange={(e) => {
+                      setEmployeeId(e.target.value);
+                      if (errorMessage) setErrorMessage(null);
+                    }}
                     disabled={isSubmitting || lockoutSeconds > 0}
                     autoComplete="username"
                     required
@@ -568,7 +566,10 @@ export default function LoginPage() {
                     className="field-input"
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errorMessage) setErrorMessage(null);
+                    }}
                     disabled={isSubmitting || lockoutSeconds > 0}
                     autoComplete="current-password"
                     required
