@@ -51,6 +51,34 @@ export function normalizePhMobile(raw?: string | null): string {
 }
 
 /**
+ * Safely parses claims payload from a JWT token (handles Base64URL and UTF-8 characters).
+ */
+export function parseJwtPayload(token?: string | null): Record<string, any> | null {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4 !== 0) {
+      base64 += '=';
+    }
+    const decoded = atob(base64);
+    const jsonStr = decodeURIComponent(
+      Array.prototype.map.call(decoded, (c: string) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join('')
+    );
+    return JSON.parse(jsonStr);
+  } catch {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+      return null;
+    }
+  }
+}
+
+/**
  * Aggressively scans an API response object for contact/mobile numbers across common field aliases.
  */
 export function extractContactNumber(obj?: any): string {

@@ -2,6 +2,18 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/dms/(.*)",
+      "destination": "https://dts-api-gab-byafd0h2aha6a9c9.japaneast-01.azurewebsites.net/api/$1"
+    },
+    {
+      "source": "/api/stars/(.*)",
+      "destination": "https://stars-h8bgfbhghzbdc9fd.southeastasia-01.azurewebsites.net/api/$1"
+    },
+    {
+      "source": "/api/foms/(.*)",
+      "destination": "https://fomsintegration-amfve2fdccbdgbgy.eastasia-01.azurewebsites.net/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

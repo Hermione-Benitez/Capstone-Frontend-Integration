@@ -61,10 +61,28 @@ export function prewarmBackend(systemKey: 'stars' | 'dms' | 'foms' | string): vo
 }
 
 /**
+ * Resolves candidate backend URLs for a subsystem.
+ * Returns the proxy endpoint first (to ensure same-origin requests with no CORS issues),
+ * followed by the direct API URL as fallback.
+ */
+export function getBackendCandidates(systemKey: 'stars' | 'dms' | 'foms' | string): string[] {
+  const key = systemKey.toLowerCase();
+  const directUrl = SUBSYSTEM_API_URLS[key] || STARS_API_URL;
+  if (typeof window !== 'undefined') {
+    return [`/api/${key}`, directUrl];
+  }
+  return [directUrl];
+}
+
+/**
  * Resolves the primary active backend URL for the specified system.
+ * In a browser environment, returns the local same-origin proxy prefix by default to prevent CORS failures.
  */
 export function getActiveBackendUrl(systemKey: 'stars' | 'dms' | 'foms' | string): string {
   const key = systemKey.toLowerCase();
+  if (typeof window !== 'undefined') {
+    return `/api/${key}`;
+  }
   const nodes = nodeRegistry[key];
   if (nodes && nodes.length > 0) {
     const healthyNode = nodes.find((n) => n.isHealthy) || nodes[0];

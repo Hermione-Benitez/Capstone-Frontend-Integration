@@ -13,9 +13,9 @@ import {
   RefreshCw,
   Package,
 } from 'lucide-react';
-import { clearAuthSession, saveAuthSession, extractContactNumber, type AuthSession } from '../utils/auth';
+import { clearAuthSession, saveAuthSession, extractContactNumber, parseJwtPayload, type AuthSession } from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '../utils/rateLimiter';
-import { prewarmBackend, getActiveBackendUrl } from '../utils/loadBalancer';
+import { prewarmBackend, getActiveBackendUrl, getBackendCandidates } from '../utils/loadBalancer';
 import LegalDocumentModal, { type LegalDocType } from '../components/LegalDocumentModal';
 import './LoginPage.css';
 
@@ -160,182 +160,232 @@ export default function LoginPage() {
       let failureReason = 'Invalid Employee ID or password.';
 
       // 1. Primary Central Identity: Authenticate via STARS Backend
-      try {
-        const starsRes = await fetch(`${starsUrl}/api/Auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            identifier: cleanId,
-            employeeNumber: cleanId,
-            employeeId: cleanId,
-            username: cleanId,
-            password,
-          }),
-          signal: abortController.signal,
-        });
-
-        const rawStars = await starsRes.json().catch(() => null);
-
-        if (starsRes.ok && rawStars?.isSuccess) {
-          const data = rawStars.data || rawStars;
-          authSuccess = true;
-          isPasswordChanged = data.isPasswordChanged;
-          hasAcceptedTerms = data.hasAcceptedTerms;
-
-          // Parse allowed systems
-          let allowedList: string[] = ['STARS'];
-          if (cleanId === '0000') {
-            allowedList = ['STARS', 'DMS', 'FOMS'];
-          } else if (data.allowedSystems) {
-            allowedList = data.allowedSystems
-              .split(',')
-              .map((s: string) => s.trim().toUpperCase())
-              .filter(Boolean);
-          }
-
-          let contact = extractContactNumber(data);
-          let firstName = data.firstName || '';
-          let middleName = data.middleName || '';
-          let lastName = data.lastName || '';
-          let suffix = data.suffix || '';
-          let fullName = data.fullName || data.userName || '';
-
-          // If contact or name fields are missing from direct login response, query onboarding-status
-          if (!contact || !firstName || !lastName) {
-            try {
-              const statusRes = await fetch(`${starsUrl}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
-                signal: abortController.signal,
-                headers: {
-                  ...(data.accessToken || data.token ? { Authorization: `Bearer ${data.accessToken || data.token}` } : {}),
-                },
-              });
-              if (statusRes.ok) {
-                const statusRaw = await statusRes.json();
-                const statusData = statusRaw?.data || statusRaw;
-                if (statusData) {
-                  contact = contact || extractContactNumber(statusData);
-                  firstName = firstName || statusData.firstName || '';
-                  middleName = middleName || statusData.middleName || '';
-                  lastName = lastName || statusData.lastName || '';
-                  suffix = suffix || statusData.suffix || '';
-                  fullName = fullName || statusData.fullName || statusData.name || '';
-                }
-              }
-            } catch (e) {
-              console.warn('Could not probe onboarding status for STARS:', e);
-            }
-          }
-
-          profileData = {
-            firstName,
-            middleName,
-            lastName,
-            suffix,
-            contactNumber: contact || data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone || '',
-            employeeId: cleanId,
-            fullName: fullName || cleanId,
-          };
-
-          sessionPayload = {
-            authToken: data.accessToken || data.token || '',
-            refreshToken: data.refreshToken || '',
-            userRole: data.role || 'Staff',
-            employeeId: cleanId,
-            employeeName: fullName || cleanId,
-            allowedSystems: allowedList,
-            contactNumber: profileData.contactNumber,
-          };
-        } else if (rawStars?.message) {
-          failureReason = rawStars.message;
-        }
-      } catch (err: unknown) {
-        if ((err as Error)?.name === 'AbortError') return;
-        console.warn('STARS central auth check error:', err);
-      }
-
-      // 2. Fallback: Authenticate via DMS for legacy accounts not yet synced
-      if (!authSuccess) {
+      const starsCandidates = getBackendCandidates('stars');
+      for (const candidate of starsCandidates) {
         try {
-          const dmsRes = await fetch(`${dmsUrl}/api/auth/login`, {
+          const starsRes = await fetch(`${candidate}/api/Auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              identifier: cleanId,
+              employeeNumber: cleanId,
               employeeId: cleanId,
               username: cleanId,
-              identifier: cleanId,
               password,
             }),
             signal: abortController.signal,
           });
 
-          const rawDms = await dmsRes.json().catch(() => null);
+          const rawStars = await starsRes.json().catch(() => null);
 
-          if (dmsRes.ok && rawDms?.token) {
+          if (starsRes.ok && rawStars?.isSuccess) {
+            const data = rawStars.data || rawStars;
             authSuccess = true;
-            let role = rawDms.role;
-            let name = rawDms.name;
-            if ((!role || !name) && typeof rawDms.token === 'string' && rawDms.token.includes('.')) {
+            isPasswordChanged = data.isPasswordChanged;
+            hasAcceptedTerms = data.hasAcceptedTerms;
+
+            // Parse allowed systems
+            let allowedList: string[] = ['STARS'];
+            if (cleanId === '0000') {
+              allowedList = ['STARS', 'DMS', 'FOMS'];
+            } else if (data.allowedSystems) {
+              allowedList = data.allowedSystems
+                .split(',')
+                .map((s: string) => s.trim().toUpperCase())
+                .filter(Boolean);
+            }
+
+            let contact = extractContactNumber(data);
+            let firstName = data.firstName || '';
+            let middleName = data.middleName || '';
+            let lastName = data.lastName || '';
+            let suffix = data.suffix || '';
+            let fullName = data.fullName || data.userName || '';
+
+            // If contact or name fields are missing from direct login response, query onboarding-status
+            if (!contact || !firstName || !lastName) {
               try {
-                const tokenPayload = JSON.parse(atob(rawDms.token.split('.')[1]));
-                role = role || tokenPayload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || tokenPayload.role;
-                name = name || tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || tokenPayload.name;
-              } catch {
-                // ignore
+                const statusRes = await fetch(`${candidate}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
+                  signal: abortController.signal,
+                  headers: {
+                    ...(data.accessToken || data.token ? { Authorization: `Bearer ${data.accessToken || data.token}` } : {}),
+                  },
+                });
+                if (statusRes.ok) {
+                  const statusRaw = await statusRes.json();
+                  const statusData = statusRaw?.data || statusRaw;
+                  if (statusData) {
+                    contact = contact || extractContactNumber(statusData);
+                    firstName = firstName || statusData.firstName || '';
+                    middleName = middleName || statusData.middleName || '';
+                    lastName = lastName || statusData.lastName || '';
+                    suffix = suffix || statusData.suffix || '';
+                    fullName = fullName || statusData.fullName || statusData.name || '';
+                  }
+                }
+              } catch (e) {
+                console.warn('Could not probe onboarding status for STARS:', e);
               }
             }
 
-            sessionPayload = {
-              authToken: rawDms.token,
-              refreshToken: rawDms.refreshToken || '',
-              userRole: role || 'Staff',
+            profileData = {
+              firstName,
+              middleName,
+              lastName,
+              suffix,
+              contactNumber: contact || data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone || '',
               employeeId: cleanId,
-              employeeName: name || cleanId,
-              allowedSystems: ['DMS'],
+              fullName: fullName || cleanId,
             };
-          } else if (rawDms?.message) {
-            failureReason = rawDms.message;
+
+            sessionPayload = {
+              authToken: data.accessToken || data.token || '',
+              refreshToken: data.refreshToken || '',
+              userRole: data.role || 'Staff',
+              employeeId: cleanId,
+              employeeName: fullName || cleanId,
+              allowedSystems: allowedList,
+              contactNumber: profileData.contactNumber,
+            };
+            break;
+          } else if (rawStars?.message) {
+            failureReason = rawStars.message;
+            break;
           }
-        } catch (err) {
-          console.warn('DMS fallback auth check error:', err);
+        } catch (err: unknown) {
+          if ((err as Error)?.name === 'AbortError') return;
+          console.warn(`STARS central auth check error on ${candidate}:`, err);
+        }
+      }
+
+      // 2. Fallback: Authenticate via DMS for legacy accounts not yet synced
+      if (!authSuccess) {
+        const dmsCandidates = getBackendCandidates('dms');
+        for (const candidate of dmsCandidates) {
+          try {
+            const dmsRes = await fetch(`${candidate}/api/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                employeeId: cleanId,
+                username: cleanId,
+                identifier: cleanId,
+                password,
+              }),
+              signal: abortController.signal,
+            });
+
+            const rawDms = await dmsRes.json().catch(() => null);
+
+            if (dmsRes.ok && rawDms?.token) {
+              authSuccess = true;
+              let role = rawDms.role;
+              let name = rawDms.name;
+              const claims = parseJwtPayload(rawDms.token);
+              if (claims) {
+                role = role || claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || claims.role;
+                name = name || claims['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || claims.name;
+              }
+
+              // Fetch full user profile from DMS to resolve canonical name, role, and system access
+              let employeeName = name || cleanId;
+              let userRole = role || 'ADMIN';
+              let systemAccess = 'All Systems';
+
+              try {
+                const profileRes = await fetch(`${candidate}/api/auth/profile`, {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${rawDms.token}`,
+                  },
+                  signal: abortController.signal,
+                });
+                if (profileRes.ok) {
+                  const profileBody = await profileRes.json().catch(() => null);
+                  if (profileBody) {
+                    employeeName = profileBody.name || employeeName;
+                    userRole = profileBody.role || userRole;
+                    systemAccess = profileBody.systemAccess || systemAccess;
+                  }
+                }
+              } catch (profileErr) {
+                console.warn('Could not probe DMS profile:', profileErr);
+              }
+
+              // Compute allowed systems for DMS accounts
+              let allowedList: string[] = ['DMS'];
+              const normAccess = (systemAccess || '').toLowerCase();
+              if (cleanId === '0000' || normAccess.includes('all') || userRole.toUpperCase() === 'ADMIN') {
+                allowedList = ['STARS', 'DMS', 'FOMS'];
+              } else if (normAccess.includes('operation')) {
+                allowedList = ['DMS', 'STARS'];
+              } else {
+                allowedList = ['DMS'];
+              }
+
+              sessionPayload = {
+                authToken: rawDms.token,
+                refreshToken: rawDms.refreshToken || '',
+                userRole: userRole,
+                employeeId: cleanId,
+                employeeName: employeeName,
+                allowedSystems: allowedList,
+              };
+              break;
+            } else if (rawDms?.message) {
+              failureReason = rawDms.message;
+              break;
+            }
+          } catch (err: unknown) {
+            if ((err as Error)?.name === 'AbortError') return;
+            console.warn(`DMS fallback auth check error on ${candidate}:`, err);
+          }
         }
       }
 
       // 3. Fallback: Authenticate via FOMS for legacy accounts not yet synced
       if (!authSuccess) {
-        try {
-          const fomsRes = await fetch(`${fomsUrl}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              employeeId: cleanId,
-              employeeNumber: cleanId,
-              username: cleanId,
-              identifier: cleanId,
-              password,
-            }),
-            signal: abortController.signal,
-          });
+        const fomsCandidates = getBackendCandidates('foms');
+        for (const candidate of fomsCandidates) {
+          try {
+            const fomsRes = await fetch(`${candidate}/api/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                employeeId: cleanId,
+                employeeNumber: cleanId,
+                username: cleanId,
+                identifier: cleanId,
+                password,
+              }),
+              signal: abortController.signal,
+            });
 
-          const rawFoms = await fomsRes.json().catch(() => null);
-          const fomsData = rawFoms?.data || rawFoms;
-          const token = fomsData?.accessToken || fomsData?.tokens?.accessToken;
+            const rawFoms = await fomsRes.json().catch(() => null);
+            const fomsData = rawFoms?.data || rawFoms;
+            const token = fomsData?.accessToken || fomsData?.tokens?.accessToken;
 
-          if (fomsRes.ok && token) {
-            authSuccess = true;
-            const user = fomsData.user || fomsData.profile || {};
-            sessionPayload = {
-              authToken: token,
-              refreshToken: fomsData.refreshToken || fomsData.tokens?.refreshToken || '',
-              userRole: user.role || 'Accountant',
-              employeeId: user.employeeId || cleanId,
-              employeeName: user.fullName || user.name || cleanId,
-              allowedSystems: ['FOMS'],
-            };
-          } else if (rawFoms?.message || rawFoms?.error) {
-            failureReason = rawFoms.message || rawFoms.error;
+            if (fomsRes.ok && token) {
+              authSuccess = true;
+              const user = fomsData.user || fomsData.profile || {};
+              sessionPayload = {
+                authToken: token,
+                refreshToken: fomsData.refreshToken || fomsData.tokens?.refreshToken || '',
+                userRole: user.role || 'Accountant',
+                employeeId: user.employeeId || cleanId,
+                employeeName: user.fullName || user.name || cleanId,
+                allowedSystems: ['FOMS'],
+              };
+              break;
+            } else if (rawFoms?.message || rawFoms?.error) {
+              failureReason = rawFoms.message || rawFoms.error;
+              break;
+            }
+          } catch (err: unknown) {
+            if ((err as Error)?.name === 'AbortError') return;
+            console.warn(`FOMS fallback auth check error on ${candidate}:`, err);
           }
-        } catch (err) {
-          console.warn('FOMS fallback auth check error:', err);
         }
       }
 
