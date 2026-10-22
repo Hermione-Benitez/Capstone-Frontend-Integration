@@ -186,9 +186,9 @@ export default function OnboardingPage() {
         headers['Authorization'] = `Bearer ${session.authToken}`;
       }
 
-      // Probe A: /api/profile/view-profile (Returns full profile with ContactNumber in STARS)
+      // Probe A: /api/Auth/me (Returns full UserResponseDTO with ContactNumber in STARS)
       if (session?.authToken && system === 'stars') {
-        fetch(`${STARS_API_URL}/api/profile/view-profile`, { headers })
+        fetch(`${STARS_API_URL}/api/Auth/me`, { headers })
           .then((res) => (res.ok ? res.json() : null))
           .then((raw) => {
             const data = raw?.data || raw;
@@ -219,7 +219,40 @@ export default function OnboardingPage() {
           });
       }
 
-      // Probe B: onboarding-status
+      // Probe B: /api/User/employee-number/{empId}
+      if (empId && session?.authToken && system === 'stars') {
+        fetch(`${STARS_API_URL}/api/User/employee-number/${encodeURIComponent(empId)}`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((raw) => {
+            const data = raw?.data || raw;
+            if (data && typeof data === 'object') {
+              if (data.firstName || data.FirstName) {
+                setFirstName((prev) => prev || data.firstName || data.FirstName);
+              }
+              if (data.middleName || data.MiddleName) {
+                setMiddleName((prev) => prev || data.middleName || data.MiddleName);
+              }
+              if (data.lastName || data.LastName) {
+                setLastName((prev) => prev || data.lastName || data.LastName);
+              }
+              if (data.suffix || data.Suffix) {
+                setSuffix((prev) => prev || data.suffix || data.Suffix);
+              }
+
+              const fetchedPhone = extractContactNumber(data);
+              if (fetchedPhone) {
+                setContactNumber((prev) => prev || fetchedPhone);
+                saveAuthSession({ contactNumber: fetchedPhone });
+              }
+              setIsPrefilled(true);
+            }
+          })
+          .catch(() => {
+            // ignore
+          });
+      }
+
+      // Probe C: onboarding-status
       if (empId) {
         fetch(`${STARS_API_URL}/api/Auth/onboarding-status/${encodeURIComponent(empId)}`, { headers })
           .then((res) => (res.ok ? res.json() : null))

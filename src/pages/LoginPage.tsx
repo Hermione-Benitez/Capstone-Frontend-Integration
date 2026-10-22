@@ -13,7 +13,7 @@ import {
   RefreshCw,
   Package,
 } from 'lucide-react';
-import { clearAuthSession, saveAuthSession, extractContactNumber, parseJwtPayload, type AuthSession } from '../utils/auth';
+import { clearAuthSession, saveAuthSession, extractContactNumber, normalizePhMobile, parseJwtPayload, type AuthSession } from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '../utils/rateLimiter';
 import { prewarmBackend, getActiveBackendUrl, getBackendCandidates } from '../utils/loadBalancer';
 import LegalDocumentModal, { type LegalDocType } from '../components/LegalDocumentModal';
@@ -202,13 +202,66 @@ export default function LoginPage() {
             let suffix = data.suffix || '';
             let fullName = data.fullName || data.userName || '';
 
-            // If contact or name fields are missing from direct login response, query onboarding-status
+            // If contact or name fields are missing from direct login response, query full profile via /api/Auth/me
+            const authToken = data.accessToken || data.token;
+            if ((!contact || !firstName || !lastName) && authToken) {
+              try {
+                const meRes = await fetch(`${candidate}/api/Auth/me`, {
+                  signal: abortController.signal,
+                  headers: {
+                    Authorization: `Bearer ${authToken}`,
+                  },
+                });
+                if (meRes.ok) {
+                  const meRaw = await meRes.json();
+                  const meData = meRaw?.data || meRaw;
+                  if (meData) {
+                    contact = contact || extractContactNumber(meData);
+                    firstName = firstName || meData.firstName || '';
+                    middleName = middleName || meData.middleName || '';
+                    lastName = lastName || meData.lastName || '';
+                    suffix = suffix || meData.suffix || '';
+                    fullName = fullName || meData.fullName || `${firstName} ${lastName}`.trim();
+                  }
+                }
+              } catch (e) {
+                console.warn('Could not probe /api/Auth/me for STARS user:', e);
+              }
+            }
+
+            // Fallback: Query by employee number if contact is still missing
+            if ((!contact || !firstName || !lastName) && authToken) {
+              try {
+                const userRes = await fetch(`${candidate}/api/User/employee-number/${encodeURIComponent(cleanId)}`, {
+                  signal: abortController.signal,
+                  headers: {
+                    Authorization: `Bearer ${authToken}`,
+                  },
+                });
+                if (userRes.ok) {
+                  const userRaw = await userRes.json();
+                  const userData = userRaw?.data || userRaw;
+                  if (userData) {
+                    contact = contact || extractContactNumber(userData);
+                    firstName = firstName || userData.firstName || '';
+                    middleName = middleName || userData.middleName || '';
+                    lastName = lastName || userData.lastName || '';
+                    suffix = suffix || userData.suffix || '';
+                    fullName = fullName || userData.fullName || '';
+                  }
+                }
+              } catch (e) {
+                console.warn('Could not probe /api/User/employee-number for STARS user:', e);
+              }
+            }
+
+            // Fallback: Query onboarding-status
             if (!contact || !firstName || !lastName) {
               try {
                 const statusRes = await fetch(`${candidate}/api/Auth/onboarding-status/${encodeURIComponent(cleanId)}`, {
                   signal: abortController.signal,
                   headers: {
-                    ...(data.accessToken || data.token ? { Authorization: `Bearer ${data.accessToken || data.token}` } : {}),
+                    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
                   },
                 });
                 if (statusRes.ok) {
@@ -228,12 +281,16 @@ export default function LoginPage() {
               }
             }
 
+            const normalizedContact = normalizePhMobile(
+              contact || data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone || ''
+            );
+
             profileData = {
               firstName,
               middleName,
               lastName,
               suffix,
-              contactNumber: contact || data.contactNumber || data.mobileNumber || data.phoneNumber || data.phone || '',
+              contactNumber: normalizedContact,
               employeeId: cleanId,
               fullName: fullName || cleanId,
             };
@@ -245,7 +302,7 @@ export default function LoginPage() {
               employeeId: cleanId,
               employeeName: fullName || cleanId,
               allowedSystems: allowedList,
-              contactNumber: profileData.contactNumber,
+              contactNumber: normalizedContact,
             };
             break;
           } else if (rawStars?.message) {
@@ -422,7 +479,10 @@ export default function LoginPage() {
           }
         }
         startTransition(() => {
-          navigate(`/onboarding?employeeId=${encodeURIComponent(cleanId)}`, {
+          const contactQuery = profileData?.contactNumber ? `&contactNumber=${encodeURIComponent(profileData.contactNumber)}` : '';
+          const firstQuery = profileData?.firstName ? `&firstName=${encodeURIComponent(profileData.firstName)}` : '';
+          const lastQuery = profileData?.lastName ? `&lastName=${encodeURIComponent(profileData.lastName)}` : '';
+          navigate(`/onboarding?employeeId=${encodeURIComponent(cleanId)}${contactQuery}${firstQuery}${lastQuery}`, {
             state: { profile: profileData },
           });
         });
