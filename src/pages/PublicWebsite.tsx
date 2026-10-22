@@ -1,68 +1,6 @@
 import React, { useState } from 'react';
-import { useToast } from '../components';
+import { DMS_TRACKING_URL } from '../config/env';
 import './PublicWebsite.css';
-
-interface WaybillEvent {
-  status: 'done' | 'active' | 'upcoming';
-  title: string;
-  time: string;
-  location: string;
-  note?: string;
-}
-
-interface WaybillResult {
-  waybillNo: string;
-  statusText: string;
-  statusType: 'transit' | 'delivered' | 'out';
-  origin: string;
-  destination: string;
-  eta: string;
-  events: WaybillEvent[];
-}
-
-const SAMPLE_TRACKING_DATA: Record<string, WaybillResult> = {
-  'SPX-98214': {
-    waybillNo: 'SPX-98214',
-    statusText: 'In Transit',
-    statusType: 'transit',
-    origin: 'Metro Manila Hub',
-    destination: 'Cebu City Distribution Hub',
-    eta: 'Tomorrow by 4:00 PM',
-    events: [
-      { status: 'done', title: 'Package Picked Up', time: '8:40 AM', location: 'Malate Sorting Facility, Manila' },
-      { status: 'done', title: 'Scanned at Central Hub', time: '1:15 PM', location: 'Speedex Logistics Hub 1, Manila' },
-      { status: 'active', title: 'Linehaul Dispatch to Cebu', time: 'Updated 1 hour ago', location: 'In Transit via Inter-Island Cargo' },
-      { status: 'upcoming', title: 'Out for Delivery', time: 'Estimated Tomorrow', location: 'Cebu Central Hub' },
-    ],
-  },
-  'SPX-50123': {
-    waybillNo: 'SPX-50123',
-    statusText: 'Out for Delivery',
-    statusType: 'out',
-    origin: 'Pasig City Hub',
-    destination: 'Quezon City Residential',
-    eta: 'Today by 2:30 PM',
-    events: [
-      { status: 'done', title: 'Package Received from Sender', time: 'Yesterday 3:00 PM', location: 'Pasig Dropoff Center' },
-      { status: 'done', title: 'Sorted & Prepared for Route', time: 'Today 6:30 AM', location: 'East Manila Delivery Station' },
-      { status: 'active', title: 'Assigned to Courier Juan D.', time: 'Today 8:15 AM', location: 'Courier En Route' },
-      { status: 'upcoming', title: 'Delivered to Recipient', time: 'Pending confirmation', location: 'Destination Address' },
-    ],
-  },
-  'SPX-77402': {
-    waybillNo: 'SPX-77402',
-    statusText: 'Delivered',
-    statusType: 'delivered',
-    origin: 'Davao City Hub',
-    destination: 'Cagayan de Oro Branch',
-    eta: 'Delivered',
-    events: [
-      { status: 'done', title: 'Shipment Created', time: 'Sept 8, 2026', location: 'Davao Southern Hub' },
-      { status: 'done', title: 'Sorted and Dispatched', time: 'Sept 9, 2026', location: 'Mindanao Regional Freight' },
-      { status: 'done', title: 'Package Delivered & Signed', time: 'Sept 10, 2026 11:20 AM', location: 'CDO Downtown Office' },
-    ],
-  },
-};
 
 const ADVISORIES = [
   {
@@ -121,35 +59,15 @@ const ADVISORIES = [
 ];
 
 export const PublicWebsite: React.FC = () => {
-  const { triggerToast } = useToast();
   const [alertVisible, setAlertVisible] = useState(true);
-  const [waybillInput, setWaybillInput] = useState('');
-  const [trackingResult, setTrackingResult] = useState<WaybillResult | null>(null);
-  const [trackingError, setTrackingError] = useState<string | null>(null);
   const [openAdvisoryId, setOpenAdvisoryId] = useState<string | null>('adv-1');
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('top');
-  const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleOpenTrackModal = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    setIsTrackModalOpen(true);
-    setIsMobileMenuOpen(false);
-    if (!trackingResult && !waybillInput) {
-      setWaybillInput('SPX-98214');
-      setTrackingResult(SAMPLE_TRACKING_DATA['SPX-98214']);
-    }
-  };
-
-  const handleCloseTrackModal = () => {
-    setIsTrackModalOpen(false);
-  };
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsTrackModalOpen(false);
         setIsMobileMenuOpen(false);
       }
     };
@@ -158,7 +76,7 @@ export const PublicWebsite: React.FC = () => {
   }, []);
 
   React.useEffect(() => {
-    if (isTrackModalOpen || isMobileMenuOpen) {
+    if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -166,7 +84,7 @@ export const PublicWebsite: React.FC = () => {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isTrackModalOpen, isMobileMenuOpen]);
+  }, [isMobileMenuOpen]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -212,42 +130,6 @@ export const PublicWebsite: React.FC = () => {
   const [contactMessage, setContactMessage] = useState('');
   const [contactSuccess, setContactSuccess] = useState(false);
 
-  const handleTrackSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = waybillInput.trim().toUpperCase();
-    if (!query) {
-      setTrackingError('Please enter a valid waybill or tracking number.');
-      setTrackingResult(null);
-      return;
-    }
-
-    setTrackingError(null);
-    if (SAMPLE_TRACKING_DATA[query]) {
-      setTrackingResult(SAMPLE_TRACKING_DATA[query]);
-    } else {
-      // Generate realistic demo response for custom input
-      setTrackingResult({
-        waybillNo: query,
-        statusText: 'In Transit',
-        statusType: 'transit',
-        origin: 'Manila Regional Hub',
-        destination: 'Provincial Destination Hub',
-        eta: 'Estimated 1-2 business days',
-        events: [
-          { status: 'done', title: 'Waybill Generated & Received', time: 'Today 8:00 AM', location: 'Speedex Manila Hub' },
-          { status: 'done', title: 'Package Scanned & Sorted', time: 'Today 11:30 AM', location: 'Primary Sorting Center' },
-          { status: 'active', title: 'In Transit to Destination', time: 'Updated 20 mins ago', location: 'Linehaul Fleet 14' },
-          { status: 'upcoming', title: 'Out for Delivery', time: 'Pending Arrival', location: 'Local Delivery Station' },
-        ],
-      });
-    }
-  };
-
-  const handlePresetClick = (preset: string) => {
-    setWaybillInput(preset);
-    setTrackingError(null);
-    setTrackingResult(SAMPLE_TRACKING_DATA[preset] || null);
-  };
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -325,7 +207,7 @@ export const PublicWebsite: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="#track" className="spx-nav-link" onClick={handleOpenTrackModal}>
+                <a href={DMS_TRACKING_URL} className="spx-nav-link">
                   Track
                 </a>
               </li>
@@ -415,12 +297,9 @@ export const PublicWebsite: React.FC = () => {
                 </li>
                 <li>
                   <a
-                    href="#track"
+                    href={DMS_TRACKING_URL}
                     className="spx-mobile-nav-link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleOpenTrackModal();
-                    }}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <i className="ti ti-search" aria-hidden="true" />
                     <span>Track a Shipment</span>
@@ -497,7 +376,7 @@ export const PublicWebsite: React.FC = () => {
               </p>
 
               <div className="spx-hero-buttons">
-                <a href="#track" className="spx-btn-primary" onClick={handleOpenTrackModal}>
+                <a href={DMS_TRACKING_URL} className="spx-btn-primary">
                   <i className="ti ti-search" aria-hidden="true" />
                   <span>Track a Shipment</span>
                 </a>
@@ -818,7 +697,7 @@ export const PublicWebsite: React.FC = () => {
               <div className="spx-footer-col-title">Navigation</div>
               <ul className="spx-footer-links">
                 <li><a href="#top" className="spx-footer-link">Home</a></li>
-                <li><a href="#track" className="spx-footer-link" onClick={handleOpenTrackModal}>Track Delivery</a></li>
+                <li><a href={DMS_TRACKING_URL} className="spx-footer-link">Track Delivery</a></li>
                 <li><a href="#advisories" className="spx-footer-link">Advisories</a></li>
                 <li><a href="#about" className="spx-footer-link">About Us</a></li>
                 <li><a href="#contact" className="spx-footer-link">Contact</a></li>
@@ -857,215 +736,7 @@ export const PublicWebsite: React.FC = () => {
         </div>
       </footer>
 
-      {/* ── Dedicated Track a Shipment Modal ── */}
-      {isTrackModalOpen && (
-        <div
-          className="spx-modal-overlay"
-          onClick={handleCloseTrackModal}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="track-modal-title"
-        >
-          <div
-            className="spx-modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="spx-modal-header">
-              <div className="spx-modal-header-icon">
-                <i className="ti ti-truck-delivery" aria-hidden="true" />
-              </div>
-              <div className="spx-modal-header-text">
-                <h2 id="track-modal-title" className="spx-modal-title">Track a Shipment</h2>
-                <p className="spx-modal-sub">Real-time express parcel tracking across nationwide Speedex hubs.</p>
-              </div>
-              <button
-                type="button"
-                className="spx-modal-close-btn"
-                onClick={handleCloseTrackModal}
-                aria-label="Close tracking modal"
-              >
-                <i className="ti ti-x" aria-hidden="true" />
-              </button>
-            </div>
 
-            {/* Modal Body */}
-            <div className="spx-modal-body">
-              {/* Search Form */}
-              <form onSubmit={handleTrackSubmit} className="spx-track-modal-form">
-                <div className="spx-track-input-wrapper">
-                  <i className="ti ti-search spx-track-search-icon" aria-hidden="true" />
-                  <input
-                    type="text"
-                    className="spx-track-input"
-                    placeholder="Enter waybill number (e.g. SPX-98214)"
-                    value={waybillInput}
-                    onChange={(e) => setWaybillInput(e.target.value)}
-                    autoFocus
-                  />
-                  {waybillInput && (
-                    <button
-                      type="button"
-                      className="spx-track-clear-btn"
-                      onClick={() => {
-                        setWaybillInput('');
-                        setTrackingError(null);
-                      }}
-                      aria-label="Clear input"
-                    >
-                      <i className="ti ti-x" aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-                <button type="submit" className="spx-btn-primary spx-track-submit-btn">
-                  <i className="ti ti-arrow-right" aria-hidden="true" />
-                  <span>Track</span>
-                </button>
-              </form>
-
-              {/* Quick Presets */}
-              <div className="spx-track-presets">
-                <span className="spx-presets-label">Quick samples:</span>
-                <div className="spx-preset-chips">
-                  <button
-                    type="button"
-                    className={`spx-preset-chip ${waybillInput === 'SPX-98214' ? 'is-active' : ''}`}
-                    onClick={() => handlePresetClick('SPX-98214')}
-                  >
-                    SPX-98214 (In Transit)
-                  </button>
-                  <button
-                    type="button"
-                    className={`spx-preset-chip ${waybillInput === 'SPX-50123' ? 'is-active' : ''}`}
-                    onClick={() => handlePresetClick('SPX-50123')}
-                  >
-                    SPX-50123 (Out for Delivery)
-                  </button>
-                  <button
-                    type="button"
-                    className={`spx-preset-chip ${waybillInput === 'SPX-77402' ? 'is-active' : ''}`}
-                    onClick={() => handlePresetClick('SPX-77402')}
-                  >
-                    SPX-77402 (Delivered)
-                  </button>
-                </div>
-              </div>
-
-              {/* Error message */}
-              {trackingError && (
-                <div className="spx-track-error-alert" role="alert">
-                  <i className="ti ti-alert-circle" aria-hidden="true" />
-                  <span>{trackingError}</span>
-                </div>
-              )}
-
-              {/* Result view */}
-              {trackingResult && (
-                <div className="spx-track-result-card">
-                  {/* Summary Bar */}
-                  <div className="spx-track-summary-bar">
-                    <div>
-                      <span className="spx-track-wb-label">WAYBILL NUMBER</span>
-                      <div className="spx-track-wb-number">
-                        <span>{trackingResult.waybillNo}</span>
-                        <button
-                          type="button"
-                          className="spx-track-copy-btn"
-                          onClick={() => {
-                            navigator.clipboard?.writeText(trackingResult.waybillNo);
-                            triggerToast('success', 'Copied!', `Waybill ${trackingResult.waybillNo} copied to clipboard.`);
-                          }}
-                          title="Copy waybill number"
-                        >
-                          <i className="ti ti-copy" aria-hidden="true" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="spx-track-badge-group">
-                      <span
-                        className={`spx-track-status-tag ${
-                          trackingResult.statusType === 'delivered'
-                            ? 'spx-tag-delivered'
-                            : trackingResult.statusType === 'out'
-                            ? 'spx-tag-out'
-                            : 'spx-tag-transit'
-                        }`}
-                      >
-                        <i
-                          className={
-                            trackingResult.statusType === 'delivered'
-                              ? 'ti ti-circle-check'
-                              : trackingResult.statusType === 'out'
-                              ? 'ti ti-truck-delivery'
-                              : 'ti ti-truck'
-                          }
-                          aria-hidden="true"
-                        />
-                        <span>{trackingResult.statusText}</span>
-                      </span>
-                      <span className="spx-track-eta">ETA: {trackingResult.eta}</span>
-                    </div>
-                  </div>
-
-                  {/* Route */}
-                  <div className="spx-track-route-row">
-                    <div className="spx-route-hub">
-                      <i className="ti ti-building" aria-hidden="true" />
-                      <div>
-                        <span className="spx-route-label">Origin</span>
-                        <strong>{trackingResult.origin}</strong>
-                      </div>
-                    </div>
-                    <div className="spx-route-arrow">
-                      <i className="ti ti-arrow-right" aria-hidden="true" />
-                    </div>
-                    <div className="spx-route-hub">
-                      <i className="ti ti-map-pin" aria-hidden="true" />
-                      <div>
-                        <span className="spx-route-label">Destination</span>
-                        <strong>{trackingResult.destination}</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Events Timeline */}
-                  <div className="spx-timeline-wrap">
-                    <h4 className="spx-timeline-heading">Delivery History</h4>
-                    <ol className="spx-timeline">
-                      {trackingResult.events.map((evt, idx) => (
-                        <li key={idx} className={`spx-timeline-item ${evt.status}`}>
-                          <span className="spx-timeline-node" aria-hidden="true" />
-                          <span className="spx-timeline-line" aria-hidden="true" />
-                          <div className="spx-timeline-title">{evt.title}</div>
-                          <div className="spx-timeline-meta">
-                            <span>{evt.location}</span>
-                            <span className="spx-timeline-dot">·</span>
-                            <span>{evt.time}</span>
-                          </div>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="spx-modal-footer">
-              <span className="spx-modal-footer-note">
-                <i className="ti ti-shield-check" aria-hidden="true" /> Verified with Speedex Central Tracking Dispatch
-              </span>
-              <button
-                type="button"
-                className="spx-btn-secondary"
-                onClick={handleCloseTrackModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

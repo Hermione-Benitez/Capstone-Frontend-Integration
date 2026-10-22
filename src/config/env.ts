@@ -20,6 +20,12 @@ export const DMS_URL = normalizeUrl(
   'https://delivery-system-capstone-beige.vercel.app'
 );
 
+// Delivery Management System (DMS) Public Tracking URL
+export const DMS_TRACKING_URL = normalizeUrl(
+  import.meta.env.VITE_DMS_TRACKING_URL,
+  'https://delivery-system-capstone-beige.vercel.app/tracking'
+);
+
 // Financial Operations Management System (FOMS) URL
 export const FOMS_URL = normalizeUrl(
   import.meta.env.VITE_FOMS_URL,
