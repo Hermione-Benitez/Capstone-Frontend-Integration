@@ -36,11 +36,34 @@ export const PortalPage: React.FC = () => {
     }
 
     // 1. Check if auth tokens are passed via URL hash or search parameters
+    const originSystem = (searchParams.get('system') || hashParams.get('system') || '').toLowerCase();
     const urlTokens = parseAuthFromUrl();
 
     if (urlTokens && urlTokens.authToken) {
-      // Save tokens into localStorage
-      saveAuthSession(urlTokens);
+      if (originSystem === 'dms') {
+        saveAuthSession({
+          ...urlTokens,
+          systemTokens: {
+            dms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
+          }
+        });
+      } else if (originSystem === 'stars') {
+        saveAuthSession({
+          ...urlTokens,
+          systemTokens: {
+            stars: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
+          }
+        });
+      } else if (originSystem === 'foms') {
+        saveAuthSession({
+          ...urlTokens,
+          systemTokens: {
+            foms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
+          }
+        });
+      } else {
+        saveAuthSession(urlTokens);
+      }
 
       // Clean the address bar without triggering page refresh
       window.history.replaceState(null, '', window.location.pathname);

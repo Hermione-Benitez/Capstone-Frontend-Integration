@@ -1,5 +1,11 @@
 import { STARS_URL, SUBSYSTEM_URLS } from '../config/env';
 
+export interface SubsystemTokenPair {
+  token: string;
+  refreshToken?: string;
+  role?: string;
+}
+
 export interface AuthSession {
   authToken: string;
   refreshToken: string;
@@ -8,6 +14,11 @@ export interface AuthSession {
   employeeName: string;
   allowedSystems?: string[];
   contactNumber?: string;
+  systemTokens?: {
+    stars?: SubsystemTokenPair;
+    dms?: SubsystemTokenPair;
+    foms?: SubsystemTokenPair;
+  };
 }
 
 export const AUTH_STORAGE_KEYS = {
@@ -21,6 +32,7 @@ export const AUTH_STORAGE_KEYS = {
   EMPLOYEE_NAME: 'employeeName',
   ALLOWED_SYSTEMS: 'allowedSystems',
   CONTACT_NUMBER: 'contactNumber',
+  SYSTEM_TOKENS: 'speedex_system_tokens',
 } as const;
 
 /**
@@ -301,6 +313,16 @@ export function getStoredAuthSession(): AuthSession | null {
     localStorage.getItem('mobile') ||
     '';
 
+  const rawSystemTokens = localStorage.getItem(AUTH_STORAGE_KEYS.SYSTEM_TOKENS);
+  let systemTokens: AuthSession['systemTokens'] = undefined;
+  if (rawSystemTokens) {
+    try {
+      systemTokens = JSON.parse(rawSystemTokens);
+    } catch {
+      // ignore
+    }
+  }
+
   return {
     authToken,
     refreshToken,
@@ -309,6 +331,7 @@ export function getStoredAuthSession(): AuthSession | null {
     employeeName,
     allowedSystems,
     contactNumber: normalizePhMobile(contactNumber),
+    ...(systemTokens ? { systemTokens } : {}),
   };
 }
 
@@ -353,6 +376,16 @@ export function saveAuthSession(data: Partial<AuthSession>): void {
       localStorage.setItem('contact', normalized);
     }
   }
+  if (data.systemTokens) {
+    try {
+      const existingRaw = localStorage.getItem(AUTH_STORAGE_KEYS.SYSTEM_TOKENS);
+      const existing = existingRaw ? JSON.parse(existingRaw) : {};
+      const merged = { ...existing, ...data.systemTokens };
+      localStorage.setItem(AUTH_STORAGE_KEYS.SYSTEM_TOKENS, JSON.stringify(merged));
+    } catch {
+      localStorage.setItem(AUTH_STORAGE_KEYS.SYSTEM_TOKENS, JSON.stringify(data.systemTokens));
+    }
+  }
 }
 
 /**
@@ -376,6 +409,7 @@ export function clearAuthSession(): void {
   localStorage.removeItem('name');
   localStorage.removeItem(AUTH_STORAGE_KEYS.ALLOWED_SYSTEMS);
   localStorage.removeItem(AUTH_STORAGE_KEYS.CONTACT_NUMBER);
+  localStorage.removeItem(AUTH_STORAGE_KEYS.SYSTEM_TOKENS);
   localStorage.removeItem('contactNumber');
   localStorage.removeItem('contact_number');
   localStorage.removeItem('phoneNumber');
@@ -408,10 +442,14 @@ export function getSubsystemRedirectUrl(
     ...(session || {}),
   };
 
-  const baseUrl = SUBSYSTEM_URLS[systemKey.toLowerCase()] || STARS_URL;
-  const authToken = currentSession.authToken || '';
-  const refreshToken = currentSession.refreshToken || '';
-  const role = currentSession.userRole || '';
+  const normalizedKey = systemKey.toLowerCase() as 'stars' | 'dms' | 'foms';
+  const baseUrl = SUBSYSTEM_URLS[normalizedKey] || STARS_URL;
+
+  // Use subsystem-specific token pair if present, else fallback to primary session token
+  const specificTokenPair = currentSession.systemTokens?.[normalizedKey];
+  const authToken = specificTokenPair?.token || currentSession.authToken || '';
+  const refreshToken = specificTokenPair?.refreshToken || currentSession.refreshToken || '';
+  const role = specificTokenPair?.role || currentSession.userRole || '';
   const employeeId = currentSession.employeeId || '';
   const employeeName = currentSession.employeeName || '';
   const allowedSystems = currentSession.allowedSystems || [];
@@ -444,9 +482,9 @@ export function getSubsystemRedirectUrl(
   if (allowedSystems.length > 0) {
     params.set('allowedSystems', allowedSystems.join(','));
   }
+  params.set('system', normalizedKey);
 
   const queryString = params.toString();
-  const normalizedKey = systemKey.toLowerCase();
   let targetPath = '/';
   if (normalizedKey === 'dms') {
     const isDriver = role.toUpperCase().includes('DRIVER') || role.toUpperCase().includes('COURIER') || role.toUpperCase().includes('RIDER');

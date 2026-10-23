@@ -295,6 +295,82 @@ export default function LoginPage() {
               fullName: fullName || cleanId,
             };
 
+            const systemTokens: NonNullable<AuthSession['systemTokens']> = {
+              stars: {
+                token: data.accessToken || data.token || '',
+                refreshToken: data.refreshToken || '',
+                role: data.role || 'Staff',
+              },
+            };
+
+            // Companion Authentication: Authenticate with DMS if access is authorized
+            if (allowedList.includes('DMS')) {
+              const dmsCandidates = getBackendCandidates('dms');
+              for (const candidate of dmsCandidates) {
+                try {
+                  const dmsRes = await fetch(`${candidate}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      employeeId: cleanId,
+                      username: cleanId,
+                      identifier: cleanId,
+                      password,
+                    }),
+                    signal: abortController.signal,
+                  });
+                  const rawDms = await dmsRes.json().catch(() => null);
+                  if (dmsRes.ok && rawDms?.token) {
+                    let dmsRole = rawDms.role;
+                    const claims = parseJwtPayload(rawDms.token);
+                    if (claims) {
+                      dmsRole = dmsRole || claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || claims.role;
+                    }
+                    systemTokens.dms = {
+                      token: rawDms.token,
+                      refreshToken: rawDms.refreshToken || '',
+                      role: dmsRole,
+                    };
+                    break;
+                  }
+                } catch (dmsErr) {
+                  console.warn('Could not authenticate simultaneously with DMS:', dmsErr);
+                }
+              }
+            }
+
+            // Companion Authentication: Authenticate with FOMS if access is authorized
+            if (allowedList.includes('FOMS')) {
+              const fomsCandidates = getBackendCandidates('foms');
+              for (const candidate of fomsCandidates) {
+                try {
+                  const fomsRes = await fetch(`${candidate}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      employeeId: cleanId,
+                      employeeNumber: cleanId,
+                      password,
+                    }),
+                    signal: abortController.signal,
+                  });
+                  const rawFoms = await fomsRes.json().catch(() => null);
+                  const fomsData = rawFoms?.data || rawFoms;
+                  const fToken = fomsData?.accessToken || fomsData?.tokens?.accessToken || fomsData?.token;
+                  if (fomsRes.ok && fToken) {
+                    systemTokens.foms = {
+                      token: fToken,
+                      refreshToken: fomsData?.refreshToken || fomsData?.tokens?.refreshToken || '',
+                      role: fomsData?.role || fomsData?.user?.role,
+                    };
+                    break;
+                  }
+                } catch (fomsErr) {
+                  console.warn('Could not authenticate simultaneously with FOMS:', fomsErr);
+                }
+              }
+            }
+
             sessionPayload = {
               authToken: data.accessToken || data.token || '',
               refreshToken: data.refreshToken || '',
@@ -303,6 +379,7 @@ export default function LoginPage() {
               employeeName: fullName || cleanId,
               allowedSystems: allowedList,
               contactNumber: normalizedContact,
+              systemTokens,
             };
             break;
           } else if (rawStars?.message) {
@@ -388,6 +465,13 @@ export default function LoginPage() {
                 employeeId: cleanId,
                 employeeName: employeeName,
                 allowedSystems: allowedList,
+                systemTokens: {
+                  dms: {
+                    token: rawDms.token,
+                    refreshToken: rawDms.refreshToken || '',
+                    role: userRole,
+                  },
+                },
               };
               break;
             } else if (rawDms?.message) {
@@ -433,6 +517,13 @@ export default function LoginPage() {
                 employeeId: user.employeeId || cleanId,
                 employeeName: user.fullName || user.name || cleanId,
                 allowedSystems: ['FOMS'],
+                systemTokens: {
+                  foms: {
+                    token: token,
+                    refreshToken: fomsData.refreshToken || fomsData.tokens?.refreshToken || '',
+                    role: user.role || 'Accountant',
+                  },
+                },
               };
               break;
             } else if (rawFoms?.message || rawFoms?.error) {
