@@ -15,6 +15,7 @@ const PrivacyNoticePage = lazy(() => import("./pages/PrivacyNoticePage"));
 const EmailVerificationPage = lazy(() => import("./pages/EmailVerificationPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const LockedAccountPage = lazy(() => import("./pages/LockedAccountPage"));
 
 function AppRoutes() {
   return (
@@ -31,6 +32,8 @@ function AppRoutes() {
 
         {/* Unified Central Authentication & Onboarding Gateway */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/locked-account" element={<LockedAccountPage />} />
+        <Route path="/account-locked" element={<LockedAccountPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />

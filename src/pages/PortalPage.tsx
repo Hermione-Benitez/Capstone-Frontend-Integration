@@ -10,6 +10,7 @@ import {
   getAvatarInitials,
   type AuthSession,
 } from '../utils/auth';
+import { checkRateLimit } from '../utils/rateLimiter';
 import { useCentralSessionTimeout } from '../hooks/useCentralSessionTimeout';
 
 export const PortalPage: React.FC = () => {
@@ -90,6 +91,22 @@ export const PortalPage: React.FC = () => {
       // Unauthenticated user - redirect to Central Login
       setIsCheckingAuth(false);
       navigate('/login', { replace: true });
+      return;
+    }
+
+    // 3. Ensure account is not locked out
+    const lockStatus = checkRateLimit(currentSession.employeeId);
+    if (lockStatus.isLocked) {
+      clearAuthSession();
+      setIsCheckingAuth(false);
+      navigate(`/locked-account?employeeId=${encodeURIComponent(currentSession.employeeId)}`, {
+        state: {
+          employeeId: currentSession.employeeId,
+          remainingSeconds: lockStatus.remainingSeconds,
+          lockedUntil: lockStatus.lockedUntil,
+        },
+        replace: true,
+      });
       return;
     }
 

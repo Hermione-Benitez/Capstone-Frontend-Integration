@@ -14,7 +14,7 @@ import {
   Package,
 } from 'lucide-react';
 import { clearAuthSession, saveAuthSession, extractContactNumber, normalizePhMobile, parseJwtPayload, type AuthSession } from '../utils/auth';
-import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '../utils/rateLimiter';
+import { checkRateLimit, recordFailedAttempt, resetRateLimit, forceLockAccount } from '../utils/rateLimiter';
 import { prewarmBackend, getActiveBackendUrl, getBackendCandidates } from '../utils/loadBalancer';
 import LegalDocumentModal, { type LegalDocType } from '../components/LegalDocumentModal';
 import './LoginPage.css';
@@ -130,11 +130,17 @@ export default function LoginPage() {
       return;
     }
 
-    // Check rate limit status
+    // Check rate limit & lockout status
     const rateStatus = checkRateLimit(cleanId);
     if (rateStatus.isLocked) {
-      setLockoutSeconds(rateStatus.remainingSeconds);
-      setErrorMessage(`Too many failed attempts. Please wait ${rateStatus.remainingSeconds}s before trying again.`);
+      navigate(`/locked-account?employeeId=${encodeURIComponent(cleanId)}`, {
+        state: {
+          employeeId: cleanId,
+          remainingSeconds: rateStatus.remainingSeconds,
+          lockedUntil: rateStatus.lockedUntil,
+        },
+        replace: true,
+      });
       return;
     }
 
@@ -534,12 +540,39 @@ export default function LoginPage() {
       }
 
       if (!authSuccess || !sessionPayload) {
-        const failStatus = recordFailedAttempt(cleanId);
+        // If server indicated an explicit account lockout
+        if (
+          failureReason.toLowerCase().includes('locked') ||
+          failureReason.toLowerCase().includes('lockout')
+        ) {
+          const lockStatus = forceLockAccount(cleanId, undefined, failureReason);
+          navigate(`/locked-account?employeeId=${encodeURIComponent(cleanId)}`, {
+            state: {
+              employeeId: cleanId,
+              remainingSeconds: lockStatus.remainingSeconds,
+              lockedUntil: lockStatus.lockedUntil,
+            },
+            replace: true,
+          });
+          return;
+        }
+
+        const failStatus = recordFailedAttempt(cleanId, failureReason);
         if (failStatus.isLocked) {
-          setLockoutSeconds(failStatus.remainingSeconds);
-          setErrorMessage(`Account locked due to repeated failures. Please wait ${failStatus.remainingSeconds}s.`);
+          // 5 consecutive failed attempts reached: proceed directly to locked account page
+          navigate(`/locked-account?employeeId=${encodeURIComponent(cleanId)}`, {
+            state: {
+              employeeId: cleanId,
+              remainingSeconds: failStatus.remainingSeconds,
+              lockedUntil: failStatus.lockedUntil,
+            },
+            replace: true,
+          });
+          return;
         } else {
-          setErrorMessage(`${failureReason} (${failStatus.attemptsLeft} attempts remaining)`);
+          setErrorMessage(
+            `${failureReason} (${failStatus.attemptsLeft} attempt${failStatus.attemptsLeft === 1 ? '' : 's'} remaining before account lockout)`
+          );
         }
         return;
       }
