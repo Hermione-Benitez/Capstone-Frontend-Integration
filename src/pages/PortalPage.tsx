@@ -43,20 +43,27 @@ export const PortalPage: React.FC = () => {
 
     if (urlTokens && urlTokens.authToken) {
       const storedAllowed = localStorage.getItem('allowedSystems');
+      const storedAllowedList = storedAllowed
+        ? storedAllowed.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
+        : [];
+      const incomingAllowedList = urlTokens.allowedSystems || [];
+
+      // Combine allowed systems so we never lose multi-system scope
+      const combinedAllowed = Array.from(
+        new Set([...storedAllowedList, ...incomingAllowedList])
+      );
+
       const fallbackAllowed =
-        urlTokens.allowedSystems ||
-        (storedAllowed ? undefined : (
-          originSystem === 'dms'
-            ? (urlTokens.employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['DMS'])
-            : originSystem === 'foms'
-            ? (urlTokens.employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'])
-            : (urlTokens.employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['STARS'])
-        ));
+        combinedAllowed.length > 0
+          ? combinedAllowed
+          : (urlTokens.employeeId === '0000'
+              ? ['STARS', 'DMS', 'FOMS']
+              : [originSystem ? originSystem.toUpperCase() : 'STARS']);
 
       if (originSystem === 'dms') {
         saveAuthSession({
           ...urlTokens,
-          ...(fallbackAllowed ? { allowedSystems: fallbackAllowed } : {}),
+          allowedSystems: fallbackAllowed,
           systemTokens: {
             dms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
           }
@@ -64,7 +71,7 @@ export const PortalPage: React.FC = () => {
       } else if (originSystem === 'stars') {
         saveAuthSession({
           ...urlTokens,
-          ...(fallbackAllowed ? { allowedSystems: fallbackAllowed } : {}),
+          allowedSystems: fallbackAllowed,
           systemTokens: {
             stars: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
           }
@@ -72,13 +79,16 @@ export const PortalPage: React.FC = () => {
       } else if (originSystem === 'foms') {
         saveAuthSession({
           ...urlTokens,
-          ...(fallbackAllowed ? { allowedSystems: fallbackAllowed } : {}),
+          allowedSystems: fallbackAllowed,
           systemTokens: {
             foms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
           }
         });
       } else {
-        saveAuthSession(urlTokens);
+        saveAuthSession({
+          ...urlTokens,
+          allowedSystems: fallbackAllowed,
+        });
       }
 
       // Clean the address bar without triggering page refresh
@@ -111,9 +121,29 @@ export const PortalPage: React.FC = () => {
       return;
     }
 
-    // 4. Auto-bypass portal if account has strictly ONE authorized subsystem
+    // 4. Handle Subsystem Return (Logout) vs Portal Landing Logic
     const singleSubsystem = getPrimarySubsystem(currentSession);
-    if (singleSubsystem && currentSession.employeeId !== '0000') {
+    const isSingleSystem = !!singleSubsystem && currentSession.employeeId !== '0000';
+
+    if (originSystem) {
+      // User just returned from logging out of a subsystem (STARS, DMS, or FOMS)
+      if (isSingleSystem) {
+        // Accounts tied strictly to ONE system must go directly to Central Login page upon logout
+        clearAuthSession();
+        setIsCheckingAuth(false);
+        navigate(`/login?action=logout&reason=logged_out&system=${encodeURIComponent(originSystem)}`, { replace: true });
+        return;
+      }
+
+      // Accounts tied to MORE than one system return to the Landing Page (/portal) so they can switch systems.
+      // Auto-redirect is suppressed so they remain on /portal and can choose an authorized system.
+      setSession(currentSession);
+      setIsCheckingAuth(false);
+      return;
+    }
+
+    // 5. Direct navigation to /portal (e.g. user manually opens /portal while logged in)
+    if (isSingleSystem) {
       redirectToSubsystem(singleSubsystem, currentSession);
       return;
     }

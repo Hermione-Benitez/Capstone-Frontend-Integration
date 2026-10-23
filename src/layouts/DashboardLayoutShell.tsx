@@ -56,7 +56,7 @@ export const DashboardLayoutShell: React.FC = () => {
 
   const handleLogout = () => {
     clearAuthSession();
-    navigate('/');
+    navigate('/login?action=logout&reason=logged_out', { replace: true });
   };
 
   return (
