@@ -222,9 +222,59 @@
 /* ── Cards Grid ───────────────────────────────────────────────── */
 .sys-sel-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 22px;
+  width: 100%;
+  justify-content: center;
 }
+
+@media (min-width: 900px) {
+  .sys-sel-cards[data-count="1"] {
+    grid-template-columns: minmax(320px, 440px);
+    justify-content: center;
+  }
+  .sys-sel-cards[data-count="2"] {
+    grid-template-columns: repeat(2, minmax(320px, 460px));
+    justify-content: center;
+  }
+  .sys-sel-cards[data-count="3"] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.sys-sel-empty-card {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.sys-sel-empty-card i {
+  font-size: 38px;
+  color: #ef4444;
+}
+
+.sys-sel-empty-card h3 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.sys-sel-empty-card p {
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  max-width: 440px;
+  margin: 0;
+  line-height: 1.5;
+}
+
 
 /* ── System Card ──────────────────────────────────────────────── */
 .sys-card {

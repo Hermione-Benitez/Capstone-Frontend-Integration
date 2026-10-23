@@ -13,7 +13,16 @@ import {
   RefreshCw,
   Package,
 } from 'lucide-react';
-import { clearAuthSession, saveAuthSession, extractContactNumber, normalizePhMobile, parseJwtPayload, type AuthSession } from '../utils/auth';
+import {
+  clearAuthSession,
+  saveAuthSession,
+  extractContactNumber,
+  normalizePhMobile,
+  parseJwtPayload,
+  redirectToSubsystem,
+  getPrimarySubsystem,
+  type AuthSession,
+} from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit, forceLockAccount } from '../utils/rateLimiter';
 import { prewarmBackend, getActiveBackendUrl, getBackendCandidates } from '../utils/loadBalancer';
 import LegalDocumentModal, { type LegalDocType } from '../components/LegalDocumentModal';
@@ -617,7 +626,15 @@ export default function LoginPage() {
         return;
       }
 
-      // Fully onboarded user: Navigate to Central Landing Page (/portal)
+      // Check single-system vs multi-system access
+      const singleSubsystem = getPrimarySubsystem(sessionPayload);
+      if (singleSubsystem && cleanId !== '0000') {
+        // Account has authorization for strictly ONE system: bypass the portal and enter dashboard immediately
+        redirectToSubsystem(singleSubsystem, sessionPayload);
+        return;
+      }
+
+      // Fully onboarded multi-system user (or superadmin 0000): Navigate to Central Landing Page (/portal)
       startTransition(() => {
         navigate('/portal');
       });

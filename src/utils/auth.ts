@@ -516,3 +516,72 @@ export function redirectToSubsystem(
     window.location.href = url;
   }
 }
+
+/**
+ * Resolves the normalized list of systems an account is authorized to access.
+ * Root superadmin ('0000') always has access to all three ('stars', 'dms', 'foms').
+ */
+export function resolveAllowedSystems(
+  session?: Partial<AuthSession> | null
+): ('dms' | 'stars' | 'foms')[] {
+  const currentSession = session || getStoredAuthSession();
+  if (!currentSession) return ['stars'];
+
+  if (currentSession.employeeId === '0000') {
+    return ['dms', 'stars', 'foms'];
+  }
+
+  const rawList = currentSession.allowedSystems;
+  if (!rawList || rawList.length === 0) {
+    // If systemTokens contains specific tokens, infer allowed systems from present tokens
+    const tokens = currentSession.systemTokens;
+    if (tokens) {
+      const detected: ('dms' | 'stars' | 'foms')[] = [];
+      if (tokens.dms?.token) detected.push('dms');
+      if (tokens.stars?.token) detected.push('stars');
+      if (tokens.foms?.token) detected.push('foms');
+      if (detected.length > 0) return detected;
+    }
+    return ['stars'];
+  }
+
+  const normalized = new Set<'dms' | 'stars' | 'foms'>();
+  for (const item of rawList) {
+    const upper = item.trim().toUpperCase();
+    if (upper === 'DMS' || upper.includes('DMS')) normalized.add('dms');
+    if (upper === 'STARS' || upper.includes('STARS')) normalized.add('stars');
+    if (upper === 'FOMS' || upper.includes('FOMS')) normalized.add('foms');
+  }
+
+  // Preserve canonical display order: DMS, STARS, FOMS
+  const ordered: ('dms' | 'stars' | 'foms')[] = [];
+  if (normalized.has('dms')) ordered.push('dms');
+  if (normalized.has('stars')) ordered.push('stars');
+  if (normalized.has('foms')) ordered.push('foms');
+
+  return ordered.length > 0 ? ordered : ['stars'];
+}
+
+/**
+ * Checks if a specific system is authorized for the given session.
+ */
+export function isSubsystemAllowed(
+  systemKey: string,
+  session?: Partial<AuthSession> | null
+): boolean {
+  const allowed = resolveAllowedSystems(session);
+  const key = systemKey.trim().toLowerCase() as 'dms' | 'stars' | 'foms';
+  return allowed.includes(key);
+}
+
+/**
+ * Returns the single authorized subsystem key if the account only handles ONE system.
+ * Returns null if the account has multi-system access (e.g. 2 or 3 systems).
+ */
+export function getPrimarySubsystem(
+  session?: Partial<AuthSession> | null
+): ('dms' | 'stars' | 'foms') | null {
+  const allowed = resolveAllowedSystems(session);
+  return allowed.length === 1 ? allowed[0] : null;
+}
+

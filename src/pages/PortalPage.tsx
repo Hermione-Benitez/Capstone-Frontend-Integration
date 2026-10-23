@@ -8,6 +8,7 @@ import {
   clearAuthSession,
   redirectToSubsystem,
   getAvatarInitials,
+  getPrimarySubsystem,
   type AuthSession,
 } from '../utils/auth';
 import { checkRateLimit } from '../utils/rateLimiter';
@@ -107,6 +108,13 @@ export const PortalPage: React.FC = () => {
         },
         replace: true,
       });
+      return;
+    }
+
+    // 4. Auto-bypass portal if account has strictly ONE authorized subsystem
+    const singleSubsystem = getPrimarySubsystem(currentSession);
+    if (singleSubsystem && currentSession.employeeId !== '0000') {
+      redirectToSubsystem(singleSubsystem, currentSession);
       return;
     }
 
