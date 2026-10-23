@@ -60,36 +60,36 @@ export const PortalPage: React.FC = () => {
               ? ['STARS', 'DMS', 'FOMS']
               : [originSystem ? originSystem.toUpperCase() : 'STARS']);
 
+      const existingStoredSession = getStoredAuthSession();
+      const mergedSystemTokens = {
+        ...(existingStoredSession?.systemTokens || {}),
+      };
+
       if (originSystem === 'dms') {
-        saveAuthSession({
-          ...urlTokens,
-          allowedSystems: fallbackAllowed,
-          systemTokens: {
-            dms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
-          }
-        });
+        mergedSystemTokens.dms = {
+          token: urlTokens.authToken,
+          refreshToken: urlTokens.refreshToken,
+          role: urlTokens.userRole,
+        };
       } else if (originSystem === 'stars') {
-        saveAuthSession({
-          ...urlTokens,
-          allowedSystems: fallbackAllowed,
-          systemTokens: {
-            stars: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
-          }
-        });
+        mergedSystemTokens.stars = {
+          token: urlTokens.authToken,
+          refreshToken: urlTokens.refreshToken,
+          role: urlTokens.userRole,
+        };
       } else if (originSystem === 'foms') {
-        saveAuthSession({
-          ...urlTokens,
-          allowedSystems: fallbackAllowed,
-          systemTokens: {
-            foms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
-          }
-        });
-      } else {
-        saveAuthSession({
-          ...urlTokens,
-          allowedSystems: fallbackAllowed,
-        });
+        mergedSystemTokens.foms = {
+          token: urlTokens.authToken,
+          refreshToken: urlTokens.refreshToken,
+          role: urlTokens.userRole,
+        };
       }
+
+      saveAuthSession({
+        ...urlTokens,
+        allowedSystems: fallbackAllowed,
+        systemTokens: mergedSystemTokens,
+      });
 
       // Clean the address bar without triggering page refresh
       window.history.replaceState(null, '', window.location.pathname);
