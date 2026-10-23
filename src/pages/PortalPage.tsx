@@ -43,7 +43,13 @@ export const PortalPage: React.FC = () => {
 
     if (urlTokens && urlTokens.authToken) {
       const storedAllowed = localStorage.getItem('allowedSystems');
-      const storedAllowedList = storedAllowed
+      const storedEmployeeId = localStorage.getItem('employeeId');
+      const isSameUser =
+        !storedEmployeeId ||
+        !urlTokens.employeeId ||
+        storedEmployeeId.trim().toUpperCase() === urlTokens.employeeId.trim().toUpperCase();
+
+      const storedAllowedList = storedAllowed && isSameUser
         ? storedAllowed.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
         : [];
       const incomingAllowedList = urlTokens.allowedSystems || [];
