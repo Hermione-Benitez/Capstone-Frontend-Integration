@@ -63,6 +63,25 @@ export function normalizePhMobile(raw?: string | null): string {
 }
 
 /**
+ * Checks if the given employee ID corresponds to root superadmin.
+ * Canonicalizes '0000', 'EMP-000', 'EMP-0000', and variations.
+ */
+export function isSuperAdmin(id: string | null | undefined): boolean {
+  if (!id) return false;
+  const clean = id.trim().toUpperCase();
+  return clean === '0000' || clean === 'EMP-000' || clean === 'EMP-0000' || clean.replace(/^EMP-0*/, '') === '';
+}
+
+/**
+ * Normalizes an employee ID by stripping standard prefixes and canonicalizing superadmin to '0000'.
+ */
+export function normalizeEmployeeId(id: string | null | undefined): string {
+  if (!id) return '';
+  if (isSuperAdmin(id)) return '0000';
+  return id.trim().toUpperCase().replace(/^EMP-/, '');
+}
+
+/**
  * Safely parses claims payload from a JWT token (handles Base64URL and UTF-8 characters).
  */
 export function parseJwtPayload(token?: string | null): Record<string, any> | null {
@@ -308,11 +327,11 @@ export function getStoredAuthSession(): AuthSession | null {
   } else {
     // If no explicit allowedSystems stored, inspect active systemTokens to determine system scope
     if (systemTokens?.dms && !systemTokens?.stars && !systemTokens?.foms) {
-      allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['DMS'];
+      allowedSystems = isSuperAdmin(employeeId) ? ['STARS', 'DMS', 'FOMS'] : ['DMS'];
     } else if (systemTokens?.foms && !systemTokens?.stars && !systemTokens?.dms) {
-      allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'];
+      allowedSystems = isSuperAdmin(employeeId) ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'];
     } else {
-      allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['STARS'];
+      allowedSystems = isSuperAdmin(employeeId) ? ['STARS', 'DMS', 'FOMS'] : ['STARS'];
     }
   }
 
@@ -527,7 +546,7 @@ export function resolveAllowedSystems(
   const currentSession = session || getStoredAuthSession();
   if (!currentSession) return ['stars'];
 
-  if (currentSession.employeeId === '0000') {
+  if (isSuperAdmin(currentSession.employeeId)) {
     return ['dms', 'stars', 'foms'];
   }
 

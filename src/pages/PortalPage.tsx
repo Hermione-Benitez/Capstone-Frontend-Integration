@@ -10,6 +10,8 @@ import {
   redirectToSubsystem,
   getAvatarInitials,
   getPrimarySubsystem,
+  isSuperAdmin,
+  normalizeEmployeeId,
   type AuthSession,
 } from '../utils/auth';
 import { checkRateLimit } from '../utils/rateLimiter';
@@ -63,7 +65,7 @@ export const PortalPage: React.FC = () => {
       const isSameUser =
         !storedEmployeeId ||
         !urlTokens.employeeId ||
-        storedEmployeeId.trim().toUpperCase() === urlTokens.employeeId.trim().toUpperCase();
+        normalizeEmployeeId(storedEmployeeId) === normalizeEmployeeId(urlTokens.employeeId);
 
       const storedAllowedList = storedAllowed && isSameUser
         ? storedAllowed.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
@@ -75,15 +77,26 @@ export const PortalPage: React.FC = () => {
         new Set([...storedAllowedList, ...incomingAllowedList])
       );
 
+      const rawEmployeeId = urlTokens.employeeId || storedEmployeeId || '';
+      const isSuper = isSuperAdmin(rawEmployeeId);
+      const canonicalEmployeeId = isSuper ? '0000' : (storedEmployeeId || urlTokens.employeeId || '');
+
       const fallbackAllowed =
         combinedAllowed.length > 0
           ? combinedAllowed
-          : (urlTokens.employeeId === '0000'
+          : (isSuper
               ? ['STARS', 'DMS', 'FOMS']
               : [originSystem ? originSystem.toUpperCase() : 'STARS']);
 
-      const employeeId = urlTokens.employeeId || storedEmployeeId || '';
-      const isSingleSystemUser = (fallbackAllowed.length === 1 || (fallbackAllowed.length === 0 && employeeId !== '0000')) && employeeId !== '0000';
+      const existingStoredSession = getStoredAuthSession();
+      const hasMultipleStoredTokens = Object.keys(existingStoredSession?.systemTokens || {}).length > 1;
+
+      const isMultiSystemUser =
+        hasMultipleStoredTokens ||
+        fallbackAllowed.length > 1 ||
+        isSuper;
+
+      const isSingleSystemUser = !isMultiSystemUser;
 
       // CRITICAL: If a single-system user lands on /portal with URL tokens, they just logged out of their single subsystem!
       // Immediately clear all sessions and redirect to Central Login with logged_out status.
@@ -96,7 +109,6 @@ export const PortalPage: React.FC = () => {
         return;
       }
 
-      const existingStoredSession = getStoredAuthSession();
       const mergedSystemTokens = {
         ...(existingStoredSession?.systemTokens || {}),
       };
@@ -123,6 +135,7 @@ export const PortalPage: React.FC = () => {
 
       saveAuthSession({
         ...urlTokens,
+        employeeId: canonicalEmployeeId,
         allowedSystems: fallbackAllowed,
         systemTokens: mergedSystemTokens,
       });
@@ -159,7 +172,7 @@ export const PortalPage: React.FC = () => {
 
     // 4. Handle Subsystem Return (Logout) vs Portal Landing Logic
     const singleSubsystem = getPrimarySubsystem(currentSession);
-    const isSingleSystem = !!singleSubsystem && currentSession.employeeId !== '0000';
+    const isSingleSystem = !!singleSubsystem && !isSuperAdmin(currentSession.employeeId);
 
     if (originSystem) {
       // User just returned from logging out of a subsystem (STARS, DMS, or FOMS)

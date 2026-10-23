@@ -21,6 +21,7 @@ import {
   parseJwtPayload,
   redirectToSubsystem,
   getPrimarySubsystem,
+  isSuperAdmin,
   type AuthSession,
 } from '../utils/auth';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit, forceLockAccount } from '../utils/rateLimiter';
@@ -201,7 +202,7 @@ export default function LoginPage() {
 
             // Parse allowed systems
             let allowedList: string[] = ['STARS'];
-            if (cleanId === '0000') {
+            if (isSuperAdmin(cleanId)) {
               allowedList = ['STARS', 'DMS', 'FOMS'];
             } else if (data.allowedSystems) {
               allowedList = data.allowedSystems
@@ -514,7 +515,7 @@ export default function LoginPage() {
               // unless the account is root superadmin ('0000') or was explicitly granted multi-system access in STARS.
               // Note: DMS internal role ('ADMIN') and internal systemAccess ('All Systems') refer only to DMS internal
               // feature modules (Delivery Tracker, Operations, Client Portal), NOT cross-system access to STARS or FOMS.
-              const allowedList: string[] = cleanId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['DMS'];
+              const allowedList: string[] = isSuperAdmin(cleanId) ? ['STARS', 'DMS', 'FOMS'] : ['DMS'];
 
               sessionPayload = {
                 authToken: rawDms.token,
@@ -574,7 +575,7 @@ export default function LoginPage() {
                 userRole: user.role || 'Accountant',
                 employeeId: user.employeeId || cleanId,
                 employeeName: user.fullName || user.name || cleanId,
-                allowedSystems: cleanId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'],
+                allowedSystems: isSuperAdmin(cleanId) ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'],
                 systemTokens: {
                   foms: {
                     token: token,
@@ -646,7 +647,7 @@ export default function LoginPage() {
       saveAuthSession(sessionPayload);
 
       // Check if Onboarding is required (temporary password not yet changed)
-      if (isPasswordChanged === false && cleanId !== '0000') {
+      if (isPasswordChanged === false && !isSuperAdmin(cleanId)) {
         if (profileData) {
           try {
             sessionStorage.setItem('onboarding_profile', JSON.stringify(profileData));
@@ -675,7 +676,7 @@ export default function LoginPage() {
 
       // Check single-system vs multi-system access
       const singleSubsystem = getPrimarySubsystem(sessionPayload);
-      if (singleSubsystem && cleanId !== '0000') {
+      if (singleSubsystem && !isSuperAdmin(cleanId)) {
         // Account has authorization for strictly ONE system: bypass the portal and enter dashboard immediately
         redirectToSubsystem(singleSubsystem, sessionPayload);
         return;

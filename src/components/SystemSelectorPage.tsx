@@ -5,6 +5,7 @@
  */
 import React, { useState } from 'react';
 import './SystemSelectorPage.css';
+import { isSuperAdmin } from '../utils/auth';
 
 /* ── System Registry ─────────────────────────────────────────────── */
 
@@ -114,7 +115,7 @@ export const SystemSelectorPage: React.FC<SystemSelectorPageProps> = ({
 
   const isSystemAllowed = (sysKey: SystemKey): boolean => {
     // Master admin 0000 has access to all systems
-    if (profile.employeeId === '0000') return true;
+    if (isSuperAdmin(profile.employeeId)) return true;
     const keyUpper = sysKey.toUpperCase();
     return normalizedAllowed.some(
       (a) => a === keyUpper || (keyUpper === 'DMS' && a.includes('DMS')) || (keyUpper === 'STARS' && a.includes('STARS')) || (keyUpper === 'FOMS' && a.includes('FOMS'))
