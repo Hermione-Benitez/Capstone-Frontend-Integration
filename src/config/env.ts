@@ -29,7 +29,7 @@ export const DMS_TRACKING_URL = normalizeUrl(
 // Financial Operations Management System (FOMS) URL
 export const FOMS_URL = normalizeUrl(
   import.meta.env.VITE_FOMS_URL,
-  'https://fomsfrontend.vercel.app'
+  'https://foms-system-repository.vercel.app'
 );
 
 export const SUBSYSTEM_URLS: Record<string, string> = {
