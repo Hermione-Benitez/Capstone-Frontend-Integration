@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SystemSelectorPage, { type SystemKey } from '../components/SystemSelectorPage';
 import {
   parseAuthFromUrl,
+  parseJwtPayload,
   getStoredAuthSession,
   saveAuthSession,
   clearAuthSession,
@@ -38,10 +39,25 @@ export const PortalPage: React.FC = () => {
     }
 
     // 1. Check if auth tokens are passed via URL hash or search parameters
-    const originSystem = (searchParams.get('system') || hashParams.get('system') || '').toLowerCase();
+    let originSystem = (searchParams.get('system') || hashParams.get('system') || '').toLowerCase();
     const urlTokens = parseAuthFromUrl();
 
     if (urlTokens && urlTokens.authToken) {
+      if (!originSystem) {
+        // Fallback: Infer origin subsystem from token claims or user role
+        const claims = parseJwtPayload(urlTokens.authToken);
+        const iss = (claims?.iss || '').toLowerCase();
+        const aud = (claims?.aud || '').toLowerCase();
+        const role = (claims?.role || claims?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || urlTokens.userRole || '').toLowerCase();
+        if (iss.includes('foms') || aud.includes('foms') || role.includes('finance') || role.includes('accountant')) {
+          originSystem = 'foms';
+        } else if (iss.includes('dms') || aud.includes('dms') || role.includes('courier') || role.includes('driver')) {
+          originSystem = 'dms';
+        } else if (iss.includes('stars') || aud.includes('stars')) {
+          originSystem = 'stars';
+        }
+      }
+
       const storedAllowed = localStorage.getItem('allowedSystems');
       const storedEmployeeId = localStorage.getItem('employeeId');
       const isSameUser =
@@ -65,6 +81,20 @@ export const PortalPage: React.FC = () => {
           : (urlTokens.employeeId === '0000'
               ? ['STARS', 'DMS', 'FOMS']
               : [originSystem ? originSystem.toUpperCase() : 'STARS']);
+
+      const employeeId = urlTokens.employeeId || storedEmployeeId || '';
+      const isSingleSystemUser = (fallbackAllowed.length === 1 || (fallbackAllowed.length === 0 && employeeId !== '0000')) && employeeId !== '0000';
+
+      // CRITICAL: If a single-system user lands on /portal with URL tokens, they just logged out of their single subsystem!
+      // Immediately clear all sessions and redirect to Central Login with logged_out status.
+      if (isSingleSystemUser) {
+        clearAuthSession();
+        window.history.replaceState(null, '', window.location.pathname);
+        setIsCheckingAuth(false);
+        const targetSystem = originSystem || (fallbackAllowed.length === 1 ? fallbackAllowed[0].toLowerCase() : 'foms');
+        navigate(`/login?action=logout&reason=logged_out&system=${encodeURIComponent(targetSystem)}`, { replace: true });
+        return;
+      }
 
       const existingStoredSession = getStoredAuthSession();
       const mergedSystemTokens = {
@@ -149,11 +179,8 @@ export const PortalPage: React.FC = () => {
     }
 
     // 5. Direct navigation to /portal (e.g. user manually opens /portal while logged in)
-    if (isSingleSystem) {
-      redirectToSubsystem(singleSubsystem, currentSession);
-      return;
-    }
-
+    // IMPORTANT: Do NOT automatically bounce single-system users back to their dashboard.
+    // That caused infinite bounce loops during logout handoffs. Instead, render the portal with their single authorized system tile, allowing them to click "Enter System" or "Log Out".
     setSession(currentSession);
     setIsCheckingAuth(false);
   }, [navigate]);
