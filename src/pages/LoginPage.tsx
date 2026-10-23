@@ -448,15 +448,11 @@ export default function LoginPage() {
               }
 
               // Compute allowed systems for DMS accounts
-              let allowedList: string[] = ['DMS'];
-              const normAccess = (systemAccess || '').toLowerCase();
-              if (cleanId === '0000' || normAccess.includes('all') || userRole.toUpperCase() === 'ADMIN') {
-                allowedList = ['STARS', 'DMS', 'FOMS'];
-              } else if (normAccess.includes('operation')) {
-                allowedList = ['DMS', 'STARS'];
-              } else {
-                allowedList = ['DMS'];
-              }
+              // DMS-native accounts (such as EMP-001) are scoped exclusively to DMS,
+              // unless the account is root superadmin ('0000') or was explicitly granted multi-system access in STARS.
+              // Note: DMS internal role ('ADMIN') and internal systemAccess ('All Systems') refer only to DMS internal
+              // feature modules (Delivery Tracker, Operations, Client Portal), NOT cross-system access to STARS or FOMS.
+              const allowedList: string[] = cleanId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['DMS'];
 
               sessionPayload = {
                 authToken: rawDms.token,
@@ -516,7 +512,7 @@ export default function LoginPage() {
                 userRole: user.role || 'Accountant',
                 employeeId: user.employeeId || cleanId,
                 employeeName: user.fullName || user.name || cleanId,
-                allowedSystems: ['FOMS'],
+                allowedSystems: cleanId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'],
                 systemTokens: {
                   foms: {
                     token: token,

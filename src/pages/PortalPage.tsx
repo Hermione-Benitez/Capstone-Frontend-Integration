@@ -40,9 +40,21 @@ export const PortalPage: React.FC = () => {
     const urlTokens = parseAuthFromUrl();
 
     if (urlTokens && urlTokens.authToken) {
+      const storedAllowed = localStorage.getItem('allowedSystems');
+      const fallbackAllowed =
+        urlTokens.allowedSystems ||
+        (storedAllowed ? undefined : (
+          originSystem === 'dms'
+            ? (urlTokens.employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['DMS'])
+            : originSystem === 'foms'
+            ? (urlTokens.employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'])
+            : (urlTokens.employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['STARS'])
+        ));
+
       if (originSystem === 'dms') {
         saveAuthSession({
           ...urlTokens,
+          ...(fallbackAllowed ? { allowedSystems: fallbackAllowed } : {}),
           systemTokens: {
             dms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
           }
@@ -50,6 +62,7 @@ export const PortalPage: React.FC = () => {
       } else if (originSystem === 'stars') {
         saveAuthSession({
           ...urlTokens,
+          ...(fallbackAllowed ? { allowedSystems: fallbackAllowed } : {}),
           systemTokens: {
             stars: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
           }
@@ -57,6 +70,7 @@ export const PortalPage: React.FC = () => {
       } else if (originSystem === 'foms') {
         saveAuthSession({
           ...urlTokens,
+          ...(fallbackAllowed ? { allowedSystems: fallbackAllowed } : {}),
           systemTokens: {
             foms: { token: urlTokens.authToken, refreshToken: urlTokens.refreshToken, role: urlTokens.userRole }
           }

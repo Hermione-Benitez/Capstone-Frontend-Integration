@@ -285,6 +285,16 @@ export function getStoredAuthSession(): AuthSession | null {
     localStorage.getItem('name') ||
     'Speedex Staff';
 
+  const rawSystemTokens = localStorage.getItem(AUTH_STORAGE_KEYS.SYSTEM_TOKENS);
+  let systemTokens: AuthSession['systemTokens'] = undefined;
+  if (rawSystemTokens) {
+    try {
+      systemTokens = JSON.parse(rawSystemTokens);
+    } catch {
+      // ignore
+    }
+  }
+
   const rawAllowed = localStorage.getItem(AUTH_STORAGE_KEYS.ALLOWED_SYSTEMS);
   let allowedSystems: string[] = [];
   if (rawAllowed) {
@@ -296,8 +306,14 @@ export function getStoredAuthSession(): AuthSession | null {
       allowedSystems = rawAllowed.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
     }
   } else {
-    // Legacy / existing accounts without explicit allowedSystems default to STARS (or all systems for root 0000)
-    allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['STARS'];
+    // If no explicit allowedSystems stored, inspect active systemTokens to determine system scope
+    if (systemTokens?.dms && !systemTokens?.stars && !systemTokens?.foms) {
+      allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['DMS'];
+    } else if (systemTokens?.foms && !systemTokens?.stars && !systemTokens?.dms) {
+      allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['FOMS'];
+    } else {
+      allowedSystems = employeeId === '0000' ? ['STARS', 'DMS', 'FOMS'] : ['STARS'];
+    }
   }
 
   const contactNumber =
@@ -312,16 +328,6 @@ export function getStoredAuthSession(): AuthSession | null {
     localStorage.getItem('phone') ||
     localStorage.getItem('mobile') ||
     '';
-
-  const rawSystemTokens = localStorage.getItem(AUTH_STORAGE_KEYS.SYSTEM_TOKENS);
-  let systemTokens: AuthSession['systemTokens'] = undefined;
-  if (rawSystemTokens) {
-    try {
-      systemTokens = JSON.parse(rawSystemTokens);
-    } catch {
-      // ignore
-    }
-  }
 
   return {
     authToken,
