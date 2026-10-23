@@ -335,15 +335,37 @@ export default function LoginPage() {
                     signal: abortController.signal,
                   });
                   const rawDms = await dmsRes.json().catch(() => null);
-                  if (dmsRes.ok && rawDms?.token) {
-                    let dmsRole = rawDms.role;
-                    const claims = parseJwtPayload(rawDms.token);
+                  let dmsToken = rawDms?.token;
+                  let dmsRefreshToken = rawDms?.refreshToken || '';
+                  let dmsRole = rawDms?.role;
+
+                  if (!dmsToken && (data.accessToken || data.token)) {
+                    try {
+                      const ssoRes = await fetch(`${candidate}/api/auth/sso-exchange`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: data.accessToken || data.token }),
+                        signal: abortController.signal,
+                      });
+                      const ssoData = await ssoRes.json().catch(() => null);
+                      if (ssoData?.token) {
+                        dmsToken = ssoData.token;
+                        dmsRefreshToken = ssoData.refreshToken || '';
+                        dmsRole = ssoData.role;
+                      }
+                    } catch {
+                      // ignore
+                    }
+                  }
+
+                  if (dmsToken) {
+                    const claims = parseJwtPayload(dmsToken);
                     if (claims) {
                       dmsRole = dmsRole || claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || claims.role;
                     }
                     systemTokens.dms = {
-                      token: rawDms.token,
-                      refreshToken: rawDms.refreshToken || '',
+                      token: dmsToken,
+                      refreshToken: dmsRefreshToken,
                       role: dmsRole,
                     };
                     break;
@@ -365,18 +387,43 @@ export default function LoginPage() {
                     body: JSON.stringify({
                       employeeId: cleanId,
                       employeeNumber: cleanId,
+                      username: cleanId,
+                      identifier: cleanId,
                       password,
                     }),
                     signal: abortController.signal,
                   });
                   const rawFoms = await fomsRes.json().catch(() => null);
                   const fomsData = rawFoms?.data || rawFoms;
-                  const fToken = fomsData?.accessToken || fomsData?.tokens?.accessToken || fomsData?.token;
-                  if (fomsRes.ok && fToken) {
+                  let fToken = fomsData?.accessToken || fomsData?.tokens?.accessToken || fomsData?.token;
+                  let fRefreshToken = fomsData?.refreshToken || fomsData?.tokens?.refreshToken || '';
+                  let fRole = fomsData?.role || fomsData?.user?.role;
+
+                  if (!fToken && (data.accessToken || data.token)) {
+                    try {
+                      const ssoRes = await fetch(`${candidate}/api/auth/sso-exchange`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: data.accessToken || data.token }),
+                        signal: abortController.signal,
+                      });
+                      const ssoData = await ssoRes.json().catch(() => null);
+                      const unwrapped = ssoData?.data || ssoData;
+                      if (unwrapped?.accessToken || unwrapped?.token) {
+                        fToken = unwrapped.accessToken || unwrapped.token;
+                        fRefreshToken = unwrapped.refreshToken || '';
+                        fRole = unwrapped.role || unwrapped.user?.role;
+                      }
+                    } catch {
+                      // ignore
+                    }
+                  }
+
+                  if (fToken) {
                     systemTokens.foms = {
                       token: fToken,
-                      refreshToken: fomsData?.refreshToken || fomsData?.tokens?.refreshToken || '',
-                      role: fomsData?.role || fomsData?.user?.role,
+                      refreshToken: fRefreshToken,
+                      role: fRole,
                     };
                     break;
                   }
