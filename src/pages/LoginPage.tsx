@@ -914,11 +914,15 @@ export default function LoginPage() {
               alt="Speedex Warehouse Logistics Team"
               className="login-visual-img"
             />
-            <div className="login-visual-curve-mask" />
-            <div className="login-visual-tag">
-              <Package size={14} />
-              <span>Speedex Logistics Operations</span>
-            </div>
+            {/* Elegant organic convex curve divider (Starkfest Inspo) */}
+            <svg
+              className="login-visual-curve"
+              viewBox="0 0 40 500"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
+            </svg>
           </div>
         </div>
       </main>

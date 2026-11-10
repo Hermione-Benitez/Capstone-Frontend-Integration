@@ -11,8 +11,6 @@ import {
   ShieldCheck,
   ArrowRight,
   ArrowLeft,
-  Globe,
-  KeyRound,
 } from 'lucide-react';
 import { STARS_API_URL } from '../config/env';
 import './LoginPage.css';
@@ -35,68 +33,65 @@ const getPwChecks = (pw: string) => ({
   special: PW_RULES.hasSpecial.test(pw),
 });
 
-const isPasswordValid = (pw: string) => Object.values(getPwChecks(pw)).every(Boolean);
+const isPasswordValid = (pw: string) => {
+  const c = getPwChecks(pw);
+  return c.length && c.uppercase && c.lowercase && c.number && c.special;
+};
 
-const getStrength = (pw: string): { level: 0 | 1 | 2 | 3; label: string; color: string } => {
-  if (!pw) return { level: 0, label: '', color: '' };
-  const passed = Object.values(getPwChecks(pw)).filter(Boolean).length;
-  if (passed <= 2) return { level: 1, label: 'Weak', color: '#ef4444' };
-  if (passed <= 4) return { level: 2, label: 'Fair', color: '#f59e0b' };
-  return { level: 3, label: 'Strong', color: '#10b981' };
+const getStrength = (pw: string) => {
+  if (!pw) return { level: 0, label: '', color: '#e2e8f0' };
+  const c = getPwChecks(pw);
+  const met = Object.values(c).filter(Boolean).length;
+  if (met <= 2) return { level: 1, label: 'Weak', color: '#ef4444' };
+  if (met <= 4) return { level: 2, label: 'Moderate', color: '#f59e0b' };
+  return { level: 3, label: 'Strong (OWASP Compliant)', color: '#10b981' };
 };
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const token = (searchParams.get('token') ?? '').trim();
-  const tokenMissing = !token;
+  const token = searchParams.get('token') || '';
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
   const [touchedNew, setTouchedNew] = useState(false);
   const [touchedConfirm, setTouchedConfirm] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
-  const [redirectCountdown, setRedirectCountdown] = useState(3);
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
 
   const checks = getPwChecks(newPassword);
   const strength = getStrength(newPassword);
-  const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
+  const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
+  const tokenMissing = !token.trim();
 
-  // Auto redirect on success
+  // Redirect countdown on success
   useEffect(() => {
     if (!isDone) return;
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       setRedirectCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
+          clearInterval(interval);
           navigate('/login');
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, [isDone, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouchedNew(true);
-    setTouchedConfirm(true);
     setErrorMessage(null);
 
     if (tokenMissing) {
-      setErrorMessage('Reset token is missing or malformed. Please request a new link.');
-      return;
-    }
-    if (!newPassword) {
-      setErrorMessage('Please enter a new password.');
+      setErrorMessage('Reset token is missing from the URL. Please request a new link.');
       return;
     }
     if (!isPasswordValid(newPassword)) {
@@ -153,10 +148,6 @@ export default function ResetPasswordPage() {
             }}
           >
             <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
-            <div className="speedex-header-text">
-              <span className="brand-name">Speedex</span>
-              <span className="brand-sub">COURIER &amp; FORWARDER, INC.</span>
-            </div>
           </a>
           <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
             <button
@@ -167,65 +158,18 @@ export default function ResetPasswordPage() {
               <ArrowLeft size={14} />
               <span>Back to Login</span>
             </button>
-            <a
-              href="/"
-              className="speedex-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/');
-              }}
-            >
-              <Globe size={14} />
-              <span>Public Website</span>
-            </a>
           </nav>
         </div>
       </header>
 
-      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
-      <div className="login-page-split">
-        {/* LEFT PANEL */}
-        <aside className="login-left">
-          <div className="login-decorative-circle circle-1" />
-          <div className="login-decorative-circle circle-2" />
-          <div className="login-left-content">
-            <div className="login-brand-badge">
-              <div className="brand-icon-box">
-                <KeyRound size={22} />
-              </div>
-              <div>
-                <span className="brand-title-badge">Credential Vault</span>
-                <span className="brand-sub-badge">OWASP COMPLIANT RESET</span>
-              </div>
-            </div>
-
-            <div className="login-headline">
-              <h2>
-                Enterprise security,<br />
-                <span className="headline-accent">zero compromises.</span>
-              </h2>
-              <p className="headline-body">
-                Speedex enforces modern cryptographic guidelines and high-entropy passwords to safeguard our
-                logistics and dispatch systems against automated attacks.
-              </p>
-            </div>
-
-            <div className="pw-guideline-box">
-              <h4>Security Standard Requirements</h4>
-              <p>
-                In compliance with Speedex Enterprise Security Policies, passwords must be at least 15 characters
-                and contain a mix of character categories.
-              </p>
-            </div>
-          </div>
-        </aside>
-
-        {/* RIGHT PANEL */}
-        <main className="login-right">
-          <div className="login-card">
+      {/* ── UNIFIED 2-COLUMN FLOATING CARD (Starkfest Inspo) ── */}
+      <main className="login-page-main">
+        <div className="login-unified-card">
+          {/* LEFT COLUMN: FORM */}
+          <div className="login-card-form" style={{ maxWidth: '500px', flex: '0 0 500px' }}>
             <button
               type="button"
-              className="back-to-public-btn"
+              className="forgot-back-link"
               onClick={() => navigate('/login')}
               aria-label="Back to Login"
             >
@@ -237,7 +181,7 @@ export default function ResetPasswordPage() {
               /* TOKEN MISSING OR INVALID STATE */
               <div className="reset-token-missing-box">
                 <div className="token-missing-icon">
-                  <AlertTriangle size={42} />
+                  <AlertTriangle size={40} />
                 </div>
                 <h2>Invalid or Missing Reset Link</h2>
                 <p>
@@ -248,7 +192,7 @@ export default function ResetPasswordPage() {
                   type="button"
                   className="submit-btn"
                   onClick={() => navigate('/forgot-password')}
-                  style={{ marginTop: '20px' }}
+                  style={{ marginTop: '16px' }}
                 >
                   <span>Request a New Reset Link</span>
                   <ArrowRight size={18} />
@@ -258,15 +202,14 @@ export default function ResetPasswordPage() {
               /* SUCCESS SCREEN */
               <div className="reset-success-box">
                 <div className="reset-success-icon">
-                  <CheckCircle size={44} />
+                  <CheckCircle size={40} />
                 </div>
                 <h2>Password Reset Successfully</h2>
                 <p>
-                  Your credentials have been securely updated. You can now use your new password across Speedex
-                  services.
+                  Your credentials have been securely updated. You can now use your new password across Speedex.
                 </p>
                 <div className="redirect-notice">
-                  Redirecting to Central One-Login in <strong>{redirectCountdown}</strong> seconds...
+                  Redirecting to Login in <strong>{redirectCountdown}</strong> seconds...
                 </div>
                 <button
                   type="button"
@@ -281,7 +224,6 @@ export default function ResetPasswordPage() {
               /* RESET FORM */
               <>
                 <div className="card-header">
-                  <span className="header-badge">CREDENTIAL RECOVERY</span>
                   <h1 className="card-title">Set New Password</h1>
                   <p className="card-subtitle">
                     Enter your new password below. It must satisfy all security requirements.
@@ -388,27 +330,27 @@ export default function ResetPasswordPage() {
                     <span className="checklist-title">Password Requirements:</span>
                     <ul className="checklist-items">
                       <li className={checks.length ? 'met' : 'unmet'}>
-                        {checks.length ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                        {checks.length ? <CheckCircle size={13} /> : <XCircle size={13} />}
                         <span>At least 15 characters long</span>
                       </li>
                       <li className={checks.uppercase ? 'met' : 'unmet'}>
-                        {checks.uppercase ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                        {checks.uppercase ? <CheckCircle size={13} /> : <XCircle size={13} />}
                         <span>At least 1 uppercase letter (A-Z)</span>
                       </li>
                       <li className={checks.lowercase ? 'met' : 'unmet'}>
-                        {checks.lowercase ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                        {checks.lowercase ? <CheckCircle size={13} /> : <XCircle size={13} />}
                         <span>At least 1 lowercase letter (a-z)</span>
                       </li>
                       <li className={checks.number ? 'met' : 'unmet'}>
-                        {checks.number ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                        {checks.number ? <CheckCircle size={13} /> : <XCircle size={13} />}
                         <span>At least 1 number (0-9)</span>
                       </li>
                       <li className={checks.special ? 'met' : 'unmet'}>
-                        {checks.special ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                        {checks.special ? <CheckCircle size={13} /> : <XCircle size={13} />}
                         <span>At least 1 special character (!@#$%^&amp;*...)</span>
                       </li>
                       <li className={passwordsMatch ? 'met' : 'unmet'}>
-                        {passwordsMatch ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                        {passwordsMatch ? <CheckCircle size={13} /> : <XCircle size={13} />}
                         <span>Passwords match</span>
                       </li>
                     </ul>
@@ -419,7 +361,7 @@ export default function ResetPasswordPage() {
                     type="submit"
                     className="submit-btn"
                     disabled={isSubmitting || !isPasswordValid(newPassword) || !passwordsMatch}
-                    style={{ marginTop: '16px' }}
+                    style={{ marginTop: '14px' }}
                   >
                     {isSubmitting ? (
                       <>
@@ -437,15 +379,33 @@ export default function ResetPasswordPage() {
               </>
             )}
 
-            <footer className="login-footer" style={{ marginTop: '32px' }}>
+            <footer className="login-footer" style={{ marginTop: '20px' }}>
               <div className="security-note">
                 <Lock size={13} />
-                <span>Protected by Speedex PBKDF2 Encrypted Password Storage</span>
+                <span>Protected by Speedex Security Standards</span>
               </div>
             </footer>
           </div>
-        </main>
-      </div>
+
+          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ART */}
+          <div className="login-card-visual" aria-hidden="true">
+            <img
+              src="/warehouse-team.png"
+              alt="Speedex Warehouse Logistics Team"
+              className="login-visual-img"
+            />
+            {/* Elegant organic convex curve divider (Starkfest Inspo) */}
+            <svg
+              className="login-visual-curve"
+              viewBox="0 0 40 500"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
+            </svg>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

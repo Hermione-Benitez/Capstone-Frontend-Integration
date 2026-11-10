@@ -1,37 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  Package,
   Mail,
   User,
   ArrowRight,
   ArrowLeft,
-  Globe,
   AlertTriangle,
   CheckCircle,
   Loader2,
   Clock,
   RotateCcw,
-  ShieldCheck,
 } from 'lucide-react';
 import { STARS_API_URL } from '../config/env';
 import './LoginPage.css';
 import './ForgotPasswordPage.css';
 
-type SystemKey = 'stars' | 'dms' | 'foms';
-
-const SYSTEM_NAMES: Record<SystemKey, string> = {
-  stars: 'STARS (Tracking & Audit System)',
-  dms: 'DMS (Delivery Management System)',
-  foms: 'FOMS (Financial Operations System)',
-};
-
 export default function ForgotPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const systemParam = (searchParams.get('system')?.toLowerCase() as SystemKey) || 'stars';
-  const initialSystem: SystemKey = ['stars', 'dms', 'foms'].includes(systemParam) ? systemParam : 'stars';
   const initialId = searchParams.get('id') || searchParams.get('employeeId') || '';
 
   const [employeeNumber, setEmployeeNumber] = useState(initialId);
@@ -60,7 +47,7 @@ export default function ForgotPasswordPage() {
     const cleanEmail = email.trim();
 
     if (!cleanId) {
-      setErrorMessage('Please enter your Employee ID / Username.');
+      setErrorMessage('Please enter your Employee ID.');
       return;
     }
     if (!cleanEmail) {
@@ -99,8 +86,8 @@ export default function ForgotPasswordPage() {
       setStep('sent');
       setCooldown(60); // 60s cooldown
     } catch (err) {
-      console.error('Password recovery error:', err);
-      setErrorMessage('Unable to connect to the authentication server. Please check your network and try again.');
+      console.error('Forgot password request error:', err);
+      setErrorMessage('Unable to reach the server. Please verify your connection.');
     } finally {
       setIsSubmitting(false);
     }
@@ -135,97 +122,41 @@ export default function ForgotPasswordPage() {
             }}
           >
             <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
-            <div className="speedex-header-text">
-              <span className="brand-name">Speedex</span>
-              <span className="brand-sub">COURIER &amp; FORWARDER, INC.</span>
-            </div>
           </a>
           <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
             <button
               type="button"
               className="speedex-nav-link speedex-nav-link-public"
-              onClick={() => navigate(`/login?system=${initialSystem}`)}
+              onClick={() => navigate('/login')}
             >
               <ArrowLeft size={14} />
               <span>Back to Login</span>
             </button>
-            <a
-              href="/"
-              className="speedex-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/');
-              }}
-            >
-              <Globe size={14} />
-              <span>Public Website</span>
-            </a>
           </nav>
         </div>
       </header>
 
-      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
-      <div className="login-page-split">
-        {/* LEFT PANEL */}
-        <aside className="login-left">
-          <div className="login-decorative-circle circle-1" />
-          <div className="login-decorative-circle circle-2" />
-          <div className="login-left-content">
-            <div className="login-brand-badge">
-              <div className="brand-icon-box">
-                <ShieldCheck size={22} />
-              </div>
-              <div>
-                <span className="brand-title-badge">Identity Recovery</span>
-                <span className="brand-sub-badge">CENTRAL SECURITY PORTAL</span>
-              </div>
-            </div>
-
-            <div className="login-headline">
-              <h2>
-                Secure identity,<br />
-                <span className="headline-accent">reliable recovery.</span>
-              </h2>
-              <p className="headline-body">
-                Speedex enterprise password reset protocol. We verify identity across registered records
-                before dispatching secure time-bound reset credentials.
-              </p>
-            </div>
-
-            <div className="recovery-instruction-card">
-              <h4>Recovery Instructions</h4>
-              <ul>
-                <li>Enter your registered Employee ID and associated corporate email.</li>
-                <li>Check your inbox for a secure one-time password reset link.</li>
-                <li>The reset link remains active for 15 minutes.</li>
-                <li>Ensure your new password meets OWASP security standards (min 15 characters).</li>
-              </ul>
-            </div>
-          </div>
-        </aside>
-
-        {/* RIGHT PANEL */}
-        <main className="login-right">
-          <div className="login-card">
+      {/* ── UNIFIED 2-COLUMN FLOATING CARD (Starkfest Inspo) ── */}
+      <main className="login-page-main">
+        <div className="login-unified-card">
+          {/* LEFT COLUMN: FORM */}
+          <div className="login-card-form">
             <button
               type="button"
-              className="back-to-public-btn"
-              onClick={() => navigate(`/login?system=${initialSystem}`)}
+              className="forgot-back-link"
+              onClick={() => navigate('/login')}
               aria-label="Back to Login"
             >
               <ArrowLeft size={14} />
-              <span>Back to Central Login</span>
+              <span>Back to Login</span>
             </button>
 
             {step === 'form' ? (
               <>
                 <div className="card-header">
-                  <div className="system-recovery-tag">
-                    <span>{SYSTEM_NAMES[initialSystem] || 'Speedex System'}</span>
-                  </div>
                   <h1 className="card-title">Forgot Password?</h1>
                   <p className="card-subtitle">
-                    Enter your Employee ID and corporate email to receive a secure password reset link.
+                    Enter your Employee ID and corporate email to receive a password reset link.
                   </p>
                 </div>
 
@@ -240,7 +171,7 @@ export default function ForgotPasswordPage() {
                   {/* Employee ID */}
                   <div className="field-group">
                     <label htmlFor="recovery-id" className="field-label">
-                      Employee ID / Username <span style={{ color: '#E31A1A' }}>*</span>
+                      Employee ID <span style={{ color: '#E31A1A' }}>*</span>
                     </label>
                     <div className="field-wrapper">
                       <span className="field-icon">
@@ -273,7 +204,7 @@ export default function ForgotPasswordPage() {
                         id="recovery-email"
                         type="email"
                         className="field-input"
-                        placeholder="e.g. employee@speedex.com"
+                        placeholder="e.g. employee@myspeedex.net"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isSubmitting}
@@ -288,7 +219,7 @@ export default function ForgotPasswordPage() {
                     type="submit"
                     className="submit-btn"
                     disabled={isSubmitting}
-                    style={{ marginTop: '12px' }}
+                    style={{ marginTop: '10px' }}
                   >
                     {isSubmitting ? (
                       <>
@@ -308,7 +239,7 @@ export default function ForgotPasswordPage() {
               /* SENT CONFIRMATION STEP */
               <div className="recovery-sent-wrapper">
                 <div className="recovery-success-icon-box">
-                  <CheckCircle size={44} />
+                  <CheckCircle size={40} />
                 </div>
                 <h2 className="recovery-sent-title">Check Your Email</h2>
                 <p className="recovery-sent-desc">
@@ -318,7 +249,6 @@ export default function ForgotPasswordPage() {
                 </p>
                 <p className="recovery-sent-subtext">
                   Please click the link in your email to choose a new password. The link will expire in 15 minutes.
-                  If you don't see it, be sure to check your spam or junk folder.
                 </p>
 
                 <div className="recovery-actions">
@@ -344,7 +274,7 @@ export default function ForgotPasswordPage() {
                   <button
                     type="button"
                     className="submit-btn"
-                    onClick={() => navigate(`/login?system=${initialSystem}&id=${encodeURIComponent(employeeNumber)}`)}
+                    onClick={() => navigate('/login')}
                   >
                     <span>Return to Login</span>
                     <ArrowRight size={18} />
@@ -353,17 +283,35 @@ export default function ForgotPasswordPage() {
               </div>
             )}
 
-            <footer className="login-footer" style={{ marginTop: '32px' }}>
+            <footer className="login-footer" style={{ marginTop: '20px' }}>
               <p className="login-footer-copy">
-                Need administrative assistance? Contact the{' '}
-                <a href="mailto:admin@speedex.com" style={{ color: '#0f1936', fontWeight: 600 }}>
-                  Speedex Security Desk
+                Need administrative assistance? Contact{' '}
+                <a href="mailto:admin@myspeedex.net" style={{ color: '#00776D', fontWeight: 600 }}>
+                  admin@myspeedex.net
                 </a>
               </p>
             </footer>
           </div>
-        </main>
-      </div>
+
+          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ART */}
+          <div className="login-card-visual" aria-hidden="true">
+            <img
+              src="/warehouse-team.png"
+              alt="Speedex Warehouse Logistics Team"
+              className="login-visual-img"
+            />
+            {/* Elegant organic convex curve divider (Starkfest Inspo) */}
+            <svg
+              className="login-visual-curve"
+              viewBox="0 0 40 500"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
+            </svg>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -265,9 +265,6 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
 
         {/* ── MODAL FOOTER ── */}
         <footer className="legal-modal-footer">
-          <span className="legal-modal-footer-copy">
-            Speedex Courier &amp; Forwarder, Inc. · Enterprise Legal Standard
-          </span>
           <button
             type="button"
             className="legal-modal-close-action-btn"
