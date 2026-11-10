@@ -130,7 +130,6 @@ export const PublicWebsite: React.FC = () => {
   const [contactMessage, setContactMessage] = useState('');
   const [contactSuccess, setContactSuccess] = useState(false);
 
-
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName || !contactEmail || !contactMessage) return;
@@ -186,12 +185,12 @@ export const PublicWebsite: React.FC = () => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
               window.history.pushState(null, '', '#top');
             }}
-            title="Back to top"
+            title="Speedex Home"
           >
             <img src="/logo.png" alt="Speedex Logo" className="spx-logo-img" />
           </a>
 
-          <nav>
+          <nav className="spx-nav-menu" aria-label="Main Navigation">
             <ul className="spx-nav-links">
               <li>
                 <a
@@ -203,41 +202,54 @@ export const PublicWebsite: React.FC = () => {
                     window.history.pushState(null, '', '#top');
                   }}
                 >
-                  Home
+                  <span className="spx-nav-link-text">Home</span>
                 </a>
               </li>
               <li>
-                <a href={DMS_TRACKING_URL} className="spx-nav-link">
-                  Track
+                <a href={DMS_TRACKING_URL} className="spx-nav-link spx-nav-link--track">
+                  <i className="ti ti-search spx-nav-icon" aria-hidden="true" />
+                  <span className="spx-nav-link-text">Track</span>
                 </a>
               </li>
-              <li><a
-                href="#advisories"
-                className={`spx-nav-link${activeSection === 'advisories' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#advisories');
-                }}
-              >Advisories</a></li>
-              <li><a
-                href="#about"
-                className={`spx-nav-link${activeSection === 'about' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#about');
-                }}
-              >About Us</a></li>
-              <li><a
-                href="#contact"
-                className={`spx-nav-link${activeSection === 'contact' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#contact');
-                }}
-              >Contact</a></li>
+              <li>
+                <a
+                  href="#advisories"
+                  className={`spx-nav-link${activeSection === 'advisories' ? ' is-active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
+                    window.history.pushState(null, '', '#advisories');
+                  }}
+                >
+                  <span className="spx-nav-link-text">Advisories</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#about"
+                  className={`spx-nav-link${activeSection === 'about' ? ' is-active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                    window.history.pushState(null, '', '#about');
+                  }}
+                >
+                  <span className="spx-nav-link-text">About Us</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#contact"
+                  className={`spx-nav-link${activeSection === 'contact' ? ' is-active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                    window.history.pushState(null, '', '#contact');
+                  }}
+                >
+                  <span className="spx-nav-link-text">Contact</span>
+                </a>
+              </li>
             </ul>
           </nav>
 
@@ -246,6 +258,7 @@ export const PublicWebsite: React.FC = () => {
             <a
               href="/login"
               className="spx-btn-login"
+              title="Staff Access"
             >
               <i className="ti ti-login" aria-hidden="true" />
               <span>Log In</span>
@@ -269,7 +282,7 @@ export const PublicWebsite: React.FC = () => {
           <div className="spx-mobile-drawer-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="spx-mobile-drawer" onClick={(e) => e.stopPropagation()}>
               <div className="spx-mobile-drawer-header">
-                <span className="spx-mobile-drawer-title">Navigation</span>
+                <span className="spx-mobile-drawer-title">Speedex Navigation</span>
                 <button
                   type="button"
                   className="spx-mobile-drawer-close"
@@ -367,6 +380,11 @@ export const PublicWebsite: React.FC = () => {
         <section className="spx-hero-section">
           <div className="spx-container spx-hero-grid">
             <div className="spx-hero-content">
+              <div className="spx-hero-pill">
+                <span className="spx-hero-pill-badge">31 Years</span>
+                <span>Philippine Logistics Excellence Since 1993</span>
+              </div>
+
               <h1 className="spx-hero-title">
                 Your parcels, across the Philippines, <span className="spx-hero-highlight">tracked at every stop.</span>
               </h1>
@@ -386,68 +404,132 @@ export const PublicWebsite: React.FC = () => {
               </div>
             </div>
 
-            {/* ── Right Column ── */}
+            {/* ── Right Column: Interactive Live Network Showcase ── */}
             <div className="spx-hero-right">
-              <div className="spx-stats-cluster">
-                <div className="spx-stat-circle stat-c1">
-                  <strong>31</strong>
-                  <span>Years of Service</span>
+              <div className="spx-hero-showcase-card">
+                <div className="spx-showcase-header">
+                  <div className="spx-showcase-live-pill">
+                    <span className="spx-live-pulse-dot" />
+                    <span>Live Logistics Active</span>
+                  </div>
+                  <span className="spx-showcase-region">Luzon · Visayas · Mindanao</span>
                 </div>
-                <div className="spx-stat-circle stat-c2">
-                  <strong>100%</strong>
-                  <span>Filipino-Owned</span>
+
+                <div className="spx-showcase-preview-card">
+                  <div className="spx-preview-top">
+                    <div className="spx-preview-meta">
+                      <span className="spx-preview-label">Live Dispatch Example</span>
+                      <strong className="spx-preview-waybill">SPX-2026-0842</strong>
+                    </div>
+                    <span className="spx-preview-status-badge">
+                      <i className="ti ti-truck" aria-hidden="true" /> In Transit
+                    </span>
+                  </div>
+
+                  <div className="spx-preview-route">
+                    <div className="spx-route-point">
+                      <div className="spx-point-icon spx-point-origin"><i className="ti ti-building" aria-hidden="true" /></div>
+                      <div>
+                        <div className="spx-point-name">Manila Central Hub</div>
+                        <div className="spx-point-time">Dispatched 08:30 AM</div>
+                      </div>
+                    </div>
+                    <div className="spx-route-connector">
+                      <div className="spx-connector-line">
+                        <span className="spx-connector-truck"><i className="ti ti-truck-delivery" aria-hidden="true" /></span>
+                      </div>
+                    </div>
+                    <div className="spx-route-point">
+                      <div className="spx-point-icon spx-point-dest"><i className="ti ti-map-pin" aria-hidden="true" /></div>
+                      <div>
+                        <div className="spx-point-name">Cebu Sorting Hub</div>
+                        <div className="spx-point-time">Est. Arrival Today</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="spx-stat-circle stat-c3">
-                  <strong>70+</strong>
-                  <span>Sorting Hubs</span>
+
+                <div className="spx-showcase-metrics">
+                  <div className="spx-showcase-metric">
+                    <strong>31+</strong>
+                    <span>Years Trusted</span>
+                  </div>
+                  <div className="spx-metric-divider" />
+                  <div className="spx-showcase-metric">
+                    <strong>100%</strong>
+                    <span>Filipino-Owned</span>
+                  </div>
+                  <div className="spx-metric-divider" />
+                  <div className="spx-showcase-metric">
+                    <strong>70+</strong>
+                    <span>Regional Hubs</span>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            
           </div>
         </section>
 
-        {/* ── Feature Pillars ── */}
-        <section className="spx-section">
+        {/* ── Feature Pillars: Bento-Grid Value Proposition ── */}
+        <section className="spx-section spx-pillars-section">
           <div className="spx-container">
             <div className="spx-section-header">
-              <span className="spx-section-kicker">Why Choose Speedex</span>
-              <h2 className="spx-section-title">Reliable, capable, and fairly priced</h2>
+              <span className="spx-section-kicker">
+                <i className="ti ti-shield-check" aria-hidden="true" /> Why Choose Speedex
+              </span>
+              <h2 className="spx-section-title">Built for enterprise reliability and nationwide delivery</h2>
               <p className="spx-section-sub">
-                What clients and enterprise partners can expect when they send with Speedex Courier and Forwarder.
+                What clients and enterprise partners rely on: strict chain of custody, multi-modal transport reach, and transparent rates.
               </p>
             </div>
 
             <div className="spx-pillars-grid">
-              <div className="spx-pillar-card">
+              <div className="spx-pillar-card spx-pillar-card--featured">
+                <div className="spx-pillar-badge">Security & Chain of Custody</div>
                 <div className="spx-pillar-icon-box">
                   <i className="ti ti-shield-check" aria-hidden="true" />
                 </div>
-                <h3 className="spx-pillar-title">Reliable</h3>
+                <h3 className="spx-pillar-title">Guaranteed Reliability & Care</h3>
                 <p className="spx-pillar-desc">
-                  Seasoned, highly trained logistics personnel and couriers stationed across key municipal hubs with guaranteed confidentiality and handling standards.
+                  Seasoned, highly trained logistics personnel and couriers stationed across key municipal hubs with strict confidentiality and digital Proof of Delivery (POD & POT).
                 </p>
-              </div>
-
-              <div className="spx-pillar-card">
-                <div className="spx-pillar-icon-box">
-                  <i className="ti ti-bolt" aria-hidden="true" />
+                <div className="spx-pillar-tags">
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> Digital POD & POT</span>
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> Certified Couriers</span>
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> 100% Confidential</span>
                 </div>
-                <h3 className="spx-pillar-title">Capable</h3>
-                <p className="spx-pillar-desc">
-                  Equipped with dedicated ground and inter-island air freight channels ready to deliver parcels in the quickest, safest time window possible.
-                </p>
               </div>
 
               <div className="spx-pillar-card">
-                <div className="spx-pillar-icon-box">
+                <div className="spx-pillar-badge spx-badge--azure">Inter-Island Linehaul</div>
+                <div className="spx-pillar-icon-box spx-icon--azure">
+                  <i className="ti ti-truck-delivery" aria-hidden="true" />
+                </div>
+                <h3 className="spx-pillar-title">Multi-Modal Island Reach</h3>
+                <p className="spx-pillar-desc">
+                  Equipped with synchronized ground linehaul, maritime cargo routing, and inter-island air freight channels connecting Luzon, Visayas, and Mindanao securely.
+                </p>
+                <div className="spx-pillar-tags">
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> 70+ Regional Hubs</span>
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> Air & Sea Channels</span>
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> Climate-Stable Hubs</span>
+                </div>
+              </div>
+
+              <div className="spx-pillar-card">
+                <div className="spx-pillar-badge spx-badge--amber">Transparent Governance</div>
+                <div className="spx-pillar-icon-box spx-icon--amber">
                   <i className="ti ti-coin" aria-hidden="true" />
                 </div>
-                <h3 className="spx-pillar-title">Efficient</h3>
+                <h3 className="spx-pillar-title">Fair & Predictable Pricing</h3>
                 <p className="spx-pillar-desc">
-                  Transparent, cost-effective shipping rates tailored for businesses, eCommerce shops, and individual forwarders without hidden costs.
+                  Transparent, cost-effective shipping rates tailored for businesses, corporate accounts, and individual forwarders with zero hidden charges or surprise surcharges.
                 </p>
+                <div className="spx-pillar-tags">
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> Volume B2B Discounts</span>
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> Zero Hidden Surcharges</span>
+                  <span className="spx-pillar-tag"><i className="ti ti-check" aria-hidden="true" /> Batch Waybill Printing</span>
+                </div>
               </div>
             </div>
           </div>
@@ -735,8 +817,6 @@ export const PublicWebsite: React.FC = () => {
           </div>
         </div>
       </footer>
-
-
     </div>
   );
 };
