@@ -914,6 +914,12 @@ export default function LoginPage() {
               alt="Speedex Warehouse Logistics Team"
               className="login-visual-img"
             />
+            {/* Subtle color grading tint overlay (Navy / Teal harmonious blend) */}
+            <div className="login-visual-color-grade" />
+
+            {/* Soft gradient feather along the crescent curve */}
+            <div className="login-visual-curve-feather" />
+
             {/* Elegant organic convex curve divider (Starkfest Inspo) */}
             <svg
               className="login-visual-curve"

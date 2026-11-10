@@ -150,14 +150,17 @@ export default function ResetPasswordPage() {
             <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
           </a>
           <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
-            <button
-              type="button"
+            <a
+              href="/"
               className="speedex-nav-link speedex-nav-link-public"
-              onClick={() => navigate('/login')}
+              title="Back to Home"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+              }}
             >
-              <ArrowLeft size={14} />
-              <span>Back to Login</span>
-            </button>
+              <span>Back to Home</span>
+            </a>
           </nav>
         </div>
       </header>
@@ -394,6 +397,12 @@ export default function ResetPasswordPage() {
               alt="Speedex Warehouse Logistics Team"
               className="login-visual-img"
             />
+            {/* Subtle color grading tint overlay (Navy / Teal harmonious blend) */}
+            <div className="login-visual-color-grade" />
+
+            {/* Soft gradient feather along the crescent curve */}
+            <div className="login-visual-curve-feather" />
+
             {/* Elegant organic convex curve divider (Starkfest Inspo) */}
             <svg
               className="login-visual-curve"

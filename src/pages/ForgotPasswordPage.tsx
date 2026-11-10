@@ -5,6 +5,7 @@ import {
   User,
   ArrowRight,
   ArrowLeft,
+  Home,
   AlertTriangle,
   CheckCircle,
   Loader2,
@@ -55,7 +56,7 @@ export default function ForgotPasswordPage() {
       return;
     }
     if (!isValidEmail(cleanEmail)) {
-      setErrorMessage('Please enter a valid email address (e.g. user@speedex.com).');
+      setErrorMessage('Please enter a valid email address.');
       return;
     }
 
@@ -77,17 +78,17 @@ export default function ForgotPasswordPage() {
       const data = await response.json().catch(() => null);
 
       if (!response.ok || (data && data.isSuccess === false)) {
-        const errorMsg = data?.message || 'Unable to locate an active employee record with these credentials.';
+        const errorMsg = data?.message || 'Unable to locate an active record with these credentials.';
         setErrorMessage(errorMsg);
         return;
       }
 
       // Success
       setStep('sent');
-      setCooldown(60); // 60s cooldown
+      setCooldown(60);
     } catch (err) {
       console.error('Forgot password request error:', err);
-      setErrorMessage('Unable to reach the server. Please verify your connection.');
+      setErrorMessage('Unable to reach authentication servers. Please verify your connection.');
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +110,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="login-page-container">
-      {/* ── TOP NAV BAR ── */}
+      {/* ── TOP NAV BAR (Consistent across all auth pages) ── */}
       <header className="speedex-system-header">
         <div className="speedex-header-inner">
           <a
@@ -124,14 +125,18 @@ export default function ForgotPasswordPage() {
             <img src="/logo.png" alt="Speedex Logo" className="speedex-nav-logo" />
           </a>
           <nav className="speedex-nav-links" aria-label="Speedex System Navigation">
-            <button
-              type="button"
+            <a
+              href="/"
               className="speedex-nav-link speedex-nav-link-public"
-              onClick={() => navigate('/login')}
+              title="Back to Home"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+              }}
             >
-              <ArrowLeft size={14} />
-              <span>Back to Login</span>
-            </button>
+              <Home size={14} />
+              <span>Back to Home</span>
+            </a>
           </nav>
         </div>
       </header>
@@ -140,7 +145,7 @@ export default function ForgotPasswordPage() {
       <main className="login-page-main">
         <div className="login-unified-card">
           {/* LEFT COLUMN: FORM */}
-          <div className="login-card-form">
+          <div className="login-card-form forgot-card-form">
             <button
               type="button"
               className="forgot-back-link"
@@ -153,7 +158,7 @@ export default function ForgotPasswordPage() {
 
             {step === 'form' ? (
               <>
-                <div className="card-header">
+                <div className="card-header forgot-card-header">
                   <h1 className="card-title">Forgot Password?</h1>
                   <p className="card-subtitle">
                     Enter your Employee ID and corporate email to receive a password reset link.
@@ -181,7 +186,7 @@ export default function ForgotPasswordPage() {
                         id="recovery-id"
                         type="text"
                         className="field-input"
-                        placeholder="e.g. EMP-001 or MGR001"
+                        placeholder="Enter your Employee ID"
                         value={employeeNumber}
                         onChange={(e) => setEmployeeNumber(e.target.value)}
                         disabled={isSubmitting}
@@ -204,7 +209,7 @@ export default function ForgotPasswordPage() {
                         id="recovery-email"
                         type="email"
                         className="field-input"
-                        placeholder="e.g. employee@myspeedex.net"
+                        placeholder="Enter your corporate email address"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isSubmitting}
@@ -283,7 +288,7 @@ export default function ForgotPasswordPage() {
               </div>
             )}
 
-            <footer className="login-footer" style={{ marginTop: '20px' }}>
+            <footer className="login-footer forgot-footer">
               <p className="login-footer-copy">
                 Need administrative assistance? Contact{' '}
                 <a href="mailto:admin@myspeedex.net" style={{ color: '#00776D', fontWeight: 600 }}>
@@ -293,14 +298,20 @@ export default function ForgotPasswordPage() {
             </footer>
           </div>
 
-          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ART */}
+          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ART (Color graded + Soft Curve) */}
           <div className="login-card-visual" aria-hidden="true">
             <img
               src="/warehouse-team.png"
               alt="Speedex Warehouse Logistics Team"
               className="login-visual-img"
             />
-            {/* Elegant organic convex curve divider (Starkfest Inspo) */}
+            {/* Subtle color grading tint overlay (Navy / Teal harmonious blend) */}
+            <div className="login-visual-color-grade" />
+
+            {/* Soft gradient feather along the crescent curve */}
+            <div className="login-visual-curve-feather" />
+
+            {/* Organic convex curve divider (Starkfest Inspo) */}
             <svg
               className="login-visual-curve"
               viewBox="0 0 40 500"
