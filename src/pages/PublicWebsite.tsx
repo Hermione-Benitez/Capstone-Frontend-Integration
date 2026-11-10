@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DMS_TRACKING_URL } from '../config/env';
+import { LegalDocumentModal, LegalDocType } from '../components/LegalDocumentModal';
 import './PublicWebsite.css';
 
 const ADVISORIES = [
@@ -64,6 +65,13 @@ export const PublicWebsite: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('top');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [legalModalType, setLegalModalType] = useState<LegalDocType>('privacy');
+
+  const openLegal = (type: LegalDocType) => {
+    setLegalModalType(type);
+    setLegalModalOpen(true);
+  };
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -130,7 +138,6 @@ export const PublicWebsite: React.FC = () => {
   const [contactMessage, setContactMessage] = useState('');
   const [contactSuccess, setContactSuccess] = useState(false);
 
-
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName || !contactEmail || !contactMessage) return;
@@ -146,6 +153,38 @@ export const PublicWebsite: React.FC = () => {
     setOpenAdvisoryId((prev) => (prev === id ? null : id));
   };
 
+  const scrollToSection = (sectionId: string) => {
+    setIsMobileMenuOpen(false);
+    if (sectionId === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.history.pushState(null, '', '#top');
+      setActiveSection('top');
+      return;
+    }
+    const el = document.getElementById(sectionId);
+    if (el) {
+      // Offset by exact sticky navbar height (68px) so section padding starts directly below it
+      const navOffset = 68;
+      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navOffset;
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: 'smooth',
+      });
+      window.history.pushState(null, '', `#${sectionId}`);
+      setActiveSection(sectionId);
+    }
+  };
+
+  React.useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && hash !== 'top') {
+      setTimeout(() => {
+        scrollToSection(hash);
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className="spx-pub-root" id="top">
       {/* ── Operations Advisory Banner ── */}
@@ -159,7 +198,14 @@ export const PublicWebsite: React.FC = () => {
               </div>
             </div>
             <div className="spx-alert-actions">
-              <a href="#advisories" className="spx-alert-link">
+              <a
+                href="#advisories"
+                className="spx-alert-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('advisories');
+                }}
+              >
                 Read advisories <i className="ti ti-arrow-down" aria-hidden="true" />
               </a>
               <button
@@ -183,15 +229,14 @@ export const PublicWebsite: React.FC = () => {
             className="spx-logo-link"
             onClick={(e) => {
               e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              window.history.pushState(null, '', '#top');
+              scrollToSection('top');
             }}
-            title="Back to top"
+            title="Speedex Home"
           >
             <img src="/logo.png" alt="Speedex Logo" className="spx-logo-img" />
           </a>
 
-          <nav>
+          <nav className="spx-nav-menu" aria-label="Main Navigation">
             <ul className="spx-nav-links">
               <li>
                 <a
@@ -199,8 +244,7 @@ export const PublicWebsite: React.FC = () => {
                   className={`spx-nav-link${activeSection === 'top' ? ' is-active' : ''}`}
                   onClick={(e) => {
                     e.preventDefault();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    window.history.pushState(null, '', '#top');
+                    scrollToSection('top');
                   }}
                 >
                   Home
@@ -211,33 +255,42 @@ export const PublicWebsite: React.FC = () => {
                   Track
                 </a>
               </li>
-              <li><a
-                href="#advisories"
-                className={`spx-nav-link${activeSection === 'advisories' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#advisories');
-                }}
-              >Advisories</a></li>
-              <li><a
-                href="#about"
-                className={`spx-nav-link${activeSection === 'about' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#about');
-                }}
-              >About Us</a></li>
-              <li><a
-                href="#contact"
-                className={`spx-nav-link${activeSection === 'contact' ? ' is-active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#contact');
-                }}
-              >Contact</a></li>
+              <li>
+                <a
+                  href="#advisories"
+                  className={`spx-nav-link${activeSection === 'advisories' ? ' is-active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('advisories');
+                  }}
+                >
+                  Advisories
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#about"
+                  className={`spx-nav-link${activeSection === 'about' ? ' is-active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('about');
+                  }}
+                >
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#contact"
+                  className={`spx-nav-link${activeSection === 'contact' ? ' is-active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('contact');
+                  }}
+                >
+                  Contact
+                </a>
+              </li>
             </ul>
           </nav>
 
@@ -246,6 +299,7 @@ export const PublicWebsite: React.FC = () => {
             <a
               href="/login"
               className="spx-btn-login"
+              title="Staff Access"
             >
               <i className="ti ti-login" aria-hidden="true" />
               <span>Log In</span>
@@ -255,11 +309,10 @@ export const PublicWebsite: React.FC = () => {
             <button
               type="button"
               className="spx-menu-toggle"
-              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
             >
-              <i className={`ti ${isMobileMenuOpen ? 'ti-x' : 'ti-menu-2'}`} aria-hidden="true" />
+              <i className="ti ti-menu-2" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -269,7 +322,7 @@ export const PublicWebsite: React.FC = () => {
           <div className="spx-mobile-drawer-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="spx-mobile-drawer" onClick={(e) => e.stopPropagation()}>
               <div className="spx-mobile-drawer-header">
-                <span className="spx-mobile-drawer-title">Navigation</span>
+                <img src="/logo.png" alt="Speedex" style={{ height: '32px', width: 'auto' }} />
                 <button
                   type="button"
                   className="spx-mobile-drawer-close"
@@ -286,9 +339,7 @@ export const PublicWebsite: React.FC = () => {
                     className={`spx-mobile-nav-link ${activeSection === 'top' ? 'is-active' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      setIsMobileMenuOpen(false);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                      window.history.pushState(null, '', '#top');
+                      scrollToSection('top');
                     }}
                   >
                     <i className="ti ti-home" aria-hidden="true" />
@@ -311,9 +362,7 @@ export const PublicWebsite: React.FC = () => {
                     className={`spx-mobile-nav-link ${activeSection === 'advisories' ? 'is-active' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      setIsMobileMenuOpen(false);
-                      document.getElementById('advisories')?.scrollIntoView({ behavior: 'smooth' });
-                      window.history.pushState(null, '', '#advisories');
+                      scrollToSection('advisories');
                     }}
                   >
                     <i className="ti ti-bell-ringing" aria-hidden="true" />
@@ -326,9 +375,7 @@ export const PublicWebsite: React.FC = () => {
                     className={`spx-mobile-nav-link ${activeSection === 'about' ? 'is-active' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      setIsMobileMenuOpen(false);
-                      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-                      window.history.pushState(null, '', '#about');
+                      scrollToSection('about');
                     }}
                   >
                     <i className="ti ti-info-circle" aria-hidden="true" />
@@ -341,9 +388,7 @@ export const PublicWebsite: React.FC = () => {
                     className={`spx-mobile-nav-link ${activeSection === 'contact' ? 'is-active' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      setIsMobileMenuOpen(false);
-                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                      window.history.pushState(null, '', '#contact');
+                      scrollToSection('contact');
                     }}
                   >
                     <i className="ti ti-mail" aria-hidden="true" />
@@ -380,13 +425,20 @@ export const PublicWebsite: React.FC = () => {
                   <i className="ti ti-search" aria-hidden="true" />
                   <span>Track a Shipment</span>
                 </a>
-                <a href="#contact" className="spx-btn-secondary">
+                <a
+                  href="#contact"
+                  className="spx-btn-secondary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('contact');
+                  }}
+                >
                   <span>Talk to Us</span>
                 </a>
               </div>
             </div>
 
-            {/* ── Right Column ── */}
+            {/* ── Right Column: 3 Original Credibility Circles ── */}
             <div className="spx-hero-right">
               <div className="spx-stats-cluster">
                 <div className="spx-stat-circle stat-c1">
@@ -403,13 +455,11 @@ export const PublicWebsite: React.FC = () => {
                 </div>
               </div>
             </div>
-            
-            
           </div>
         </section>
 
-        {/* ── Feature Pillars ── */}
-        <section className="spx-section">
+        {/* ── Why Choose Speedex ── */}
+        <section className="spx-section spx-pillars-section" id="why-us">
           <div className="spx-container">
             <div className="spx-section-header">
               <span className="spx-section-kicker">Why Choose Speedex</span>
@@ -431,8 +481,8 @@ export const PublicWebsite: React.FC = () => {
               </div>
 
               <div className="spx-pillar-card">
-                <div className="spx-pillar-icon-box">
-                  <i className="ti ti-bolt" aria-hidden="true" />
+                <div className="spx-pillar-icon-box spx-icon--azure">
+                  <i className="ti ti-truck-delivery" aria-hidden="true" />
                 </div>
                 <h3 className="spx-pillar-title">Capable</h3>
                 <p className="spx-pillar-desc">
@@ -441,7 +491,7 @@ export const PublicWebsite: React.FC = () => {
               </div>
 
               <div className="spx-pillar-card">
-                <div className="spx-pillar-icon-box">
+                <div className="spx-pillar-icon-box spx-icon--amber">
                   <i className="ti ti-coin" aria-hidden="true" />
                 </div>
                 <h3 className="spx-pillar-title">Efficient</h3>
@@ -468,30 +518,21 @@ export const PublicWebsite: React.FC = () => {
               {ADVISORIES.map((adv) => {
                 const isOpen = openAdvisoryId === adv.id;
                 return (
-                  <div key={adv.id} className={`spx-advisory-item type-${adv.categoryType} ${isOpen ? 'is-open' : ''}`}>
+                  <div key={adv.id} className={`spx-advisory-item ${isOpen ? 'is-open' : ''}`}>
                     <button
                       type="button"
                       className="spx-advisory-summary"
                       onClick={() => toggleAdvisory(adv.id)}
                       aria-expanded={isOpen}
                     >
-                      <div className="spx-advisory-title-wrap">
-                        <span
-                          className={`spx-advisory-badge ${adv.categoryType === 'weather'
-                            ? 'spx-badge-weather'
-                            : adv.categoryType === 'holiday'
-                              ? 'spx-badge-holiday'
-                              : 'spx-badge-ops'
-                            }`}
-                        >
-                          {adv.category}
-                        </span>
-                        <h3 className="spx-advisory-heading">{adv.title}</h3>
-                      </div>
-                      <div className="spx-advisory-meta">
-                        <span className="spx-advisory-date">{adv.date}</span>
+                      <span className={`spx-adv-tag spx-adv-tag--${adv.categoryType}`}>
+                        {adv.category}
+                      </span>
+                      <h3 className="spx-advisory-heading">{adv.title}</h3>
+                      <span className="spx-advisory-date">{adv.date}</span>
+                      <span className="spx-adv-chevron-box">
                         <i className="ti ti-chevron-down spx-advisory-chevron" aria-hidden="true" />
-                      </div>
+                      </span>
                     </button>
 
                     <div className="spx-advisory-body-wrap">
@@ -728,15 +769,33 @@ export const PublicWebsite: React.FC = () => {
           <div className="spx-footer-bottom">
             <div>&copy; {new Date().getFullYear()} Speedex Courier and Forwarder, Inc. All rights reserved.</div>
             <div className="spx-footer-bottom-links">
-              <a href="#top" className="spx-footer-link">Privacy Policy</a>
+              <button
+                type="button"
+                className="spx-footer-link spx-footer-link-btn"
+                onClick={() => openLegal('privacy')}
+              >
+                Privacy Policy
+              </button>
               <span aria-hidden="true">·</span>
-              <a href="#top" className="spx-footer-link">Terms of Use</a>
+              <button
+                type="button"
+                className="spx-footer-link spx-footer-link-btn"
+                onClick={() => openLegal('terms')}
+              >
+                Terms of Use
+              </button>
             </div>
           </div>
         </div>
       </footer>
 
-
+      {/* ── Legal Modal (opened from footer links) ── */}
+      <LegalDocumentModal
+        isOpen={legalModalOpen}
+        type={legalModalType}
+        onClose={() => setLegalModalOpen(false)}
+        onSwitchType={(t) => setLegalModalType(t)}
+      />
     </div>
   );
 };
