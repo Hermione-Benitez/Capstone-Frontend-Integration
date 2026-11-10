@@ -12,10 +12,17 @@
   color: #0F172A;
 }
 
-/* â”€â”€ SPEEDEX TOP HEADER â”€â”€ */
+@media (min-width: 861px) {
+  .login-page-container {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* ── SPEEDEX TOP HEADER ── */
 .speedex-system-header {
   width: 100%;
-  height: 68px;
+  height: 64px;
   background: #0B1437;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -24,7 +31,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.16);
+  flex-shrink: 0;
 }
 
 .speedex-header-inner {
@@ -50,7 +58,7 @@
 }
 
 .speedex-nav-logo {
-  height: 38px;
+  height: 36px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -62,31 +70,19 @@
   gap: 16px;
 }
 
-.speedex-nav-link {
-  color: #ffffff;
-  font-size: 0.88rem;
-  font-weight: 500;
-  text-decoration: none;
-  padding: 7px 16px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  transition: all 0.2s ease;
-}
-
-.speedex-nav-link:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #ffffff;
-}
-
 .speedex-nav-link-public {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   color: #ffffff;
   font-weight: 500;
-  font-size: 13.5px;
+  font-size: 13px;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: all 0.2s ease;
 }
 
 .speedex-nav-link-public:hover {
@@ -95,16 +91,17 @@
   color: #ffffff;
 }
 
-/* â”€â”€ 2-COLUMN SPLIT LAYOUT â”€â”€ */
+/* ── 2-COLUMN SPLIT LAYOUT ── */
 .login-page-split {
   display: flex;
   flex: 1;
-  min-height: calc(100vh - 68px);
+  min-height: calc(100vh - 64px);
+  overflow: hidden;
 }
 
-/* â”€â”€ LEFT PANEL â”€â”€ */
+/* ── LEFT PANEL ── */
 .login-left {
-  width: 460px;
+  width: 440px;
   flex-shrink: 0;
   background: #0B1437;
   position: relative;
@@ -112,7 +109,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 56px 44px;
+  padding: clamp(24px, 4vh, 48px) clamp(24px, 3vw, 40px);
   color: #ffffff;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -124,39 +121,39 @@
 }
 
 .circle-1 {
-  width: 400px;
-  height: 400px;
-  top: -120px;
-  right: -120px;
+  width: 380px;
+  height: 380px;
+  top: -100px;
+  right: -100px;
   background: radial-gradient(circle, rgba(0, 169, 157, 0.12) 0%, transparent 65%);
 }
 
 .circle-2 {
-  width: 320px;
-  height: 320px;
-  bottom: -80px;
-  left: -100px;
+  width: 300px;
+  height: 300px;
+  bottom: -60px;
+  left: -80px;
   background: radial-gradient(circle, rgba(2, 132, 199, 0.09) 0%, transparent 65%);
 }
 
 .login-left-content {
   position: relative;
   z-index: 2;
-  max-width: 380px;
+  max-width: 360px;
   width: 100%;
 }
 
-/* Brand mark â€” logo + name, no "CENTRAL GATEWAY" label */
+/* Brand mark */
 .login-brand-mark {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 36px;
+  margin-bottom: clamp(16px, 2.5vh, 28px);
 }
 
 .brand-icon-box {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   background: linear-gradient(135deg, #00A99D, #00776D);
   display: flex;
@@ -177,10 +174,10 @@
 
 .login-headline h2 {
   font-family: Montserrat, -apple-system, sans-serif;
-  font-size: 2.05rem;
+  font-size: clamp(1.65rem, 2.2vw, 1.95rem);
   font-weight: 800;
   line-height: 1.22;
-  margin: 0 0 14px 0;
+  margin: 0 0 10px 0;
   letter-spacing: -0.025em;
   color: #ffffff;
 }
@@ -193,14 +190,14 @@
 }
 
 .headline-body {
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   color: #94a3b8;
-  line-height: 1.65;
-  margin: 0 0 36px 0;
+  line-height: 1.6;
+  margin: 0 0 clamp(16px, 2.5vh, 26px) 0;
   max-width: 340px;
 }
 
-/* Trust Pillars â€” replaces system name cards */
+/* Trust Pillars */
 .login-trust-pillars {
   display: flex;
   flex-direction: column;
@@ -209,18 +206,18 @@
 
 .trust-item {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-start;
-  padding: 14px 16px;
-  border-radius: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .trust-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
   background: rgba(0, 169, 157, 0.14);
   color: #00BFB3;
   display: flex;
@@ -237,78 +234,79 @@
 }
 
 .trust-text strong {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #f1f5f9;
   display: block;
 }
 
 .trust-text span {
-  font-size: 0.775rem;
+  font-size: 0.76rem;
   color: #64748b;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
-/* â”€â”€ RIGHT PANEL â”€â”€ */
+/* ── RIGHT PANEL ── */
 .login-right {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 32px;
+  padding: clamp(16px, 3vh, 32px) clamp(16px, 3vw, 32px);
   background: #F4F7FC;
+  overflow-y: auto;
 }
 
 .login-card {
   width: 100%;
-  max-width: 460px;
+  max-width: 430px;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid #E2E8F0;
-  padding: 40px 38px;
-  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.07);
+  padding: clamp(22px, 3vh, 32px) clamp(22px, 2.8vw, 34px);
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
 }
 
 .card-header {
-  margin-bottom: 28px;
+  margin-bottom: clamp(14px, 2vh, 20px);
   text-align: center;
 }
 
 .card-title {
   font-family: Montserrat, -apple-system, sans-serif;
-  font-size: 1.75rem;
+  font-size: clamp(1.4rem, 1.9vw, 1.6rem);
   font-weight: 800;
   color: #0B1437;
-  margin: 0 0 8px 0;
+  margin: 0 0 5px 0;
   letter-spacing: -0.025em;
   text-align: center;
 }
 
 .card-subtitle {
-  font-size: 0.875rem;
+  font-size: 0.825rem;
   color: #64748b;
   margin: 0 auto;
   max-width: 320px;
-  line-height: 1.55;
+  line-height: 1.5;
   text-align: center;
 }
 
-/* â”€â”€ FORM FIELDS â”€â”€ */
+/* ── FORM FIELDS ── */
 .login-form {
   display: flex;
   flex-direction: column;
 }
 
 .field-group {
-  margin-bottom: 18px;
+  margin-bottom: 13px;
 }
 
 .field-label {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.79rem;
   font-weight: 600;
   color: #334155;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
 
 .field-wrapper {
@@ -329,7 +327,7 @@
 
 .field-icon {
   position: absolute;
-  left: 14px;
+  left: 13px;
   color: #94a3b8;
   display: flex;
   align-items: center;
@@ -340,8 +338,8 @@
   width: 100%;
   border: none;
   background: transparent;
-  padding: 12px 14px 12px 42px;
-  font-size: 0.92rem;
+  padding: 10px 14px 10px 40px;
+  font-size: 0.89rem;
   color: #0f172a;
   outline: none;
   border-radius: 8px;
@@ -350,12 +348,12 @@
 
 .field-input::placeholder {
   color: #94a3b8;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 }
 
 .toggle-pw {
   position: absolute;
-  right: 12px;
+  right: 11px;
   background: transparent;
   border: none;
   color: #94a3b8;
@@ -371,30 +369,30 @@
   color: #475569;
 }
 
-/* â”€â”€ REMEMBER ME & FORGOT PASSWORD OPTIONS â”€â”€ */
+/* ── REMEMBER ME & FORGOT PASSWORD ── */
 .login-form-options {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: -4px;
-  margin-bottom: 20px;
-  font-size: 0.85rem;
+  margin-top: -2px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
 }
 
 .remember-me-label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   color: #475569;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
   user-select: none;
 }
 
 .remember-me-checkbox {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   border-radius: 4px;
   border: 1.5px solid #cbd5e1;
   accent-color: #00776D;
@@ -406,7 +404,7 @@
   border: none;
   padding: 0;
   color: #00776D;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -425,16 +423,16 @@
   border-radius: 2px;
 }
 
-/* â”€â”€ SUBMIT BUTTON â”€â”€ */
+/* ── SUBMIT BUTTON ── */
 .submit-btn {
   width: 100%;
-  margin-top: 6px;
-  padding: 13px 20px;
+  margin-top: 4px;
+  padding: 11px 18px;
   border-radius: 8px;
   background: #00A99D;
   color: #ffffff;
   border: none;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -457,16 +455,16 @@
   cursor: not-allowed;
 }
 
-/* â”€â”€ ALERT BANNERS â”€â”€ */
+/* ── ALERT BANNERS ── */
 .alert-banner {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   line-height: 1.45;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -508,13 +506,13 @@
   to { transform: rotate(360deg); }
 }
 
-/* â”€â”€ LEGAL NOTICE & FOOTER LINKS â”€â”€ */
+/* ── LEGAL NOTICE & FOOTER LINKS ── */
 .login-legal-notice {
-  margin-top: 20px;
+  margin-top: 14px;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 0.775rem;
   color: #64748b;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .legal-notice-btn {
@@ -523,7 +521,7 @@
   padding: 0;
   margin: 0;
   color: #00776D;
-  font-size: 0.8rem;
+  font-size: 0.775rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
@@ -543,16 +541,16 @@
   border-radius: 2px;
 }
 
-/* â”€â”€ FOOTER â”€â”€ */
+/* ── FOOTER ── */
 .login-footer {
-  margin-top: 24px;
-  padding-top: 18px;
+  margin-top: 14px;
+  padding-top: 11px;
   border-top: 1px solid #f1f5f9;
   text-align: center;
 }
 
 .login-footer-copy {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   color: #94a3b8;
   margin: 0;
 }
@@ -562,11 +560,11 @@
   color: #64748b;
 }
 
-/* â”€â”€ RESPONSIVE DESIGN â”€â”€ */
+/* ── RESPONSIVE DESIGN ── */
 @media (max-width: 1024px) {
   .login-left {
-    width: 380px;
-    padding: 40px 28px;
+    width: 360px;
+    padding: 32px 24px;
   }
   .speedex-header-inner {
     padding: 0 20px;
@@ -576,10 +574,12 @@
 @media (max-width: 860px) {
   .login-page-split {
     flex-direction: column;
+    min-height: auto;
+    overflow: visible;
   }
   .login-left {
     width: 100%;
-    padding: 32px 20px;
+    padding: 28px 20px;
   }
   .login-headline h2 {
     font-size: 1.55rem;
@@ -589,8 +589,9 @@
   }
   .login-right {
     padding: 24px 16px;
+    overflow-y: visible;
   }
   .login-card {
-    padding: 28px 20px;
+    padding: 26px 20px;
   }
 }
