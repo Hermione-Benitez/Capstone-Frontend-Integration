@@ -1,7 +1,6 @@
-/* ================================================================
-   Speedex Unified Central One-Login Styles
+﻿/* ================================================================
+   Speedex Unified Central Portal Login Styles
    Harmonized with Deep Navy #0B1437 & Speedex Teal #00A99D Design System
-   Matches STARS, DMS, FOMS & Public Portal
    ================================================================ */
 
 .login-page-container {
@@ -13,11 +12,11 @@
   color: #0F172A;
 }
 
-/* ── SPEEDEX TOP HEADER ── */
+/* â”€â”€ SPEEDEX TOP HEADER â”€â”€ */
 .speedex-system-header {
   width: 100%;
   height: 68px;
-  background: #0B1437; /* Unified Deep Navy */
+  background: #0B1437;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
@@ -43,12 +42,11 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .speedex-header-brand:hover {
-  opacity: 0.95;
-  transform: translateY(-1px);
+  opacity: 0.88;
 }
 
 .speedex-nav-logo {
@@ -56,27 +54,6 @@
   width: auto;
   object-fit: contain;
   display: block;
-}
-
-.speedex-header-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.speedex-header-text .brand-name {
-  color: #ffffff;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-}
-
-.speedex-header-text .brand-sub {
-  color: #94a3b8;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .speedex-nav-links {
@@ -107,8 +84,6 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
   color: #ffffff;
   font-weight: 500;
   font-size: 13.5px;
@@ -118,27 +93,26 @@
   background: rgba(255, 255, 255, 0.16);
   border-color: rgba(255, 255, 255, 0.35);
   color: #ffffff;
-  transform: translateY(-1px);
 }
 
-/* ── 2-COLUMN SPLIT LAYOUT ── */
+/* â”€â”€ 2-COLUMN SPLIT LAYOUT â”€â”€ */
 .login-page-split {
   display: flex;
   flex: 1;
   min-height: calc(100vh - 68px);
 }
 
-/* ── LEFT PANEL ── */
+/* â”€â”€ LEFT PANEL â”€â”€ */
 .login-left {
-  width: 490px;
+  width: 460px;
   flex-shrink: 0;
-  background: #0B1437; /* Unified Deep Navy */
+  background: #0B1437;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 40px;
+  padding: 56px 44px;
   color: #ffffff;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -150,40 +124,39 @@
 }
 
 .circle-1 {
-  width: 360px;
-  height: 360px;
-  top: -80px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(0, 169, 157, 0.14) 0%, transparent 70%);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  width: 400px;
+  height: 400px;
+  top: -120px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(0, 169, 157, 0.12) 0%, transparent 65%);
 }
 
 .circle-2 {
-  width: 300px;
-  height: 300px;
-  bottom: -60px;
-  left: -80px;
-  background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, transparent 70%);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  width: 320px;
+  height: 320px;
+  bottom: -80px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(2, 132, 199, 0.09) 0%, transparent 65%);
 }
 
 .login-left-content {
   position: relative;
   z-index: 2;
-  max-width: 400px;
+  max-width: 380px;
   width: 100%;
 }
 
-.login-brand-badge {
+/* Brand mark â€” logo + name, no "CENTRAL GATEWAY" label */
+.login-brand-mark {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: 12px;
+  margin-bottom: 36px;
 }
 
 .brand-icon-box {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
   background: linear-gradient(135deg, #00A99D, #00776D);
   display: flex;
@@ -191,6 +164,7 @@
   justify-content: center;
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(0, 169, 157, 0.35);
+  flex-shrink: 0;
 }
 
 .brand-title-badge {
@@ -201,21 +175,12 @@
   letter-spacing: -0.01em;
 }
 
-.brand-sub-badge {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #00BFB3;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .login-headline h2 {
   font-family: Montserrat, -apple-system, sans-serif;
-  font-size: 1.95rem;
+  font-size: 2.05rem;
   font-weight: 800;
-  line-height: 1.25;
-  margin: 0 0 12px 0;
+  line-height: 1.22;
+  margin: 0 0 14px 0;
   letter-spacing: -0.025em;
   color: #ffffff;
 }
@@ -228,138 +193,107 @@
 }
 
 .headline-body {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: #94a3b8;
-  line-height: 1.6;
-  margin: 0 0 32px 0;
+  line-height: 1.65;
+  margin: 0 0 36px 0;
+  max-width: 340px;
 }
 
-/* Ecosystem Feature Cards */
-.feature-list {
+/* Trust Pillars â€” replaces system name cards */
+.login-trust-pillars {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-.feature-item {
+.trust-item {
   display: flex;
   gap: 14px;
   align-items: flex-start;
   padding: 14px 16px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.feature-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(0, 169, 157, 0.4);
-  transform: translateX(3px);
-}
-
-.feature-item.active {
-  background: rgba(0, 169, 157, 0.1);
-  border-color: rgba(0, 169, 157, 0.5);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.feature-num {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(0, 169, 157, 0.15);
+.trust-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 169, 157, 0.14);
   color: #00BFB3;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.78rem;
-  font-weight: 700;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  margin-top: 1px;
 }
 
-.feature-item.active .feature-num {
-  background: #00A99D;
-  color: #FFFFFF;
+.trust-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.feature-text strong {
-  display: block;
-  font-size: 0.88rem;
+.trust-text strong {
+  font-size: 0.875rem;
   font-weight: 600;
   color: #f1f5f9;
-  margin-bottom: 2px;
+  display: block;
 }
 
-.feature-text p {
-  font-size: 0.78rem;
-  color: #94a3b8;
-  margin: 0;
+.trust-text span {
+  font-size: 0.775rem;
+  color: #64748b;
   line-height: 1.4;
 }
 
-/* ── RIGHT PANEL ── */
+/* â”€â”€ RIGHT PANEL â”€â”€ */
 .login-right {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 48px 32px;
-  background: #F4F7FC; /* Standard Canvas */
+  background: #F4F7FC;
 }
 
 .login-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #E2E8F0;
-  padding: 38px 36px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  padding: 40px 38px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.07);
 }
 
 .card-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   text-align: center;
-}
-
-/* Clean text kicker (No cheesy pill!) */
-.header-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #00776D;
-  margin: 0 auto 8px auto;
-  text-align: center;
-  background: none;
-  border: none;
-  padding: 0;
 }
 
 .card-title {
   font-family: Montserrat, -apple-system, sans-serif;
-  font-size: 1.7rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: #0B1437;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   letter-spacing: -0.025em;
   text-align: center;
 }
 
 .card-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #64748b;
   margin: 0 auto;
-  line-height: 1.5;
+  max-width: 320px;
+  line-height: 1.55;
   text-align: center;
 }
 
-/* ── FORM FIELDS ── */
+/* â”€â”€ FORM FIELDS â”€â”€ */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -374,7 +308,7 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: #334155;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .field-wrapper {
@@ -390,7 +324,7 @@
 .field-wrapper:focus-within {
   border-color: #00776D;
   background: #FFFFFF;
-  box-shadow: 0 0 0 3px rgba(0, 119, 109, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 119, 109, 0.14);
 }
 
 .field-icon {
@@ -437,7 +371,7 @@
   color: #475569;
 }
 
-/* ── REMEMBER ME & FORGOT PASSWORD OPTIONS ── */
+/* â”€â”€ REMEMBER ME & FORGOT PASSWORD OPTIONS â”€â”€ */
 .login-form-options {
   display: flex;
   align-items: center;
@@ -491,7 +425,7 @@
   border-radius: 2px;
 }
 
-/* ── SUBMIT BUTTON (Speedex Solid Teal Brand) ── */
+/* â”€â”€ SUBMIT BUTTON â”€â”€ */
 .submit-btn {
   width: 100%;
   margin-top: 6px;
@@ -523,7 +457,7 @@
   cursor: not-allowed;
 }
 
-/* ── ALERT BANNERS ── */
+/* â”€â”€ ALERT BANNERS â”€â”€ */
 .alert-banner {
   display: flex;
   align-items: flex-start;
@@ -570,15 +504,11 @@
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* ── LEGAL NOTICE & FOOTER LINKS ── */
+/* â”€â”€ LEGAL NOTICE & FOOTER LINKS â”€â”€ */
 .login-legal-notice {
   margin-top: 20px;
   text-align: center;
@@ -613,7 +543,7 @@
   border-radius: 2px;
 }
 
-/* ── FOOTER ── */
+/* â”€â”€ FOOTER â”€â”€ */
 .login-footer {
   margin-top: 24px;
   padding-top: 18px;
@@ -632,11 +562,11 @@
   color: #64748b;
 }
 
-/* ── RESPONSIVE DESIGN ── */
+/* â”€â”€ RESPONSIVE DESIGN â”€â”€ */
 @media (max-width: 1024px) {
   .login-left {
     width: 380px;
-    padding: 36px 24px;
+    padding: 40px 28px;
   }
   .speedex-header-inner {
     padding: 0 20px;
@@ -652,9 +582,9 @@
     padding: 32px 20px;
   }
   .login-headline h2 {
-    font-size: 1.5rem;
+    font-size: 1.55rem;
   }
-  .feature-list {
+  .login-trust-pillars {
     display: none;
   }
   .login-right {

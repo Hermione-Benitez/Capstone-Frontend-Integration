@@ -735,49 +735,49 @@ export default function LoginPage() {
           <div className="login-decorative-circle circle-1" />
           <div className="login-decorative-circle circle-2" />
           <div className="login-left-content">
-            <div className="login-brand-badge">
+            <div className="login-brand-mark">
               <div className="brand-icon-box">
                 <Package size={22} />
               </div>
-              <div>
-                <span className="brand-title-badge">Speedex One-Login</span>
-                <span className="brand-sub-badge">CENTRAL GATEWAY</span>
-              </div>
+              <span className="brand-title-badge">Speedex</span>
             </div>
 
             <div className="login-headline">
               <h2>
-                One Secure Account.<br />
-                <span className="headline-accent">All Enterprise Systems.</span>
+                Authorized Personnel<br />
+                <span className="headline-accent">Access Only.</span>
               </h2>
               <p className="headline-body">
-                Speedex Enterprise Central Authentication provides single sign-on access across our entire ecosystem with role-based access governance and audit logging.
+                This portal is restricted to Speedex employees and authorized personnel. Access is monitored, logged, and subject to Speedex's security and governance policies.
               </p>
             </div>
 
-            {/* Ecosystem Feature Cards */}
-            <div className="feature-list">
-              <div className="feature-item">
-                <div className="feature-num">1</div>
-                <div className="feature-text">
-                  <strong>Smart Tracking &amp; Routing System (STARS)</strong>
-                  <p>Real-time vehicle tracking, route optimization, and operational analytics.</p>
+            <div className="login-trust-pillars">
+              <div className="trust-item">
+                <div className="trust-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div className="trust-text">
+                  <strong>Secure Access</strong>
+                  <span>Multi-layer authentication with session monitoring</span>
                 </div>
               </div>
-
-              <div className="feature-item">
-                <div className="feature-num">2</div>
-                <div className="feature-text">
-                  <strong>Delivery Management System (DMS)</strong>
-                  <p>Driver task dispatching, run-sheet management, and proof of delivery.</p>
+              <div className="trust-item">
+                <div className="trust-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div className="trust-text">
+                  <strong>Role-Based Access</strong>
+                  <span>Permissions scoped to your assigned role and responsibilities</span>
                 </div>
               </div>
-
-              <div className="feature-item">
-                <div className="feature-num">3</div>
-                <div className="feature-text">
-                  <strong>Financial Operations System (FOMS)</strong>
-                  <p>Accounts receivable, billing, invoices, and payment collections.</p>
+              <div className="trust-item">
+                <div className="trust-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <div className="trust-text">
+                  <strong>Audit Logging</strong>
+                  <span>All access and activity is recorded per data privacy regulations</span>
                 </div>
               </div>
             </div>
@@ -788,10 +788,9 @@ export default function LoginPage() {
         <main className="login-right">
           <div className="login-card">
             <div className="card-header">
-              <span className="header-badge">CENTRAL ONE-LOGIN</span>
               <h1 className="card-title">Welcome to Speedex</h1>
               <p className="card-subtitle">
-                Sign in with your employee credentials to access your authorized systems.
+                Sign in with your credentials to continue. Access is restricted to authorized Speedex personnel.
               </p>
             </div>
 
