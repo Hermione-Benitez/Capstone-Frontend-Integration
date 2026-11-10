@@ -263,16 +263,6 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
           )}
         </div>
 
-        {/* ── MODAL FOOTER ── */}
-        <footer className="legal-modal-footer">
-          <button
-            type="button"
-            className="legal-modal-close-action-btn"
-            onClick={onClose}
-          >
-            Close
-          </button>
-        </footer>
       </div>
     </div>
   );
