@@ -301,11 +301,10 @@ export const PublicWebsite: React.FC = () => {
             <button
               type="button"
               className="spx-menu-toggle"
-              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
             >
-              <i className={`ti ${isMobileMenuOpen ? 'ti-x' : 'ti-menu-2'}`} aria-hidden="true" />
+              <i className="ti ti-menu-2" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -315,7 +314,7 @@ export const PublicWebsite: React.FC = () => {
           <div className="spx-mobile-drawer-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="spx-mobile-drawer" onClick={(e) => e.stopPropagation()}>
               <div className="spx-mobile-drawer-header">
-                <span className="spx-mobile-drawer-title">Speedex Navigation</span>
+                <img src="/logo.png" alt="Speedex" style={{ height: '32px', width: 'auto' }} />
                 <button
                   type="button"
                   className="spx-mobile-drawer-close"
@@ -455,6 +454,7 @@ export const PublicWebsite: React.FC = () => {
         <section className="spx-section spx-pillars-section" id="why-us">
           <div className="spx-container">
             <div className="spx-section-header">
+              <span className="spx-section-kicker">Why Choose Speedex</span>
               <h2 className="spx-section-title">Reliable, capable, and fairly priced</h2>
               <p className="spx-section-sub">
                 What clients and enterprise partners can expect when they send with Speedex Courier and Forwarder.
@@ -499,6 +499,7 @@ export const PublicWebsite: React.FC = () => {
         <section className="spx-section alt" id="advisories">
           <div className="spx-container">
             <div className="spx-section-header">
+              <span className="spx-section-kicker">Service Bulletins</span>
               <h2 className="spx-section-title">Advisories & Operational Notices</h2>
               <p className="spx-section-sub">
                 Stay informed with official updates on weather forecasts, national holidays, port schedules, and dispatch protocols.
@@ -516,18 +517,14 @@ export const PublicWebsite: React.FC = () => {
                       onClick={() => toggleAdvisory(adv.id)}
                       aria-expanded={isOpen}
                     >
-                      <div className="spx-advisory-left">
-                        <span className={`spx-adv-tag spx-adv-tag--${adv.categoryType}`}>
-                          {adv.category}
-                        </span>
-                        <h3 className="spx-advisory-heading">{adv.title}</h3>
-                      </div>
-                      <div className="spx-advisory-right">
-                        <span className="spx-advisory-date">{adv.date}</span>
-                        <span className="spx-adv-chevron-box">
-                          <i className="ti ti-chevron-down spx-advisory-chevron" aria-hidden="true" />
-                        </span>
-                      </div>
+                      <span className={`spx-adv-tag spx-adv-tag--${adv.categoryType}`}>
+                        {adv.category}
+                      </span>
+                      <h3 className="spx-advisory-heading">{adv.title}</h3>
+                      <span className="spx-advisory-date">{adv.date}</span>
+                      <span className="spx-adv-chevron-box">
+                        <i className="ti ti-chevron-down spx-advisory-chevron" aria-hidden="true" />
+                      </span>
                     </button>
 
                     <div className="spx-advisory-body-wrap">
@@ -550,6 +547,7 @@ export const PublicWebsite: React.FC = () => {
         <section className="spx-section" id="about">
           <div className="spx-container spx-about-grid">
             <div className="spx-about-text">
+              <span className="spx-section-kicker">Our Heritage</span>
               <h2 className="spx-section-title">A Filipino courier built on trust</h2>
               <p>
                 Speedex Courier and Forwarder, Inc. is 100% Filipino-owned and has been registered with the Department of Trade and Industry since October 1993, and with the Securities and Exchange Commission (SEC) since October 6, 2009.
@@ -595,6 +593,7 @@ export const PublicWebsite: React.FC = () => {
         <section className="spx-section alt" id="contact">
           <div className="spx-container spx-contact-grid">
             <div className="spx-contact-info">
+              <span className="spx-section-kicker">Get in Touch</span>
               <h2 className="spx-section-title">We are here to assist you</h2>
               <p>
                 Reach out to our customer support team or visit our administrative office for corporate logistics, rates, and parcel inquiries.
