@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DMS_TRACKING_URL } from '../config/env';
+import { LegalDocumentModal, LegalDocType } from '../components/LegalDocumentModal';
 import './PublicWebsite.css';
 
 const ADVISORIES = [
@@ -64,6 +65,13 @@ export const PublicWebsite: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('top');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [legalModalType, setLegalModalType] = useState<LegalDocType>('privacy');
+
+  const openLegal = (type: LegalDocType) => {
+    setLegalModalType(type);
+    setLegalModalOpen(true);
+  };
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -761,13 +769,33 @@ export const PublicWebsite: React.FC = () => {
           <div className="spx-footer-bottom">
             <div>&copy; {new Date().getFullYear()} Speedex Courier and Forwarder, Inc. All rights reserved.</div>
             <div className="spx-footer-bottom-links">
-              <a href="#top" className="spx-footer-link">Privacy Policy</a>
+              <button
+                type="button"
+                className="spx-footer-link spx-footer-link-btn"
+                onClick={() => openLegal('privacy')}
+              >
+                Privacy Policy
+              </button>
               <span aria-hidden="true">·</span>
-              <a href="#top" className="spx-footer-link">Terms of Use</a>
+              <button
+                type="button"
+                className="spx-footer-link spx-footer-link-btn"
+                onClick={() => openLegal('terms')}
+              >
+                Terms of Use
+              </button>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* ── Legal Modal (opened from footer links) ── */}
+      <LegalDocumentModal
+        isOpen={legalModalOpen}
+        type={legalModalType}
+        onClose={() => setLegalModalOpen(false)}
+        onSwitchType={(t) => setLegalModalType(t)}
+      />
     </div>
   );
 };

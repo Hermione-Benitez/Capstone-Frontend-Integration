@@ -1127,6 +1127,15 @@
   color: #00C4B7;
 }
 
+/* Button-styled footer link (for Privacy Policy / Terms of Use) */
+.spx-footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
 .spx-footer-bottom {
   padding-top: 28px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
