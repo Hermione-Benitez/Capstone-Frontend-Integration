@@ -730,69 +730,15 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
-      <div className="login-page-split">
-        {/* LEFT PANEL */}
-        <aside className="login-left">
-          <div className="login-decorative-circle circle-1" />
-          <div className="login-decorative-circle circle-2" />
-          <div className="login-left-content">
-            <div className="login-brand-mark">
-              <div className="brand-icon-box">
-                <Package size={22} />
-              </div>
-              <span className="brand-title-badge">Speedex</span>
-            </div>
-
-            <div className="login-headline">
-              <h2>
-                Authorized Personnel<br />
-                <span className="headline-accent">Access Only.</span>
-              </h2>
-              <p className="headline-body">
-                This portal is restricted to Speedex employees and authorized personnel. Access is monitored, logged, and subject to Speedex's security and governance policies.
-              </p>
-            </div>
-
-            <div className="login-trust-pillars">
-              <div className="trust-item">
-                <div className="trust-icon">
-                  <ShieldCheck size={16} />
-                </div>
-                <div className="trust-text">
-                  <strong>Secure Access</strong>
-                  <span>Multi-layer authentication with session monitoring</span>
-                </div>
-              </div>
-              <div className="trust-item">
-                <div className="trust-icon">
-                  <Lock size={16} />
-                </div>
-                <div className="trust-text">
-                  <strong>Role-Based Access</strong>
-                  <span>Permissions scoped to your assigned role and responsibilities</span>
-                </div>
-              </div>
-              <div className="trust-item">
-                <div className="trust-icon">
-                  <FileText size={16} />
-                </div>
-                <div className="trust-text">
-                  <strong>Audit Logging</strong>
-                  <span>All access and activity is recorded per data privacy regulations</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* RIGHT PANEL */}
-        <main className="login-right">
-          <div className="login-card">
+      {/* ── UNIFIED 2-COLUMN LOGIN CARD ── */}
+      <main className="login-page-main">
+        <div className="login-unified-card">
+          {/* LEFT COLUMN: AUTHENTICATION FORM */}
+          <div className="login-card-form">
             <div className="card-header">
-              <h1 className="card-title">Welcome to Speedex</h1>
+              <h1 className="card-title">Welcome Back</h1>
               <p className="card-subtitle">
-                Sign in with your credentials to continue. Access is restricted to authorized Speedex personnel.
+                Sign in with your employee credentials to continue.
               </p>
             </div>
 
@@ -933,7 +879,6 @@ export default function LoginPage() {
               </button>
             </form>
 
-
             {/* Legal Notice / Terms & Privacy Links */}
             <div className="login-legal-notice">
               <span>By signing in, you understand and agree to the Speedex</span>{' '}
@@ -961,8 +906,22 @@ export default function LoginPage() {
               </p>
             </footer>
           </div>
-        </main>
-      </div>
+
+          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ILLUSTRATION (Starkfest Inspo) */}
+          <div className="login-card-visual" aria-hidden="true">
+            <img
+              src="/warehouse-team.png"
+              alt="Speedex Warehouse Logistics Team"
+              className="login-visual-img"
+            />
+            <div className="login-visual-curve-mask" />
+            <div className="login-visual-tag">
+              <Package size={14} />
+              <span>Speedex Logistics Operations</span>
+            </div>
+          </div>
+        </div>
+      </main>
 
       {/* ── LEGAL DOCUMENT MODAL (Terms of Use / Privacy Statement) ── */}
       <LegalDocumentModal

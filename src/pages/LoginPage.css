@@ -1,5 +1,6 @@
 /* ================================================================
    Speedex Unified Central Portal Login Styles
+   Starkfest Inspiration: 2-Column Floating Card with Warehouse Team Art
    Harmonized with Deep Navy #0B1437 & Speedex Teal #00A99D Design System
    ================================================================ */
 
@@ -7,7 +8,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #F4F7FC;
+  background: #EEF2F6;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #0F172A;
 }
@@ -91,204 +92,61 @@
   color: #ffffff;
 }
 
-/* ── 2-COLUMN SPLIT LAYOUT ── */
-.login-page-split {
-  display: flex;
+/* ── MAIN VIEWPORT CONTAINER ── */
+.login-page-main {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 3vh, 32px) clamp(16px, 2.5vw, 28px);
   min-height: calc(100vh - 64px);
-  overflow: hidden;
-}
-
-/* ── LEFT PANEL ── */
-.login-left {
-  width: 440px;
-  flex-shrink: 0;
-  background: #0B1437;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(24px, 4vh, 48px) clamp(24px, 3vw, 40px);
-  color: #ffffff;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.login-decorative-circle {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.circle-1 {
-  width: 380px;
-  height: 380px;
-  top: -100px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(0, 169, 157, 0.12) 0%, transparent 65%);
-}
-
-.circle-2 {
-  width: 300px;
-  height: 300px;
-  bottom: -60px;
-  left: -80px;
-  background: radial-gradient(circle, rgba(2, 132, 199, 0.09) 0%, transparent 65%);
-}
-
-.login-left-content {
-  position: relative;
-  z-index: 2;
-  max-width: 360px;
-  width: 100%;
-}
-
-/* Brand mark */
-.login-brand-mark {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: clamp(16px, 2.5vh, 28px);
-}
-
-.brand-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #00A99D, #00776D);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(0, 169, 157, 0.35);
-  flex-shrink: 0;
-}
-
-.brand-title-badge {
-  display: block;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-}
-
-.login-headline h2 {
-  font-family: Montserrat, -apple-system, sans-serif;
-  font-size: clamp(1.65rem, 2.2vw, 1.95rem);
-  font-weight: 800;
-  line-height: 1.22;
-  margin: 0 0 10px 0;
-  letter-spacing: -0.025em;
-  color: #ffffff;
-}
-
-.headline-accent {
-  background: linear-gradient(135deg, #00BFB3 0%, #38BDF8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.headline-body {
-  font-size: 0.86rem;
-  color: #94a3b8;
-  line-height: 1.6;
-  margin: 0 0 clamp(16px, 2.5vh, 26px) 0;
-  max-width: 340px;
-}
-
-/* Trust Pillars */
-.login-trust-pillars {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.trust-item {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.trust-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  background: rgba(0, 169, 157, 0.14);
-  color: #00BFB3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.trust-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.trust-text strong {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #f1f5f9;
-  display: block;
-}
-
-.trust-text span {
-  font-size: 0.76rem;
-  color: #64748b;
-  line-height: 1.35;
-}
-
-/* ── RIGHT PANEL ── */
-.login-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(16px, 3vh, 32px) clamp(16px, 3vw, 32px);
-  background: #F4F7FC;
   overflow-y: auto;
 }
 
-.login-card {
+/* ── UNIFIED 2-COLUMN FLOATING CARD (Starkfest Inspo) ── */
+.login-unified-card {
   width: 100%;
-  max-width: 430px;
+  max-width: 980px;
+  min-height: 560px;
   background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid #E2E8F0;
-  padding: clamp(22px, 3vh, 32px) clamp(22px, 2.8vw, 34px);
-  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.14),
+              0 0 0 1px rgba(226, 232, 240, 0.9);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── LEFT COLUMN: FORM ── */
+.login-card-form {
+  flex: 1 1 450px;
+  max-width: 480px;
+  padding: clamp(28px, 4vh, 38px) clamp(28px, 3.5vw, 42px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #ffffff;
+  z-index: 2;
 }
 
 .card-header {
   margin-bottom: clamp(14px, 2vh, 20px);
-  text-align: center;
 }
 
 .card-title {
   font-family: Montserrat, -apple-system, sans-serif;
-  font-size: clamp(1.4rem, 1.9vw, 1.6rem);
+  font-size: clamp(1.5rem, 2vw, 1.75rem);
   font-weight: 800;
   color: #0B1437;
-  margin: 0 0 5px 0;
+  margin: 0 0 6px 0;
   letter-spacing: -0.025em;
-  text-align: center;
 }
 
 .card-subtitle {
-  font-size: 0.825rem;
+  font-size: 0.85rem;
   color: #64748b;
-  margin: 0 auto;
-  max-width: 320px;
+  margin: 0;
   line-height: 1.5;
-  text-align: center;
 }
 
 /* ── FORM FIELDS ── */
@@ -303,7 +161,7 @@
 
 .field-label {
   display: block;
-  font-size: 0.79rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #334155;
   margin-bottom: 5px;
@@ -339,7 +197,7 @@
   border: none;
   background: transparent;
   padding: 10px 14px 10px 40px;
-  font-size: 0.89rem;
+  font-size: 0.9rem;
   color: #0f172a;
   outline: none;
   border-radius: 8px;
@@ -348,7 +206,7 @@
 
 .field-input::placeholder {
   color: #94a3b8;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
 }
 
 .toggle-pw {
@@ -376,7 +234,7 @@
   justify-content: space-between;
   margin-top: -2px;
   margin-bottom: 14px;
-  font-size: 0.82rem;
+  font-size: 0.83rem;
 }
 
 .remember-me-label {
@@ -384,7 +242,7 @@
   align-items: center;
   gap: 7px;
   color: #475569;
-  font-size: 0.82rem;
+  font-size: 0.83rem;
   font-weight: 500;
   cursor: pointer;
   user-select: none;
@@ -404,7 +262,7 @@
   border: none;
   padding: 0;
   color: #00776D;
-  font-size: 0.82rem;
+  font-size: 0.83rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -423,7 +281,7 @@
   border-radius: 2px;
 }
 
-/* ── SUBMIT BUTTON ── */
+/* ── SUBMIT BUTTON (Speedex Solid Teal) ── */
 .submit-btn {
   width: 100%;
   margin-top: 4px;
@@ -432,7 +290,7 @@
   background: #00A99D;
   color: #ffffff;
   border: none;
-  font-size: 0.92rem;
+  font-size: 0.93rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -509,7 +367,6 @@
 /* ── LEGAL NOTICE & FOOTER LINKS ── */
 .login-legal-notice {
   margin-top: 14px;
-  text-align: center;
   font-size: 0.775rem;
   color: #64748b;
   line-height: 1.45;
@@ -546,7 +403,6 @@
   margin-top: 14px;
   padding-top: 11px;
   border-top: 1px solid #f1f5f9;
-  text-align: center;
 }
 
 .login-footer-copy {
@@ -560,38 +416,79 @@
   color: #64748b;
 }
 
-/* ── RESPONSIVE DESIGN ── */
-@media (max-width: 1024px) {
-  .login-left {
-    width: 360px;
-    padding: 32px 24px;
-  }
-  .speedex-header-inner {
-    padding: 0 20px;
-  }
+/* ── RIGHT COLUMN: WAREHOUSE TEAM ART (Starkfest Inspo) ── */
+.login-card-visual {
+  flex: 1 1 500px;
+  position: relative;
+  overflow: hidden;
+  background: #0B1437;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.login-visual-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Subtle curved edge mask separating form & illustration (Starkfest style) */
+.login-visual-curve-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Floating pill tag at bottom right */
+.login-visual-tag {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  background: rgba(11, 20, 55, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 7px 14px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 2;
+  user-select: none;
+}
+
+.login-visual-tag svg {
+  color: #00BFB3;
+}
+
+/* ── RESPONSIVE DESIGN ── */
 @media (max-width: 860px) {
-  .login-page-split {
-    flex-direction: column;
+  .login-unified-card {
+    max-width: 440px;
     min-height: auto;
-    overflow: visible;
+    border-radius: 16px;
   }
-  .login-left {
-    width: 100%;
-    padding: 28px 20px;
+  .login-card-form {
+    max-width: 100%;
+    padding: 28px 22px;
   }
-  .login-headline h2 {
-    font-size: 1.55rem;
-  }
-  .login-trust-pillars {
+  .login-card-visual {
     display: none;
   }
-  .login-right {
-    padding: 24px 16px;
+  .login-page-main {
+    padding: 20px 16px;
     overflow-y: visible;
-  }
-  .login-card {
-    padding: 26px 20px;
   }
 }
