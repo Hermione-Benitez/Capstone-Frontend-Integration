@@ -12,6 +12,8 @@ import {
   Loader2,
   RefreshCw,
   Package,
+  ShieldCheck,
+  FileText,
 } from 'lucide-react';
 import {
   clearAuthSession,
@@ -728,70 +730,15 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
-      <div className="login-page-split">
-        {/* LEFT PANEL */}
-        <aside className="login-left">
-          <div className="login-decorative-circle circle-1" />
-          <div className="login-decorative-circle circle-2" />
-          <div className="login-left-content">
-            <div className="login-brand-badge">
-              <div className="brand-icon-box">
-                <Package size={22} />
-              </div>
-              <div>
-                <span className="brand-title-badge">Speedex One-Login</span>
-                <span className="brand-sub-badge">CENTRAL GATEWAY</span>
-              </div>
-            </div>
-
-            <div className="login-headline">
-              <h2>
-                One Secure Account.<br />
-                <span className="headline-accent">All Enterprise Systems.</span>
-              </h2>
-              <p className="headline-body">
-                Speedex Enterprise Central Authentication provides single sign-on access across our entire ecosystem with role-based access governance and audit logging.
-              </p>
-            </div>
-
-            {/* Ecosystem Feature Cards */}
-            <div className="feature-list">
-              <div className="feature-item">
-                <div className="feature-num">1</div>
-                <div className="feature-text">
-                  <strong>Smart Tracking &amp; Routing System (STARS)</strong>
-                  <p>Real-time vehicle tracking, route optimization, and operational analytics.</p>
-                </div>
-              </div>
-
-              <div className="feature-item">
-                <div className="feature-num">2</div>
-                <div className="feature-text">
-                  <strong>Delivery Management System (DMS)</strong>
-                  <p>Driver task dispatching, run-sheet management, and proof of delivery.</p>
-                </div>
-              </div>
-
-              <div className="feature-item">
-                <div className="feature-num">3</div>
-                <div className="feature-text">
-                  <strong>Financial Operations System (FOMS)</strong>
-                  <p>Accounts receivable, billing, invoices, and payment collections.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* RIGHT PANEL */}
-        <main className="login-right">
-          <div className="login-card">
+      {/* ── UNIFIED 2-COLUMN LOGIN CARD ── */}
+      <main className="login-page-main">
+        <div className="login-unified-card">
+          {/* LEFT COLUMN: AUTHENTICATION FORM */}
+          <div className="login-card-form">
             <div className="card-header">
-              <span className="header-badge">CENTRAL ONE-LOGIN</span>
-              <h1 className="card-title">Welcome to Speedex</h1>
+              <h1 className="card-title">Welcome Back</h1>
               <p className="card-subtitle">
-                Sign in with your employee credentials to access your authorized systems.
+                Sign in with your employee credentials to continue.
               </p>
             </div>
 
@@ -932,7 +879,6 @@ export default function LoginPage() {
               </button>
             </form>
 
-
             {/* Legal Notice / Terms & Privacy Links */}
             <div className="login-legal-notice">
               <span>By signing in, you understand and agree to the Speedex</span>{' '}
@@ -960,8 +906,32 @@ export default function LoginPage() {
               </p>
             </footer>
           </div>
-        </main>
-      </div>
+
+          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ILLUSTRATION (Starkfest Inspo) */}
+          <div className="login-card-visual" aria-hidden="true">
+            <img
+              src="/warehouse-team.png"
+              alt="Speedex Warehouse Logistics Team"
+              className="login-visual-img"
+            />
+            {/* Subtle color grading tint overlay (Navy / Teal harmonious blend) */}
+            <div className="login-visual-color-grade" />
+
+            {/* Soft gradient feather along the crescent curve */}
+            <div className="login-visual-curve-feather" />
+
+            {/* Elegant organic convex curve divider (Starkfest Inspo) */}
+            <svg
+              className="login-visual-curve"
+              viewBox="0 0 40 500"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
+            </svg>
+          </div>
+        </div>
+      </main>
 
       {/* ── LEGAL DOCUMENT MODAL (Terms of Use / Privacy Statement) ── */}
       <LegalDocumentModal
