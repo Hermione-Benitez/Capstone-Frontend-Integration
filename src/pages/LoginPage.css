@@ -101,16 +101,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(16px, 3vh, 32px) clamp(16px, 2.5vw, 28px);
+  padding: clamp(10px, 2vh, 20px) clamp(16px, 2.5vw, 28px);
   min-height: calc(100vh - 64px);
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 20, 55, 0.2) transparent;
+}
+
+.login-page-main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.login-page-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.login-page-main::-webkit-scrollbar-thumb {
+  background: rgba(11, 20, 55, 0.2);
+  border-radius: 999px;
+}
+
+.login-page-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 20, 55, 0.35);
 }
 
 /* ── UNIFIED 2-COLUMN FLOATING CARD (Starkfest Inspo) ── */
 .login-unified-card {
   width: 100%;
   max-width: 1040px;
-  min-height: 560px;
+  min-height: clamp(480px, 68vh, 540px);
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.14),
@@ -124,7 +143,7 @@
 .login-card-form {
   flex: 0 0 450px;
   width: 450px;
-  padding: clamp(28px, 4vh, 38px) clamp(28px, 3.5vw, 42px);
+  padding: clamp(20px, 3vh, 30px) clamp(26px, 3vw, 38px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -158,26 +177,26 @@
 }
 
 .card-header {
-  margin-bottom: clamp(14px, 2vh, 20px);
+  margin-bottom: clamp(10px, 1.8vh, 16px);
   text-align: center;
 }
 
 .card-title {
   font-family: Montserrat, -apple-system, sans-serif;
-  font-size: clamp(1.5rem, 2vw, 1.75rem);
+  font-size: clamp(1.4rem, 1.8vw, 1.65rem);
   font-weight: 800;
   color: #0B1437;
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
   letter-spacing: -0.025em;
   text-align: center;
 }
 
 .card-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #64748b;
   margin: 0 auto;
   max-width: 320px;
-  line-height: 1.5;
+  line-height: 1.45;
   text-align: center;
 }
 
@@ -188,15 +207,15 @@
 }
 
 .field-group {
-  margin-bottom: 13px;
+  margin-bottom: 11px;
 }
 
 .field-label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: #334155;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .field-wrapper {
@@ -228,8 +247,8 @@
   width: 100%;
   border: none;
   background: transparent;
-  padding: 10px 14px 10px 40px;
-  font-size: 0.9rem;
+  padding: 9px 14px 9px 40px;
+  font-size: 0.88rem;
   color: #0f172a;
   outline: none;
   border-radius: 8px;
@@ -238,7 +257,7 @@
 
 .field-input::placeholder {
   color: #94a3b8;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
 }
 
 .toggle-pw {
@@ -265,8 +284,8 @@
   align-items: center;
   justify-content: space-between;
   margin-top: -2px;
-  margin-bottom: 14px;
-  font-size: 0.83rem;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
 }
 
 .remember-me-label {
@@ -274,7 +293,7 @@
   align-items: center;
   gap: 7px;
   color: #475569;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
   user-select: none;
@@ -294,7 +313,7 @@
   border: none;
   padding: 0;
   color: #00776D;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -317,12 +336,12 @@
 .submit-btn {
   width: 100%;
   margin-top: 4px;
-  padding: 11px 18px;
+  padding: 10px 18px;
   border-radius: 8px;
   background: #00A99D;
   color: #ffffff;
   border: none;
-  font-size: 0.93rem;
+  font-size: 0.91rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -350,11 +369,11 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
-  font-size: 0.82rem;
-  line-height: 1.45;
-  margin-bottom: 16px;
+  font-size: 0.81rem;
+  line-height: 1.4;
+  margin-bottom: 12px;
   animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -398,12 +417,12 @@
 
 /* ── LEGAL NOTICE & FOOTER LINKS (Centered & Clean) ── */
 .login-legal-notice {
-  margin: 16px auto 0 auto;
+  margin: 12px auto 0 auto;
   max-width: 360px;
   text-align: center;
-  font-size: 0.775rem;
+  font-size: 0.76rem;
   color: #64748b;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .legal-notice-btn {
@@ -412,7 +431,7 @@
   padding: 0;
   margin: 0;
   color: #00776D;
-  font-size: 0.775rem;
+  font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
@@ -434,8 +453,8 @@
 
 /* ── FOOTER (Centered & Clean) ── */
 .login-footer {
-  margin-top: 14px;
-  padding-top: 11px;
+  margin-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid #f1f5f9;
   text-align: center;
 }
