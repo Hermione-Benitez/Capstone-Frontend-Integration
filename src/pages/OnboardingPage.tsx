@@ -548,8 +548,8 @@ export default function OnboardingPage() {
                 <span>Speedex Data Governance &amp; Security Compliance</span>
               </div>
               <p>
-                Staff accounts are provisioned under Speedex Access Control Policies. Passwords are salted and
-                hashed using PBKDF2 cryptography.
+                Staff accounts are provisioned under Speedex Access Control Policies with enterprise-grade
+                credential protection and zero-knowledge storage standards.
               </p>
             </div>
           </div>
