@@ -107,52 +107,52 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
           {isTerms ? (
             <article className="legal-document-content">
               <section className="legal-section">
-                <h3>1. Introduction &amp; Acceptance of Terms</h3>
+                <h3>1. Scope &amp; Acceptance of Terms</h3>
                 <p>
-                  Welcome to the <strong>Speedex Central Unified Gateway</strong> and integrated logistics operational ecosystem.
+                  Welcome to the <strong>Speedex Logistics Portal</strong> and enterprise operational platform.
                 </p>
                 <p>
-                  By accessing, signing into, or utilizing any portion of this portal or its connected services, you certify that you are an authorized employee, contractor, courier, or operational partner of <strong>Speedex Courier &amp; Forwarder, Inc.</strong>, and agree to be legally bound by these Terms of Use and applicable operational guidelines. If you do not agree with any provision herein, you must immediately terminate your session and refrain from accessing the systems.
+                  By accessing, signing into, or utilizing any portion of this portal or its connected services, you certify that you are an authorized employee, courier, contractor, or accredited partner of <strong>Speedex Courier &amp; Forwarder, Inc.</strong>, and agree to be bound by these Terms of Use and company security guidelines. Unauthorized access, automated scraping, or exceeding permitted access levels is strictly prohibited and subject to criminal prosecution under Republic Act No. 10175 (Cybercrime Prevention Act of 2012).
                 </p>
               </section>
 
               <section className="legal-section">
                 <h3>2. Authorized Access &amp; User Conduct</h3>
                 <p>
-                  Access to Speedex internal platforms is restricted strictly to authorized corporate personnel with valid credentials assigned by the Speedex Administration team.
+                  Access to Speedex systems is restricted strictly to authenticated personnel with active corporate credentials.
                 </p>
                 <ul>
                   <li>
-                    <strong>Account Credential Protection:</strong> You are responsible for preserving the absolute confidentiality of your assigned Employee ID and authentication password. Password sharing, credential loaning, or utilizing unauthorized proxy identities is strictly prohibited.
+                    <strong>Credential Protection:</strong> You are strictly responsible for maintaining the confidentiality of your assigned credentials. Credential sharing, unauthorized delegation, or operating under proxy identities is strictly prohibited.
                   </li>
                   <li>
-                    <strong>No Prohibited Interventions:</strong> You agree not to reverse engineer, decompile, intercept, disrupt, or introduce automated scrapers, malicious scripts, or denial-of-service vectors into any Speedex service account, micro-frontend, or API endpoint.
+                    <strong>System Integrity:</strong> You agree not to reverse engineer, decompile, probe, scan, or introduce automated scripts, denial-of-service traffic, or unauthorized payloads into any Speedex network interface, digital endpoint, or operational service.
                   </li>
                   <li>
-                    <strong>Single Sign-On Integrity:</strong> Bypassing the Central Login gateway or tampering with authentication tokens or session parameters will trigger immediate account suspension and automated security review.
+                    <strong>Authentication Enforcement:</strong> Any attempt to circumvent gateway authentication, manipulate authorization tokens, forge request headers, or tamper with active sessions will trigger immediate account revocation, audit logging, and legal review.
                   </li>
                 </ul>
               </section>
 
               <section className="legal-section">
-                <h3>3. Operational Accuracy &amp; Consignment Data</h3>
+                <h3>3. Operational Accuracy &amp; Consignment Records</h3>
                 <p>
-                  Speedex systems process mission-critical national logistics records, real-time dispatch schedules, cash-on-delivery (COD) collections, and waybill tracking milestones.
+                  Speedex operational systems record and dispatch mission-critical logistics data, tracking milestones, and financial transactions.
                 </p>
                 <ul>
                   <li>
-                    <strong>Truthfulness of Entry:</strong> Employees, couriers, and dispatchers must ensure all entered parcel weights, package dimensions, recipient signatures, and delivery status transitions (e.g. <em>In Transit</em>, <em>Out for Delivery</em>, <em>Delivered</em>, <em>Failed Delivery</em>) are accurate and timely.
+                    <strong>Truthfulness of Entry:</strong> Authorized users must ensure that all recorded consignment weights, package metrics, proof-of-delivery acknowledgments, and operational status updates are truthful, accurate, and promptly filed.
                   </li>
                   <li>
-                    <strong>Zero Tolerance for Falsification:</strong> Falsifying delivery proof, tampering with financial records, or misrepresenting task completion timestamps constitutes gross misconduct and grounds for disciplinary termination and statutory legal prosecution.
+                    <strong>Zero Tolerance for Falsification:</strong> Deliberately falsifying delivery confirmations, altering cash collection records, or manipulating shipment timestamps constitutes serious misconduct and grounds for immediate termination and civil or criminal statutory action.
                   </li>
                 </ul>
               </section>
 
               <section className="legal-section">
-                <h3>4. Session Management &amp; Rate Limiting Security</h3>
+                <h3>4. Session Governance &amp; Threat Mitigation</h3>
                 <p>
-                  To protect company assets and consignor data, Speedex implements enterprise-grade sliding-window rate limiting, active session token verification, and inactivity revocation. Users will be automatically logged out after periods of idle inactivity to prevent unauthorized physical terminal access.
+                  To protect enterprise infrastructure, customer consignments, and corporate data, Speedex enforces automated request throttling, session anomaly detection, and mandatory inactivity timeouts. Sessions left unattended will be automatically terminated to prevent unauthorized physical terminal access.
                 </p>
               </section>
 
@@ -164,16 +164,16 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
               </section>
 
               <section className="legal-section">
-                <h3>6. System Availability &amp; Service SLA</h3>
+                <h3>6. System Availability &amp; Platform SLA</h3>
                 <p>
-                  Speedex provides access to its digital dashboards on an enterprise high-availability infrastructure. Scheduled maintenance windows or network telecommunications outages may cause transient service interruptions. Speedex disclaims liability for indirect damages arising from unforeseen system downtime.
+                  Speedex provides access to its operational platforms on an enterprise high-availability infrastructure. Periodic maintenance or telecommunications provider interruptions may result in transient downtime. Speedex disclaims liability for indirect operational impacts arising from unforeseen carrier or network outages.
                 </p>
               </section>
 
               <section className="legal-section">
-                <h3>7. Governing Law &amp; Jurisdiction</h3>
+                <h3>7. Governing Law &amp; Legal Jurisdiction</h3>
                 <p>
-                  These Terms of Use are governed by and construed in accordance with the laws of the <strong>Republic of the Philippines</strong>, including regulations from the Department of Trade and Industry (DTI), the Securities and Exchange Commission (SEC), and the Department of Information and Communications Technology (DICT).
+                  These Terms of Use are governed by and construed in accordance with the laws of the <strong>Republic of the Philippines</strong>, including Republic Act No. 10175 (Cybercrime Prevention Act of 2012), Republic Act No. 8792 (Electronic Commerce Act of 2000), and regulations issued by the Department of Trade and Industry (DTI) and Department of Information and Communications Technology (DICT).
                 </p>
               </section>
             </article>
@@ -182,7 +182,7 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
               <section className="legal-section">
                 <h3>1. Overview &amp; Data Controller</h3>
                 <p>
-                  <strong>Speedex Courier &amp; Forwarder, Inc.</strong> (&quot;Speedex&quot;) respects and upholds your fundamental right to privacy. This Privacy Statement describes our policies and practices regarding the collection, processing, storage, and protection of personal and operational data across our Central Gateway, Public Tracking Site, and integrated operations systems.
+                  <strong>Speedex Courier &amp; Forwarder, Inc.</strong> (&quot;Speedex&quot;) respects and upholds your fundamental right to privacy. This Privacy Statement describes our policies and practices regarding the collection, processing, storage, and protection of personal and operational data across the Speedex portal, Public Tracking site, and connected logistics systems.
                 </p>
                 <p>
                   Speedex acts as the <strong>Personal Information Controller (PIC)</strong> under the <strong>Republic of the Philippines Data Privacy Act of 2012 (Republic Act No. 10173)</strong>, its Implementing Rules and Regulations (IRR), and circulars issued by the National Privacy Commission (NPC).
@@ -223,13 +223,16 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
                 </p>
                 <ul>
                   <li>
-                    <strong>Data in Transit:</strong> All communications and transactions between client endpoints, the central gateway, and operational subsystems are protected using industry-standard transport-level cryptographic protocols.
+                    <strong>Data in Transit:</strong> All communications and transactions between client endpoints, the central portal, and operational subsystems are protected using industry-standard transport-level cryptographic protocols.
                   </li>
                   <li>
                     <strong>Data at Rest:</strong> Sensitive records, access tokens, and credentials are encrypted and stored using enterprise-grade cryptographic controls with irreversible one-way salted protection for user authentication data.
                   </li>
                   <li>
                     <strong>Role-Based Access Governance:</strong> Internal personnel and system accounts are strictly scoped to the least-privilege principle, ensuring access only to data categories required for verified business functions.
+                  </li>
+                  <li>
+                    <strong>Continuous Security Monitoring:</strong> Automated threat mitigation, intrusion detection, and immutable access logging are maintained to proactively detect, isolate, and neutralize unauthorized access attempts.
                   </li>
                 </ul>
               </section>
@@ -255,7 +258,7 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
                 </p>
                 <div className="legal-contact-card">
                   <div><strong>Speedex Data Protection Office</strong></div>
-                  <div>Email: <a href="mailto:admin@myspeedex.net">admin@myspeedex.net</a></div>
+                  <div>Email: <a href="mailto:dpo@myspeedex.net">dpo@myspeedex.net</a> / <a href="mailto:admin@myspeedex.net">admin@myspeedex.net</a></div>
                   <div>Speedex Logistics Hub 1, Manila, Philippines</div>
                 </div>
               </section>
