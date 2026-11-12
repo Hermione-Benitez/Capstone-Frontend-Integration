@@ -217,19 +217,19 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
               </section>
 
               <section className="legal-section">
-                <h3>4. Data Security &amp; Cryptographic Standards</h3>
+                <h3>4. Data Security &amp; Information Protection Standards</h3>
                 <p>
-                  Speedex implements rigorous technical, organizational, and physical security measures to protect personal data:
+                  Speedex implements comprehensive technical, organizational, and physical security controls to safeguard personal and operational data across all platforms:
                 </p>
                 <ul>
                   <li>
-                    <strong>In Transit:</strong> Communications between your browser, the Central Gateway, and the underlying systems are encrypted using <strong>Transport Layer Security (TLS 1.3)</strong>.
+                    <strong>Data in Transit:</strong> All communications and transactions between client endpoints, the central gateway, and operational subsystems are protected using industry-standard transport-level cryptographic protocols.
                   </li>
                   <li>
-                    <strong>At Rest:</strong> Sensitive credentials, tokens, and database stores are encrypted using <strong>AES-256 standard encryption</strong> with salted cryptographic hashing for passwords.
+                    <strong>Data at Rest:</strong> Sensitive records, access tokens, and credentials are encrypted and stored using enterprise-grade cryptographic controls with irreversible one-way salted protection for user authentication data.
                   </li>
                   <li>
-                    <strong>Role-Based Access (RBAC):</strong> Personnel have access only to the data categories required to perform their specific duties.
+                    <strong>Role-Based Access Governance:</strong> Internal personnel and system accounts are strictly scoped to the least-privilege principle, ensuring access only to data categories required for verified business functions.
                   </li>
                 </ul>
               </section>
