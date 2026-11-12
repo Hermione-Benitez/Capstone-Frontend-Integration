@@ -258,8 +258,9 @@ export const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
                 </p>
                 <div className="legal-contact-card">
                   <div><strong>Speedex Data Protection Office</strong></div>
-                  <div>Email: <a href="mailto:dpo@myspeedex.net">dpo@myspeedex.net</a> / <a href="mailto:admin@myspeedex.net">admin@myspeedex.net</a></div>
-                  <div>Speedex Logistics Hub 1, Manila, Philippines</div>
+                  <div>Email: <a href="mailto:admin@myspeedex.net">admin@myspeedex.net</a></div>
+                  <div>Landline: (02) 8400-4628 to 29</div>
+                  <div>Address: ECF Building, Malate, Manila, Philippines</div>
                 </div>
               </section>
             </article>
