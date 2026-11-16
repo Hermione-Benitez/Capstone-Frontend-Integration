@@ -493,120 +493,123 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      {/* ── 2-COLUMN SPLIT SCREEN (Navy Aside + White Form Card) ── */}
-      <div className="onboarding-split-container">
-        {/* LEFT PANEL: DEEP NAVY SPEEDEX ROADMAP */}
-        <aside className="onboarding-split-left">
-          <div className="onboarding-glow-orb orb-1" aria-hidden="true" />
-          <div className="onboarding-glow-orb orb-2" aria-hidden="true" />
+      {/* ── UNIFIED 2-COLUMN FLOATING CARD (Navy Roadmap Left + White Form Right) ── */}
+      <main className="login-page-main">
+        <div className="login-unified-card onboarding-unified-card">
+          {/* LEFT COLUMN: DEEP NAVY SPEEDEX ROADMAP */}
+          <aside className="onboarding-card-navy">
+            <div className="onboarding-glow-orb orb-1" aria-hidden="true" />
+            <div className="onboarding-glow-orb orb-2" aria-hidden="true" />
 
-          <div className="onboarding-left-inner">
-            {/* Top Brand Pill */}
-            <div className="onboarding-brand-pill">
-              <div className="onboarding-brand-icon">
-                {step === 'profile' ? <User size={18} /> : <KeyRound size={18} />}
+            <div className="onboarding-navy-content">
+              {/* Top Brand Pill */}
+              <div className="onboarding-brand-pill">
+                <div className="onboarding-brand-icon">
+                  {step === 'profile' ? <User size={16} /> : <KeyRound size={16} />}
+                </div>
+                <div className="onboarding-brand-text">
+                  <span className="onboarding-brand-title">Employee Gateway</span>
+                  <span className="onboarding-brand-subtitle">ACCOUNT ONBOARDING</span>
+                </div>
               </div>
-              <div className="onboarding-brand-text">
-                <span className="onboarding-brand-title">Employee Gateway</span>
-                <span className="onboarding-brand-subtitle">ACCOUNT ONBOARDING</span>
+
+              {/* Headline */}
+              <div className="onboarding-headline">
+                <h2>
+                  Welcome to Speedex,<br />
+                  <span className="headline-gradient">get ready to take off.</span>
+                </h2>
+                <p className="headline-desc">
+                  Verify your employee profile and create your permanent password to activate your access across STARS, DMS, and FOMS.
+                </p>
+              </div>
+
+              {/* Step Roadmap */}
+              <nav className="onboarding-roadmap" aria-label="Onboarding Steps Roadmap">
+                <div
+                  className={`roadmap-item ${step === 'profile' ? 'current' : 'done'}`}
+                  onClick={() => {
+                    if (step === 'password') setStep('profile');
+                  }}
+                  style={{ cursor: step === 'password' ? 'pointer' : 'default' }}
+                  title={step === 'password' ? 'Click to return to Profile Details' : undefined}
+                >
+                  <div className="roadmap-bullet">
+                    {step === 'password' ? <Check size={14} strokeWidth={2.8} /> : '1'}
+                  </div>
+                  <div className="roadmap-info">
+                    <strong>Staff Profile Details</strong>
+                    <span>Confirm your personal information.</span>
+                  </div>
+                </div>
+
+                <div className={`roadmap-item ${step === 'password' ? 'current' : ''}`}>
+                  <div className="roadmap-bullet">2</div>
+                  <div className="roadmap-info">
+                    <strong>Account Security</strong>
+                    <span>Create your permanent login password.</span>
+                  </div>
+                </div>
+
+                <div className="roadmap-item upcoming">
+                  <div className="roadmap-bullet">3</div>
+                  <div className="roadmap-info">
+                    <strong>System Access</strong>
+                    <span>Review policies and activate access.</span>
+                  </div>
+                </div>
+              </nav>
+
+              {/* Compliance Notice */}
+              <div className="onboarding-compliance-card">
+                <div className="compliance-header">
+                  <ShieldCheck size={15} className="compliance-shield" />
+                  <span>ENTERPRISE SECURITY COMPLIANCE</span>
+                </div>
+                <p>
+                  Your account is protected under Speedex Access Control Policies with encrypted credential standards.
+                </p>
               </div>
             </div>
+          </aside>
 
-            {/* Headline */}
-            <div className="onboarding-headline">
-              <h2>
-                Welcome to Speedex,<br />
-                <span className="headline-gradient">get ready to take off.</span>
-              </h2>
-              <p className="headline-desc">
-                Complete your staff profile verification and set up a permanent, OWASP-compliant password
-                to activate your enterprise access across STARS, DMS, and FOMS.
-              </p>
-            </div>
+          {/* RIGHT COLUMN: WHITE ONBOARDING FORM */}
+          <section className="onboarding-card-white">
+            {/* Top Stepper with Connecting Line */}
+            <div className="onboarding-stepper" role="navigation" aria-label="Onboarding Progress">
+              <div className="stepper-track" aria-hidden="true">
+                <div className={`stepper-track-progress ${step === 'password' ? 'filled' : ''}`} />
+              </div>
 
-            {/* Step Roadmap */}
-            <nav className="onboarding-roadmap" aria-label="Onboarding Steps Roadmap">
               <div
-                className={`roadmap-item ${step === 'profile' ? 'current' : 'done'}`}
+                className={`stepper-node ${step === 'profile' ? 'active' : 'completed'}`}
                 onClick={() => {
                   if (step === 'password') setStep('profile');
                 }}
                 style={{ cursor: step === 'password' ? 'pointer' : 'default' }}
-                title={step === 'password' ? 'Click to return to Step 1: Profile Setup' : undefined}
+                title={step === 'password' ? 'Return to Step 1: Profile Details' : undefined}
               >
-                <div className="roadmap-bullet">
-                  {step === 'password' ? <Check size={14} strokeWidth={2.8} /> : '1'}
+                <div className="stepper-node-circle">
+                  {step === 'password' ? <Check size={13} strokeWidth={3} /> : '1'}
                 </div>
-                <div className="roadmap-info">
-                  <strong>Staff Profile Setup</strong>
-                  <span>Verify manager-entered details and mobile contact.</span>
-                </div>
+                <span className="stepper-node-title">Profile Details</span>
               </div>
 
-              <div className={`roadmap-item ${step === 'password' ? 'current' : ''}`}>
-                <div className="roadmap-bullet">2</div>
-                <div className="roadmap-info">
-                  <strong>Security Password</strong>
-                  <span>Establish your high-entropy personal master password.</span>
-                </div>
+              <div className={`stepper-node ${step === 'password' ? 'active' : ''}`}>
+                <div className="stepper-node-circle">2</div>
+                <span className="stepper-node-title">New Password</span>
               </div>
-
-              <div className="roadmap-item upcoming">
-                <div className="roadmap-bullet">3</div>
-                <div className="roadmap-info">
-                  <strong>Privacy &amp; Terms</strong>
-                  <span>Speedex Data Privacy Act (RA 10173) compliance sign-off.</span>
-                </div>
-              </div>
-            </nav>
-
-            {/* Compliance Box */}
-            <div className="onboarding-compliance-card">
-              <div className="compliance-header">
-                <ShieldCheck size={15} className="compliance-shield" />
-                <span>SPEEDEX DATA GOVERNANCE &amp; SECURITY COMPLIANCE</span>
-              </div>
-              <p>
-                Staff accounts are provisioned under Speedex Access Control Policies with enterprise-grade
-                credential protection and zero-knowledge storage standards.
-              </p>
             </div>
-          </div>
-        </aside>
-
-        {/* RIGHT PANEL: FORM CANVAS */}
-        <main className="onboarding-split-right">
-          <div className="onboarding-form-card">
-            {/* Dynamic Card Top Back Link */}
-            <button
-              type="button"
-              className="card-back-action"
-              onClick={() => {
-                if (step === 'password') {
-                  setStep('profile');
-                  setError(null);
-                } else {
-                  navigate('/login');
-                }
-              }}
-              aria-label={step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}
-            >
-              <ArrowLeft size={14} />
-              <span>{step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}</span>
-            </button>
 
             {/* Card Header */}
             <div className="onboarding-card-header">
-              <span className="header-badge">
-                {step === 'profile' ? 'STEP 1 OF 2 · PROFILE VERIFICATION' : 'STEP 2 OF 2 · CREDENTIAL SETUP'}
-              </span>
               <h1 className="card-title">
                 {step === 'profile' ? 'Staff Profile Details' : 'Set Up New Password'}
               </h1>
               <p className="card-subtitle">
                 {step === 'profile'
-                  ? 'Verify your personal information. You can edit any field if corrections are required.'
-                  : 'Replace your temporary password with your permanent OWASP-compliant secret.'}
+                  ? 'Please confirm your personal information below.'
+                  : 'Create a permanent password to replace your temporary credentials.'}
               </p>
             </div>
 
@@ -617,10 +620,9 @@ export default function OnboardingPage() {
                   <Sparkles size={16} />
                 </div>
                 <div className="prefill-notice-content">
-                  <strong>Pre-filled from Manager Registration</strong>
+                  <strong>Pre-filled from Registration</strong>
                   <p>
-                    Information used by your manager during account creation is pre-filled below.
-                    Please review and edit any typos or incorrect details before continuing.
+                    Manager-entered details have been pre-filled. Please review and edit any corrections.
                   </p>
                 </div>
                 <div className="prefill-badge">
@@ -632,13 +634,13 @@ export default function OnboardingPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="alert-banner danger">
+              <div className="alert-banner danger" role="alert">
                 <AlertCircle size={18} />
                 <div>{error}</div>
               </div>
             )}
 
-            {/* Smooth Animated Form Transition Container */}
+            {/* Form Container with Smooth Non-Jumpy Transition */}
             <div key={step} className="step-fade-container">
               {/* STEP 1: PROFILE SETUP FORM */}
               {step === 'profile' ? (
@@ -767,9 +769,9 @@ export default function OnboardingPage() {
                     type="submit"
                     className="submit-btn onboarding-submit-btn"
                     disabled={!isStep1Complete}
-                    title={!isStep1Complete ? 'Please fill in all required fields (First Name, Last Name, Mobile Number) before proceeding' : undefined}
+                    title={!isStep1Complete ? 'Please fill in all required fields before proceeding' : undefined}
                   >
-                    <span>Next: Password Setup</span>
+                    <span>Continue to Password Setup</span>
                     <ArrowRight size={18} />
                   </button>
                 </form>
@@ -806,7 +808,7 @@ export default function OnboardingPage() {
                       </button>
                     </div>
                     <span className="field-helper-hint">
-                      Check your onboarding email or notification from your system manager for this password.
+                      Provided by your manager or in your onboarding notification.
                     </span>
                   </div>
 
@@ -823,7 +825,7 @@ export default function OnboardingPage() {
                         id="new-password"
                         type={showNew ? 'text' : 'password'}
                         className="field-input"
-                        placeholder="Create high-entropy password"
+                        placeholder="Create your new password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         autoComplete="new-password"
@@ -894,11 +896,11 @@ export default function OnboardingPage() {
                     )}
                   </div>
 
-                  {/* Live OWASP Complexity Requirements Checklist */}
+                  {/* Live Complexity Requirements Checklist */}
                   <div className="pw-checklist-card">
                     <div className="checklist-header">
                       <ShieldCheck size={13} className="checklist-shield-icon" />
-                      <span className="checklist-title">OWASP Password Requirements</span>
+                      <span className="checklist-title">Password Requirements</span>
                     </div>
                     <ul className="checklist-items">
                       {passwordRules.map((rule) => {
@@ -949,7 +951,7 @@ export default function OnboardingPage() {
                       {isSubmitting ? (
                         <>
                           <Loader2 size={18} className="spinner" />
-                          <span>Updating Credentials...</span>
+                          <span>Activating Account...</span>
                         </>
                       ) : (
                         <>
@@ -968,9 +970,9 @@ export default function OnboardingPage() {
                 © 2026 <span className="login-footer-company">Speedex Courier &amp; Forwarder, Inc.</span> · All rights reserved.
               </p>
             </footer>
-          </div>
-        </main>
-      </div>
+          </section>
+        </div>
+      </main>
     </div>
   );
 }

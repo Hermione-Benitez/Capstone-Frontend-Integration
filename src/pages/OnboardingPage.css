@@ -1,56 +1,77 @@
 /* ================================================================
    Speedex OneUI — Account Onboarding & Credential Setup Styles
-   Split Layout: Deep Navy Roadmap Aside + Centered Form Card
+   Harmonized 2-Column Floating Card (Navy Roadmap Left + White Form Right)
    Harmonized with Speedex Deep Navy #0B1437 & Speedex Teal #00A99D
    ================================================================ */
 
 .onboarding-view-container {
   min-height: 100vh;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   background: #EEF2F6;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #0F172A;
-  overflow: hidden;
 }
 
-/* ── SPLIT CONTAINER (Height: calc(100vh - 64px)) ── */
-.onboarding-split-container {
-  display: flex;
+@media (min-width: 901px) {
+  .onboarding-view-container {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* ── MAIN VIEWPORT (Centers the Unified Floating Card) ── */
+.onboarding-view-container .login-page-main {
   flex: 1;
-  height: calc(100vh - 64px);
-  width: 100%;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 2.5vh, 28px) clamp(16px, 3vw, 36px);
+  min-height: calc(100vh - 64px);
+  overflow-y: auto;
 }
 
-/* ── LEFT PANEL: DEEP NAVY ROADMAP ── */
-.onboarding-split-left {
-  width: 440px;
-  flex-shrink: 0;
+/* ── UNIFIED 2-COLUMN ONBOARDING FLOATING CARD ── */
+.onboarding-unified-card {
+  width: 100%;
+  max-width: 1040px;
+  min-height: 550px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.14),
+              0 0 0 1px rgba(226, 232, 240, 0.9);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  margin: auto 0;
+}
+
+/* ── LEFT COLUMN: DEEP NAVY SPEEDEX ROADMAP ── */
+.onboarding-card-navy {
+  flex: 0 0 450px;
+  width: 450px;
   background: #0B1437;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: clamp(20px, 3vh, 36px) clamp(26px, 3vw, 40px);
+  justify-content: space-between;
+  padding: 30px 34px;
   color: #ffffff;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.onboarding-left-inner {
+.onboarding-navy-content {
   position: relative;
   z-index: 2;
-  width: 100%;
-  max-width: 370px;
-  margin: 0 auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 2vh, 20px);
+  justify-content: space-between;
+  gap: 16px;
 }
 
-/* Ambient Decorative Glowing Orbs */
+/* Ambient Glowing Orbs */
 .onboarding-glow-orb {
   position: absolute;
   border-radius: 50%;
@@ -78,7 +99,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 13px;
+  padding: 5px 12px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 9999px;
@@ -86,8 +107,8 @@
 }
 
 .onboarding-brand-icon {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: linear-gradient(135deg, #00A99D 0%, #00776D 100%);
   color: #ffffff;
@@ -104,14 +125,14 @@
 }
 
 .onboarding-brand-title {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.2;
 }
 
 .onboarding-brand-subtitle {
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 700;
   color: #2DD4BF;
   letter-spacing: 0.08em;
@@ -121,7 +142,7 @@
 /* Headline */
 .onboarding-headline h2 {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(1.35rem, 1.8vw, 1.68rem);
+  font-size: 1.45rem;
   font-weight: 800;
   line-height: 1.25;
   color: #ffffff;
@@ -136,7 +157,7 @@
 }
 
 .headline-desc {
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   line-height: 1.5;
   color: #94A3B8;
   margin: 0;
@@ -153,7 +174,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 9px 12px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -172,13 +193,13 @@
 }
 
 .roadmap-bullet {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #94A3B8;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -207,7 +228,7 @@
 }
 
 .roadmap-info strong {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.25;
@@ -218,14 +239,14 @@
 }
 
 .roadmap-info span {
-  font-size: 0.69rem;
+  font-size: 0.68rem;
   color: #94A3B8;
   line-height: 1.35;
 }
 
 /* Compliance Card */
 .onboarding-compliance-card {
-  padding: 9px 13px;
+  padding: 8px 12px;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -235,12 +256,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 700;
   color: #38BDF8;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
 .compliance-shield {
@@ -249,87 +270,118 @@
 }
 
 .onboarding-compliance-card p {
-  font-size: 0.69rem;
+  font-size: 0.67rem;
   color: #94A3B8;
-  line-height: 1.38;
+  line-height: 1.35;
   margin: 0;
 }
 
-/* ── RIGHT PANEL: FORM CANVAS ── */
-.onboarding-split-right {
-  flex: 1;
-  height: calc(100vh - 64px);
-  overflow-y: auto;
+/* ── RIGHT COLUMN: WHITE ONBOARDING FORM ── */
+.onboarding-card-white {
+  flex: 1 1 auto;
+  background: #ffffff;
+  padding: 24px 34px 18px 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: visible;
+}
+
+/* ── TOP STEPPER WITH CONNECTING LINE ── */
+.onboarding-stepper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 20px;
+}
+
+.stepper-track {
+  position: absolute;
+  top: 13px;
+  left: 42px;
+  right: 42px;
+  height: 2px;
+  background: #E2E8F0;
+  z-index: 1;
+}
+
+.stepper-track-progress {
+  height: 100%;
+  width: 0%;
+  background: #10B981;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stepper-track-progress.filled {
+  width: 100%;
+}
+
+.stepper-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  user-select: none;
+}
+
+.stepper-node-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 2px solid #CBD5E1;
+  color: #64748B;
+  font-size: 0.74rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(14px, 2.2vh, 28px) clamp(18px, 2.8vw, 36px);
-  background: #EEF2F6;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(11, 20, 55, 0.2) transparent;
+  transition: all 0.2s ease;
 }
 
-.onboarding-form-card {
-  width: 100%;
-  max-width: 480px;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 16px 40px -8px rgba(11, 20, 55, 0.12),
-              0 0 0 1px rgba(226, 232, 240, 0.85);
-  padding: 22px 28px 16px 28px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  min-height: 510px;
-  justify-content: space-between;
+.stepper-node.active .stepper-node-circle {
+  background: #00A99D;
+  border-color: #00A99D;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.35);
 }
 
-/* Card Top Back Link */
-.card-back-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: none;
-  border: none;
-  padding: 0;
-  margin-bottom: 6px;
-  color: #00776D;
-  font-size: 0.76rem;
+.stepper-node.completed .stepper-node-circle {
+  background: #10B981;
+  border-color: #10B981;
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+.stepper-node-title {
+  font-size: 0.75rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-  align-self: flex-start;
+  color: #64748B;
+  transition: color 0.2s ease;
 }
 
-.card-back-action:hover {
-  color: #005F57;
-  transform: translateX(-2px);
+.stepper-node.active .stepper-node-title {
+  color: #0B1437;
+  font-weight: 700;
 }
 
-/* Card Header */
+.stepper-node.completed .stepper-node-title {
+  color: #0B1437;
+}
+
+/* ── CARD HEADER ── */
 .onboarding-card-header {
   margin-bottom: 10px;
   text-align: left;
 }
 
-.onboarding-card-header .header-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  background: rgba(0, 169, 157, 0.08);
-  border: 1px solid rgba(0, 169, 157, 0.22);
-  border-radius: 9999px;
-  color: #00776D;
-  font-size: 0.63rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 3px;
-}
-
 .onboarding-card-header .card-title {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.22rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #0B1437;
   margin: 0 0 2px 0;
@@ -345,7 +397,7 @@
   text-align: left;
 }
 
-/* Smooth Fade Transition Container (Eliminates Jumpiness) */
+/* ── SMOOTH NON-JUMPY FADE TRANSITION ── */
 .step-fade-container {
   animation: stepFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   flex: 1;
@@ -365,12 +417,12 @@
   }
 }
 
-/* ── PRE-FILL MANAGER REGISTRATION BANNER ── */
+/* ── PRE-FILL NOTICE BANNER ── */
 .prefill-notice-banner {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 11px;
+  padding: 6px 11px;
   background: linear-gradient(135deg, rgba(0, 169, 157, 0.08) 0%, rgba(37, 99, 235, 0.05) 100%);
   border: 1px solid rgba(0, 169, 157, 0.25);
   border-radius: 8px;
@@ -403,7 +455,7 @@
 }
 
 .prefill-notice-content p {
-  font-size: 0.7rem;
+  font-size: 0.69rem;
   color: #475569;
   margin: 0;
   line-height: 1.25;
@@ -425,16 +477,16 @@
 }
 
 /* ── FORM FIELD REFINEMENTS ── */
-.onboarding-form-card .login-form {
+.onboarding-card-white .login-form {
   display: flex;
   flex-direction: column;
 }
 
-.onboarding-form-card .field-group {
+.onboarding-card-white .field-group {
   margin-bottom: 7px;
 }
 
-.onboarding-form-card .field-label {
+.onboarding-card-white .field-label {
   display: block;
   font-size: 0.74rem;
   font-weight: 600;
@@ -442,7 +494,7 @@
   margin-bottom: 2px;
 }
 
-.onboarding-form-card .field-wrapper {
+.onboarding-card-white .field-wrapper {
   position: relative;
   display: flex;
   align-items: center;
@@ -452,13 +504,13 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.onboarding-form-card .field-wrapper:focus-within {
+.onboarding-card-white .field-wrapper:focus-within {
   border-color: #00776D;
   background: #FFFFFF;
   box-shadow: 0 0 0 3px rgba(0, 119, 109, 0.14);
 }
 
-.onboarding-form-card .field-icon {
+.onboarding-card-white .field-icon {
   position: absolute;
   left: 11px;
   color: #94A3B8;
@@ -467,7 +519,7 @@
   pointer-events: none;
 }
 
-.onboarding-form-card .field-input {
+.onboarding-card-white .field-input {
   width: 100%;
   border: none;
   background: transparent;
@@ -479,16 +531,16 @@
   font-family: inherit;
 }
 
-.onboarding-form-card .field-input::placeholder {
+.onboarding-card-white .field-input::placeholder {
   color: #94A3B8;
   font-size: 0.79rem;
 }
 
-.onboarding-form-card .field-input.no-left-icon {
+.onboarding-card-white .field-input.no-left-icon {
   padding-left: 11px !important;
 }
 
-.onboarding-form-card .field-helper-hint {
+.onboarding-card-white .field-helper-hint {
   display: block;
   font-size: 0.68rem;
   color: #64748B;
@@ -533,7 +585,7 @@
   pointer-events: none;
 }
 
-/* ── OWASP PASSWORD REQUIREMENTS CHECKLIST ── */
+/* ── PASSWORD COMPLEXITY REQUIREMENTS CHECKLIST ── */
 .pw-checklist-card {
   margin-top: 5px;
   margin-bottom: 6px;
@@ -699,14 +751,14 @@
 }
 
 /* ── FOOTER ── */
-.onboarding-form-card .login-footer {
+.onboarding-card-white .login-footer {
   margin-top: 8px;
   padding-top: 6px;
   border-top: 1px solid #F1F5F9;
   text-align: center;
 }
 
-.onboarding-form-card .login-footer-copy {
+.onboarding-card-white .login-footer-copy {
   font-size: 0.71rem;
   color: #94A3B8;
   margin: 0;
@@ -715,31 +767,23 @@
 
 /* ── RESPONSIVE DESIGN ── */
 @media (max-width: 960px) {
-  .onboarding-view-container {
-    height: auto;
-    overflow-y: auto;
-  }
-
-  .onboarding-split-container {
+  .onboarding-unified-card {
     flex-direction: column;
-    height: auto;
+    max-width: 500px;
+    min-height: auto;
+    border-radius: 16px;
   }
 
-  .onboarding-split-left {
+  .onboarding-card-navy {
+    flex: 1 1 100%;
     width: 100%;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 32px 24px;
+    padding: 24px 20px;
   }
 
-  .onboarding-split-right {
-    height: auto;
-    padding: 28px 16px;
-  }
-
-  .onboarding-form-card {
-    max-width: 520px;
-    min-height: auto;
+  .onboarding-card-white {
+    padding: 20px 18px;
   }
 
   .form-row-split {
