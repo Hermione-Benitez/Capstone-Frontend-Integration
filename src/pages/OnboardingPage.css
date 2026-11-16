@@ -56,8 +56,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 32px 36px;
+  justify-content: center;
+  padding: 40px 42px;
   color: #ffffff;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -65,11 +65,10 @@
 .onboarding-navy-content {
   position: relative;
   z-index: 2;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 18px;
+  justify-content: center;
+  gap: 36px;
 }
 
 /* Ambient Glowing Orbs */
@@ -104,64 +103,14 @@
   pointer-events: none;
 }
 
-/* Top Speedex Brand Header */
-.navy-brand-header {
-  display: flex;
-  align-items: center;
-}
-
-.navy-brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
-}
-
-.badge-live-pulse {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 8px #10B981;
-  animation: pulseGreen 2s infinite;
-}
-
-@keyframes pulseGreen {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
-}
-
-.badge-brand-name {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.08em;
-}
-
-.badge-divider {
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 0.7rem;
-}
-
-.badge-portal-tag {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #2DD4BF;
-  letter-spacing: 0.06em;
-}
-
 /* Hero Typography */
 .onboarding-headline h2 {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.48rem;
+  font-size: 1.52rem;
   font-weight: 800;
   line-height: 1.25;
   color: #ffffff;
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
   letter-spacing: -0.02em;
 }
 
@@ -172,8 +121,8 @@
 }
 
 .headline-desc {
-  font-size: 0.78rem;
-  line-height: 1.5;
+  font-size: 0.8rem;
+  line-height: 1.55;
   color: #94A3B8;
   margin: 0;
 }
@@ -284,49 +233,6 @@
 
 .timeline-step.active .timeline-step-desc {
   color: #94A3B8;
-}
-
-/* Bottom Security Card */
-.navy-security-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(6px);
-}
-
-.security-card-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(0, 169, 157, 0.12);
-  color: #2DD4BF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.security-card-copy {
-  display: flex;
-  flex-direction: column;
-}
-
-.security-card-copy strong {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #E2E8F0;
-  line-height: 1.25;
-}
-
-.security-card-copy p {
-  font-size: 0.67rem;
-  color: #94A3B8;
-  margin: 1px 0 0 0;
-  line-height: 1.3;
 }
 
 /* ── RIGHT COLUMN: WHITE FORM ── */

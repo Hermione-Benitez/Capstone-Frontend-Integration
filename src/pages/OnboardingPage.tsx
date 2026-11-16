@@ -503,16 +503,6 @@ export default function OnboardingPage() {
             <div className="onboarding-grid-texture" aria-hidden="true" />
 
             <div className="onboarding-navy-content">
-              {/* Top Speedex Brand Header */}
-              <div className="navy-brand-header">
-                <div className="navy-brand-badge">
-                  <span className="badge-live-pulse" />
-                  <span className="badge-brand-name">SPEEDEX</span>
-                  <span className="badge-divider">/</span>
-                  <span className="badge-portal-tag">PORTAL ONBOARDING</span>
-                </div>
-              </div>
-
               {/* Hero Title */}
               <div className="onboarding-headline">
                 <h2>
@@ -520,11 +510,11 @@ export default function OnboardingPage() {
                   <span className="headline-gradient">get ready to take off.</span>
                 </h2>
                 <p className="headline-desc">
-                  Activate your enterprise credentials across STARS, DMS, and FOMS in two quick steps.
+                  Verify your employee details and create your permanent password to complete your account setup.
                 </p>
               </div>
 
-              {/* Sleek Connected Vertical Timeline (No heavy blocky cards!) */}
+              {/* Sleek Connected Vertical Timeline */}
               <div className="navy-timeline" role="navigation" aria-label="Onboarding Progress">
                 <div className="timeline-track-rail" />
 
@@ -563,19 +553,8 @@ export default function OnboardingPage() {
                   <div className="timeline-info">
                     <span className="timeline-step-tag">Step 3</span>
                     <strong className="timeline-step-title">System Access</strong>
-                    <span className="timeline-step-desc">Activate access across STARS, DMS &amp; FOMS</span>
+                    <span className="timeline-step-desc">Review policies and complete account activation</span>
                   </div>
-                </div>
-              </div>
-
-              {/* Bottom Security Card */}
-              <div className="navy-security-card">
-                <div className="security-card-icon-box">
-                  <ShieldCheck size={18} />
-                </div>
-                <div className="security-card-copy">
-                  <strong>Enterprise Zero-Knowledge Security</strong>
-                  <p>Encrypted credential provisioning under Speedex Access Control standards.</p>
                 </div>
               </div>
             </div>
