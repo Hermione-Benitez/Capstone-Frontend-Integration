@@ -1,7 +1,8 @@
 /* ================================================================
    Speedex OneUI — Account Onboarding & Credential Setup Styles
-   Harmonized 2-Column Floating Card (Navy Roadmap Left + White Form Right)
-   Harmonized with Speedex Deep Navy #0B1437 & Speedex Teal #00A99D
+   Harmonized 2-Column Floating Card
+   Left: Sleek Deep Navy Connected Timeline
+   Right: Centered White Form & Progress Stepper
    ================================================================ */
 
 .onboarding-view-container {
@@ -20,7 +21,7 @@
   }
 }
 
-/* ── MAIN VIEWPORT (Centers the Unified Floating Card) ── */
+/* ── MAIN VIEWPORT (Centers the Card) ── */
 .onboarding-view-container .login-page-main {
   flex: 1;
   display: flex;
@@ -35,7 +36,7 @@
 .onboarding-unified-card {
   width: 100%;
   max-width: 1040px;
-  min-height: 550px;
+  min-height: 570px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.14),
@@ -46,17 +47,17 @@
   margin: auto 0;
 }
 
-/* ── LEFT COLUMN: DEEP NAVY SPEEDEX ROADMAP ── */
+/* ── LEFT COLUMN: SLEEK NAVY TIMELINE ROADMAP ── */
 .onboarding-card-navy {
-  flex: 0 0 450px;
-  width: 450px;
+  flex: 0 0 440px;
+  width: 440px;
   background: #0B1437;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 30px 34px;
+  padding: 32px 36px;
   color: #ffffff;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -68,7 +69,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
+  gap: 18px;
 }
 
 /* Ambient Glowing Orbs */
@@ -79,74 +80,88 @@
 }
 
 .orb-1 {
-  width: 340px;
-  height: 340px;
-  top: -80px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.16) 0%, transparent 70%);
+  width: 380px;
+  height: 380px;
+  top: -100px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
 }
 
 .orb-2 {
-  width: 300px;
-  height: 300px;
-  bottom: -60px;
-  left: -80px;
-  background: radial-gradient(circle, rgba(0, 169, 157, 0.2) 0%, transparent 70%);
+  width: 340px;
+  height: 340px;
+  bottom: -80px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(0, 169, 157, 0.22) 0%, transparent 70%);
 }
 
-/* Brand Pill */
-.onboarding-brand-pill {
+.onboarding-grid-texture {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+/* Top Speedex Brand Header */
+.navy-brand-header {
+  display: flex;
+  align-items: center;
+}
+
+.navy-brand-badge {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 5px 12px;
+  border-radius: 9999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 9999px;
-  width: fit-content;
+  backdrop-filter: blur(8px);
 }
 
-.onboarding-brand-icon {
-  width: 26px;
-  height: 26px;
+.badge-live-pulse {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #00A99D 0%, #00776D 100%);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.35);
-  flex-shrink: 0;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+  animation: pulseGreen 2s infinite;
 }
 
-.onboarding-brand-text {
-  display: flex;
-  flex-direction: column;
+@keyframes pulseGreen {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
 }
 
-.onboarding-brand-title {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.2;
+.badge-brand-name {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.08em;
 }
 
-.onboarding-brand-subtitle {
-  font-size: 0.58rem;
+.badge-divider {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.7rem;
+}
+
+.badge-portal-tag {
+  font-size: 0.65rem;
   font-weight: 700;
   color: #2DD4BF;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-/* Headline */
+/* Hero Typography */
 .onboarding-headline h2 {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.45rem;
+  font-size: 1.48rem;
   font-weight: 800;
   line-height: 1.25;
   color: #ffffff;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   letter-spacing: -0.02em;
 }
 
@@ -157,151 +172,191 @@
 }
 
 .headline-desc {
-  font-size: 0.77rem;
+  font-size: 0.78rem;
   line-height: 1.5;
   color: #94A3B8;
   margin: 0;
 }
 
-/* Roadmap List */
-.onboarding-roadmap {
+/* ── SLEEK VERTICAL TIMELINE (No chunky boxes!) ── */
+.navy-timeline {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+  padding-left: 2px;
 }
 
-.roadmap-item {
+.timeline-track-rail {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 14px;
+  width: 2px;
+  background: linear-gradient(to bottom, #00A99D 0%, rgba(255, 255, 255, 0.12) 80%, rgba(255, 255, 255, 0.04) 100%);
+  z-index: 1;
+}
+
+.timeline-step {
+  position: relative;
+  z-index: 2;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 12px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  align-items: flex-start;
+  gap: 14px;
   transition: all 0.2s ease;
 }
 
-.roadmap-item.current {
-  background: rgba(0, 169, 157, 0.12);
-  border-color: rgba(0, 169, 157, 0.4);
-  box-shadow: 0 4px 14px rgba(0, 169, 157, 0.15);
-}
-
-.roadmap-item.done {
-  background: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-.roadmap-bullet {
-  width: 24px;
-  height: 24px;
+.timeline-node {
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #0B1437;
+  border: 2px solid rgba(255, 255, 255, 0.18);
   color: #94A3B8;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
-.roadmap-item.current .roadmap-bullet {
+.timeline-step.active .timeline-node {
   background: #00A99D;
-  border-color: #00A99D;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.4);
+  border-color: #2DD4BF;
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(0, 169, 157, 0.22),
+              0 0 16px rgba(0, 169, 157, 0.45);
 }
 
-.roadmap-item.done .roadmap-bullet {
+.timeline-step.completed .timeline-node {
   background: #10B981;
-  border-color: #10B981;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  border-color: #34D399;
+  color: #FFFFFF;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
 }
 
-.roadmap-info {
+.timeline-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.timeline-step-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.timeline-step.active .timeline-step-tag {
+  color: #2DD4BF;
+}
+
+.timeline-step.completed .timeline-step-tag {
+  color: #10B981;
+}
+
+.timeline-step-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #E2E8F0;
+  line-height: 1.3;
+  transition: color 0.2s ease;
+}
+
+.timeline-step.active .timeline-step-title {
+  color: #FFFFFF;
+}
+
+.timeline-step.pending .timeline-step-title {
+  color: #94A3B8;
+}
+
+.timeline-step-desc {
+  font-size: 0.7rem;
+  color: #64748B;
+  line-height: 1.35;
+}
+
+.timeline-step.active .timeline-step-desc {
+  color: #94A3B8;
+}
+
+/* Bottom Security Card */
+.navy-security-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.security-card-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 169, 157, 0.12);
+  color: #2DD4BF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.security-card-copy {
   display: flex;
   flex-direction: column;
 }
 
-.roadmap-info strong {
-  font-size: 0.78rem;
+.security-card-copy strong {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #E2E8F0;
   line-height: 1.25;
 }
 
-.roadmap-item.upcoming .roadmap-info strong {
-  color: #94A3B8;
-}
-
-.roadmap-info span {
-  font-size: 0.68rem;
-  color: #94A3B8;
-  line-height: 1.35;
-}
-
-/* Compliance Card */
-.onboarding-compliance-card {
-  padding: 8px 12px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.compliance-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.64rem;
-  font-weight: 700;
-  color: #38BDF8;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-
-.compliance-shield {
-  color: #38BDF8;
-  flex-shrink: 0;
-}
-
-.onboarding-compliance-card p {
+.security-card-copy p {
   font-size: 0.67rem;
   color: #94A3B8;
-  line-height: 1.35;
-  margin: 0;
+  margin: 1px 0 0 0;
+  line-height: 1.3;
 }
 
-/* ── RIGHT COLUMN: WHITE ONBOARDING FORM ── */
+/* ── RIGHT COLUMN: WHITE FORM ── */
 .onboarding-card-white {
   flex: 1 1 auto;
   background: #ffffff;
-  padding: 24px 34px 18px 34px;
+  padding: 28px 40px 20px 40px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: visible;
 }
 
-/* ── TOP STEPPER WITH CONNECTING LINE ── */
+/* ── TOP STEPPER WITH CONNECTING LINE (Centered) ── */
 .onboarding-stepper {
   position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 12px;
-  padding: 0 20px;
+  max-width: 300px;
+  margin: 0 auto 16px auto;
+  padding: 0 10px;
+  width: 100%;
 }
 
 .stepper-track {
   position: absolute;
   top: 13px;
-  left: 42px;
-  right: 42px;
+  left: 28px;
+  right: 28px;
   height: 2px;
   background: #E2E8F0;
   z-index: 1;
@@ -373,28 +428,29 @@
   color: #0B1437;
 }
 
-/* ── CARD HEADER ── */
+/* ── CARD HEADER (Centered) ── */
 .onboarding-card-header {
-  margin-bottom: 10px;
-  text-align: left;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .onboarding-card-header .card-title {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #0B1437;
-  margin: 0 0 2px 0;
+  margin: 0 0 3px 0;
   letter-spacing: -0.025em;
-  text-align: left;
+  text-align: center;
 }
 
 .onboarding-card-header .card-subtitle {
-  font-size: 0.77rem;
+  font-size: 0.78rem;
   color: #64748B;
-  margin: 0;
-  line-height: 1.35;
-  text-align: left;
+  margin: 0 auto;
+  max-width: 360px;
+  line-height: 1.38;
+  text-align: center;
 }
 
 /* ── SMOOTH NON-JUMPY FADE TRANSITION ── */

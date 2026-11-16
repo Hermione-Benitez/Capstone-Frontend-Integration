@@ -500,75 +500,83 @@ export default function OnboardingPage() {
           <aside className="onboarding-card-navy">
             <div className="onboarding-glow-orb orb-1" aria-hidden="true" />
             <div className="onboarding-glow-orb orb-2" aria-hidden="true" />
+            <div className="onboarding-grid-texture" aria-hidden="true" />
 
             <div className="onboarding-navy-content">
-              {/* Top Brand Pill */}
-              <div className="onboarding-brand-pill">
-                <div className="onboarding-brand-icon">
-                  {step === 'profile' ? <User size={16} /> : <KeyRound size={16} />}
-                </div>
-                <div className="onboarding-brand-text">
-                  <span className="onboarding-brand-title">Employee Gateway</span>
-                  <span className="onboarding-brand-subtitle">ACCOUNT ONBOARDING</span>
+              {/* Top Speedex Brand Header */}
+              <div className="navy-brand-header">
+                <div className="navy-brand-badge">
+                  <span className="badge-live-pulse" />
+                  <span className="badge-brand-name">SPEEDEX</span>
+                  <span className="badge-divider">/</span>
+                  <span className="badge-portal-tag">PORTAL ONBOARDING</span>
                 </div>
               </div>
 
-              {/* Headline */}
+              {/* Hero Title */}
               <div className="onboarding-headline">
                 <h2>
                   Welcome to Speedex,<br />
                   <span className="headline-gradient">get ready to take off.</span>
                 </h2>
                 <p className="headline-desc">
-                  Verify your employee profile and create your permanent password to activate your access across STARS, DMS, and FOMS.
+                  Activate your enterprise credentials across STARS, DMS, and FOMS in two quick steps.
                 </p>
               </div>
 
-              {/* Step Roadmap */}
-              <nav className="onboarding-roadmap" aria-label="Onboarding Steps Roadmap">
+              {/* Sleek Connected Vertical Timeline (No heavy blocky cards!) */}
+              <div className="navy-timeline" role="navigation" aria-label="Onboarding Progress">
+                <div className="timeline-track-rail" />
+
+                {/* Step 1 */}
                 <div
-                  className={`roadmap-item ${step === 'profile' ? 'current' : 'done'}`}
+                  className={`timeline-step ${step === 'profile' ? 'active' : 'completed'}`}
                   onClick={() => {
                     if (step === 'password') setStep('profile');
                   }}
                   style={{ cursor: step === 'password' ? 'pointer' : 'default' }}
                   title={step === 'password' ? 'Click to return to Profile Details' : undefined}
                 >
-                  <div className="roadmap-bullet">
-                    {step === 'password' ? <Check size={14} strokeWidth={2.8} /> : '1'}
+                  <div className="timeline-node">
+                    {step === 'password' ? <Check size={13} strokeWidth={3} /> : '1'}
                   </div>
-                  <div className="roadmap-info">
-                    <strong>Staff Profile Details</strong>
-                    <span>Confirm your personal information.</span>
-                  </div>
-                </div>
-
-                <div className={`roadmap-item ${step === 'password' ? 'current' : ''}`}>
-                  <div className="roadmap-bullet">2</div>
-                  <div className="roadmap-info">
-                    <strong>Account Security</strong>
-                    <span>Create your permanent login password.</span>
+                  <div className="timeline-info">
+                    <span className="timeline-step-tag">Step 1</span>
+                    <strong className="timeline-step-title">Staff Profile Details</strong>
+                    <span className="timeline-step-desc">Verify your manager-entered contact details</span>
                   </div>
                 </div>
 
-                <div className="roadmap-item upcoming">
-                  <div className="roadmap-bullet">3</div>
-                  <div className="roadmap-info">
-                    <strong>System Access</strong>
-                    <span>Review policies and activate access.</span>
+                {/* Step 2 */}
+                <div className={`timeline-step ${step === 'password' ? 'active' : 'pending'}`}>
+                  <div className="timeline-node">2</div>
+                  <div className="timeline-info">
+                    <span className="timeline-step-tag">Step 2</span>
+                    <strong className="timeline-step-title">Account Security</strong>
+                    <span className="timeline-step-desc">Establish your master login password</span>
                   </div>
                 </div>
-              </nav>
 
-              {/* Compliance Notice */}
-              <div className="onboarding-compliance-card">
-                <div className="compliance-header">
-                  <ShieldCheck size={15} className="compliance-shield" />
-                  <span>ENTERPRISE SECURITY COMPLIANCE</span>
+                {/* Step 3 */}
+                <div className="timeline-step pending">
+                  <div className="timeline-node">3</div>
+                  <div className="timeline-info">
+                    <span className="timeline-step-tag">Step 3</span>
+                    <strong className="timeline-step-title">System Access</strong>
+                    <span className="timeline-step-desc">Activate access across STARS, DMS &amp; FOMS</span>
+                  </div>
                 </div>
-                <p>
-                  Your account is protected under Speedex Access Control Policies with encrypted credential standards.
-                </p>
+              </div>
+
+              {/* Bottom Security Card */}
+              <div className="navy-security-card">
+                <div className="security-card-icon-box">
+                  <ShieldCheck size={18} />
+                </div>
+                <div className="security-card-copy">
+                  <strong>Enterprise Zero-Knowledge Security</strong>
+                  <p>Encrypted credential provisioning under Speedex Access Control standards.</p>
+                </div>
               </div>
             </div>
           </aside>
