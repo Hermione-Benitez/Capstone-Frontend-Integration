@@ -907,11 +907,11 @@ export default function LoginPage() {
             </footer>
           </div>
 
-          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ILLUSTRATION (Starkfest Inspo) */}
+          {/* RIGHT COLUMN: #ROADTO30 SPEEDEX TEAM ILLUSTRATION (Starkfest Inspo) */}
           <div className="login-card-visual" aria-hidden="true">
             <img
-              src="/warehouse-team.png"
-              alt="Speedex Warehouse Logistics Team"
+              src="/login-background.jpg"
+              alt="Speedex 30 Years Team"
               className="login-visual-img"
             />
             {/* Subtle color grading tint overlay (Navy / Teal harmonious blend) */}
@@ -920,7 +920,7 @@ export default function LoginPage() {
             {/* Soft gradient feather along the crescent curve */}
             <div className="login-visual-curve-feather" />
 
-            {/* Elegant organic convex curve divider (Starkfest Inspo) */}
+            {/* Organic convex crescent curve (Starkfest Inspo SVG) */}
             <svg
               className="login-visual-curve"
               viewBox="0 0 40 500"
@@ -929,6 +929,11 @@ export default function LoginPage() {
             >
               <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
             </svg>
+
+            {/* Subtle artist credit */}
+            <span className="login-visual-credit" aria-label="Illustration credit">
+              Illustrated by: riya
+            </span>
           </div>
         </div>
       </main>

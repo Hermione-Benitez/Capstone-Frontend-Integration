@@ -19,6 +19,7 @@ import {
   Edit3,
   KeyRound,
   FileText,
+  ChevronRight,
 } from 'lucide-react';
 import { getStoredAuthSession, saveAuthSession, extractContactNumber, normalizePhMobile } from '../utils/auth';
 import { STARS_API_URL } from '../config/env';
@@ -465,10 +466,17 @@ export default function OnboardingPage() {
             <button
               type="button"
               className="speedex-nav-link speedex-nav-link-public"
-              onClick={() => navigate('/login')}
+              onClick={() => {
+                if (step === 'password') {
+                  setStep('profile');
+                  setError(null);
+                } else {
+                  navigate('/login');
+                }
+              }}
             >
               <ArrowLeft size={14} />
-              <span>Back to Login</span>
+              <span>{step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}</span>
             </button>
             <a
               href="/"
@@ -485,139 +493,131 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
-      <div className="login-page-split">
-        {/* LEFT PANEL */}
-        <aside className="login-left">
-          <div className="login-decorative-circle circle-1" />
-          <div className="login-decorative-circle circle-2" />
-          <div className="login-left-content">
-            <div className="login-brand-badge">
-              <div className="brand-icon-box">
-                {step === 'profile' ? <User size={22} /> : <KeyRound size={22} />}
-              </div>
-              <div>
-                <span className="brand-title-badge">Employee Gateway</span>
-                <span className="brand-sub-badge">ACCOUNT ONBOARDING</span>
-              </div>
-            </div>
+      {/* ── UNIFIED 2-COLUMN FLOATING CARD (Navy Roadmap Left + White Form Right) ── */}
+      <main className="login-page-main">
+        <div className="login-unified-card onboarding-unified-card">
+          {/* LEFT COLUMN: DEEP NAVY SPEEDEX ROADMAP */}
+          <aside className="onboarding-card-navy">
+            <div className="onboarding-glow-orb orb-1" aria-hidden="true" />
+            <div className="onboarding-glow-orb orb-2" aria-hidden="true" />
+            <div className="onboarding-grid-texture" aria-hidden="true" />
 
-            <div className="login-headline">
-              <h2>
-                Welcome to Speedex,<br />
-                <span className="headline-accent">get ready to take off.</span>
-              </h2>
-              <p className="headline-body">
-                Complete your staff profile verification and set up a permanent, OWASP-compliant password
-                to activate your enterprise access across STARS, DMS, and FOMS.
-              </p>
-            </div>
-
-            {/* Step Roadmap */}
-            <div className="onboarding-steps-aside">
-              <div className={`aside-step-item ${step === 'profile' ? 'current' : 'done'}`}>
-                <div className="aside-step-bullet">
-                  {step === 'profile' ? '1' : <Check size={14} />}
-                </div>
-                <div className="aside-step-text">
-                  <strong>Staff Profile Setup</strong>
-                  <span>Verify manager-entered details and mobile contact.</span>
+            <div className="onboarding-navy-content">
+              {/* Top Speedex Brand Header */}
+              <div className="navy-brand-header">
+                <div className="navy-brand-badge">
+                  <span className="badge-live-pulse" />
+                  <span className="badge-brand-name">SPEEDEX</span>
+                  <span className="badge-divider">/</span>
+                  <span className="badge-portal-tag">PORTAL ONBOARDING</span>
                 </div>
               </div>
 
-              <div className={`aside-step-item ${step === 'password' ? 'current' : ''}`}>
-                <div className="aside-step-bullet">2</div>
-                <div className="aside-step-text">
-                  <strong>Security Password</strong>
-                  <span>Establish your high-entropy personal master password.</span>
+              {/* Hero Title */}
+              <div className="onboarding-headline">
+                <h2>
+                  Welcome to Speedex,<br />
+                  <span className="headline-gradient">get ready to take off.</span>
+                </h2>
+                <p className="headline-desc">
+                  Activate your enterprise credentials across STARS, DMS, and FOMS in two quick steps.
+                </p>
+              </div>
+
+              {/* Sleek Connected Vertical Timeline (No heavy blocky cards!) */}
+              <div className="navy-timeline" role="navigation" aria-label="Onboarding Progress">
+                <div className="timeline-track-rail" />
+
+                {/* Step 1 */}
+                <div
+                  className={`timeline-step ${step === 'profile' ? 'active' : 'completed'}`}
+                  onClick={() => {
+                    if (step === 'password') setStep('profile');
+                  }}
+                  style={{ cursor: step === 'password' ? 'pointer' : 'default' }}
+                  title={step === 'password' ? 'Click to return to Profile Details' : undefined}
+                >
+                  <div className="timeline-node">
+                    {step === 'password' ? <Check size={13} strokeWidth={3} /> : '1'}
+                  </div>
+                  <div className="timeline-info">
+                    <span className="timeline-step-tag">Step 1</span>
+                    <strong className="timeline-step-title">Staff Profile Details</strong>
+                    <span className="timeline-step-desc">Verify your manager-entered contact details</span>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className={`timeline-step ${step === 'password' ? 'active' : 'pending'}`}>
+                  <div className="timeline-node">2</div>
+                  <div className="timeline-info">
+                    <span className="timeline-step-tag">Step 2</span>
+                    <strong className="timeline-step-title">Account Security</strong>
+                    <span className="timeline-step-desc">Establish your master login password</span>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="timeline-step pending">
+                  <div className="timeline-node">3</div>
+                  <div className="timeline-info">
+                    <span className="timeline-step-tag">Step 3</span>
+                    <strong className="timeline-step-title">System Access</strong>
+                    <span className="timeline-step-desc">Activate access across STARS, DMS &amp; FOMS</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="aside-step-item next-up">
-                <div className="aside-step-bullet">3</div>
-                <div className="aside-step-text">
-                  <strong>Privacy &amp; Terms</strong>
-                  <span>Speedex Data Privacy Act (RA 10173) compliance sign-off.</span>
+              {/* Bottom Security Card */}
+              <div className="navy-security-card">
+                <div className="security-card-icon-box">
+                  <ShieldCheck size={18} />
+                </div>
+                <div className="security-card-copy">
+                  <strong>Enterprise Zero-Knowledge Security</strong>
+                  <p>Encrypted credential provisioning under Speedex Access Control standards.</p>
                 </div>
               </div>
             </div>
+          </aside>
 
-            <div className="onboarding-compliance-box">
-              <div className="compliance-icon-row">
-                <ShieldCheck size={18} className="compliance-icon" />
-                <span>Speedex Data Governance &amp; Security Compliance</span>
-              </div>
-              <p>
-                Staff accounts are provisioned under Speedex Access Control Policies with enterprise-grade
-                credential protection and zero-knowledge storage standards.
-              </p>
-            </div>
-          </div>
-        </aside>
-
-        {/* RIGHT PANEL */}
-        <main className="login-right">
-          <div className="login-card onboarding-card-enhanced">
-            <button
-              type="button"
-              className="back-to-public-btn"
-              onClick={() => {
-                if (step === 'password') {
-                  setStep('profile');
-                  setError(null);
-                } else {
-                  navigate('/login');
-                }
-              }}
-              aria-label={step === 'password' ? 'Back to Profile' : 'Back to Login'}
-            >
-              <ArrowLeft size={14} />
-              <span>{step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}</span>
-            </button>
-
-            {/* Stepper Indicator */}
+          {/* RIGHT COLUMN: WHITE ONBOARDING FORM */}
+          <section className="onboarding-card-white">
+            {/* Top Stepper with Connecting Line */}
             <div className="onboarding-stepper" role="navigation" aria-label="Onboarding Progress">
+              <div className="stepper-track" aria-hidden="true">
+                <div className={`stepper-track-progress ${step === 'password' ? 'filled' : ''}`} />
+              </div>
+
               <div
-                className={`stepper-step ${step === 'profile' ? 'active' : 'completed'}`}
+                className={`stepper-node ${step === 'profile' ? 'active' : 'completed'}`}
                 onClick={() => {
                   if (step === 'password') setStep('profile');
                 }}
                 style={{ cursor: step === 'password' ? 'pointer' : 'default' }}
+                title={step === 'password' ? 'Return to Step 1: Profile Details' : undefined}
               >
-                <div className="stepper-circle">
-                  {step === 'password' ? <Check size={14} /> : '1'}
+                <div className="stepper-node-circle">
+                  {step === 'password' ? <Check size={13} strokeWidth={3} /> : '1'}
                 </div>
-                <div className="stepper-labels">
-                  <span className="step-tag">Step 1</span>
-                  <span className="step-name">Profile Details</span>
-                </div>
+                <span className="stepper-node-title">Profile Details</span>
               </div>
 
-              <div className="stepper-connector">
-                <div className={`stepper-connector-line ${step === 'password' ? 'filled' : ''}`} />
-              </div>
-
-              <div className={`stepper-step ${step === 'password' ? 'active' : ''}`}>
-                <div className="stepper-circle">2</div>
-                <div className="stepper-labels">
-                  <span className="step-tag">Step 2</span>
-                  <span className="step-name">New Password</span>
-                </div>
+              <div className={`stepper-node ${step === 'password' ? 'active' : ''}`}>
+                <div className="stepper-node-circle">2</div>
+                <span className="stepper-node-title">New Password</span>
               </div>
             </div>
 
             {/* Card Header */}
-            <div className="card-header">
-              <span className="header-badge">
-                {step === 'profile' ? 'STAFF VERIFICATION' : 'CREDENTIAL SETUP'}
-              </span>
+            <div className="onboarding-card-header">
               <h1 className="card-title">
                 {step === 'profile' ? 'Staff Profile Details' : 'Set Up New Password'}
               </h1>
               <p className="card-subtitle">
                 {step === 'profile'
-                  ? 'Verify your personal information. You can edit any field if corrections are required.'
-                  : 'Replace your temporary password with your permanent OWASP-compliant secret.'}
+                  ? 'Please confirm your personal information below.'
+                  : 'Create a permanent password to replace your temporary credentials.'}
               </p>
             </div>
 
@@ -628,10 +628,9 @@ export default function OnboardingPage() {
                   <Sparkles size={16} />
                 </div>
                 <div className="prefill-notice-content">
-                  <strong>Pre-filled from Manager Registration</strong>
+                  <strong>Pre-filled from Registration</strong>
                   <p>
-                    Information used by your manager during account creation is pre-filled below.
-                    Please review and edit any typos or incorrect details before continuing.
+                    Manager-entered details have been pre-filled. Please review and edit any corrections.
                   </p>
                 </div>
                 <div className="prefill-badge">
@@ -643,330 +642,345 @@ export default function OnboardingPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="alert-banner danger">
+              <div className="alert-banner danger" role="alert">
                 <AlertCircle size={18} />
                 <div>{error}</div>
               </div>
             )}
 
-            {/* STEP 1: PROFILE SETUP FORM */}
-            {step === 'profile' ? (
-              <form className="login-form" onSubmit={handleProfileNext} noValidate>
-                {/* First Name & Suffix in 2 columns */}
-                <div className="form-row-split">
-                  <div className="field-group flex-2">
-                    <label className="field-label" htmlFor="first-name">
-                      First Name <span className="req-star">*</span>
+            {/* Form Container with Smooth Non-Jumpy Transition */}
+            <div key={step} className="step-fade-container">
+              {/* STEP 1: PROFILE SETUP FORM */}
+              {step === 'profile' ? (
+                <form className="login-form" onSubmit={handleProfileNext} noValidate>
+                  {/* First Name & Suffix in 2 columns */}
+                  <div className="form-row-split">
+                    <div className="field-group flex-2">
+                      <label className="field-label" htmlFor="first-name">
+                        First Name <span className="req-star">*</span>
+                      </label>
+                      <div className="field-wrapper">
+                        <span className="field-icon">
+                          <User size={16} />
+                        </span>
+                        <input
+                          id="first-name"
+                          type="text"
+                          className="field-input"
+                          placeholder="e.g. Juan"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          autoComplete="given-name"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field-group flex-1">
+                      <label className="field-label" htmlFor="suffix">
+                        Suffix <span className="opt-tag">(Optional)</span>
+                      </label>
+                      <div className="field-wrapper">
+                        <input
+                          id="suffix"
+                          type="text"
+                          className="field-input no-left-icon"
+                          placeholder="e.g. Jr., III"
+                          value={suffix}
+                          onChange={(e) => setSuffix(e.target.value)}
+                          autoComplete="honorific-suffix"
+                          maxLength={10}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle Name */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="middle-name">
+                      Middle Name <span className="opt-tag">(Optional)</span>
                     </label>
                     <div className="field-wrapper">
                       <span className="field-icon">
                         <User size={16} />
                       </span>
                       <input
-                        id="first-name"
+                        id="middle-name"
                         type="text"
                         className="field-input"
-                        placeholder="e.g. Juan"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        autoComplete="given-name"
+                        placeholder="e.g. Santos"
+                        value={middleName}
+                        onChange={(e) => setMiddleName(e.target.value)}
+                        autoComplete="additional-name"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Last Name */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="last-name">
+                      Last Name <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <User size={16} />
+                      </span>
+                      <input
+                        id="last-name"
+                        type="text"
+                        className="field-input"
+                        placeholder="e.g. Dela Cruz"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        autoComplete="family-name"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="field-group flex-1">
-                    <label className="field-label" htmlFor="suffix">
-                      Suffix <span className="opt-tag">(Optional)</span>
+                  {/* Philippine Mobile Number */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="contact-number">
+                      Mobile Number <span className="req-star">*</span>
                     </label>
                     <div className="field-wrapper">
+                      <span className="field-icon">
+                        <Phone size={16} />
+                      </span>
                       <input
-                        id="suffix"
-                        type="text"
-                        className="field-input no-left-icon"
-                        placeholder="e.g. Jr., III"
-                        value={suffix}
-                        onChange={(e) => setSuffix(e.target.value)}
-                        autoComplete="honorific-suffix"
-                        maxLength={10}
+                        id="contact-number"
+                        type="tel"
+                        className="field-input"
+                        placeholder="09XXXXXXXXX (11 digits)"
+                        value={contactNumber}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                          setContactNumber(digits);
+                        }}
+                        maxLength={11}
+                        autoComplete="tel"
+                        required
                       />
+                      {contactNumber && PH_MOBILE_REGEX.test(contactNumber) && (
+                        <span className="field-valid-icon" title="Valid Philippine Mobile Number">
+                          <CheckCircle2 size={16} />
+                        </span>
+                      )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Middle Name */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="middle-name">
-                    Middle Name <span className="opt-tag">(Optional)</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <User size={16} />
+                    <span className="field-helper-hint">
+                      Format: 11-digit Philippine mobile number starting with 09 (e.g. 09171234567)
                     </span>
-                    <input
-                      id="middle-name"
-                      type="text"
-                      className="field-input"
-                      placeholder="e.g. Santos"
-                      value={middleName}
-                      onChange={(e) => setMiddleName(e.target.value)}
-                      autoComplete="additional-name"
-                    />
-                  </div>
-                </div>
-
-                {/* Last Name */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="last-name">
-                    Last Name <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <User size={16} />
-                    </span>
-                    <input
-                      id="last-name"
-                      type="text"
-                      className="field-input"
-                      placeholder="e.g. Dela Cruz"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      autoComplete="family-name"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Philippine Mobile Number */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="contact-number">
-                    Mobile Number <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <Phone size={16} />
-                    </span>
-                    <input
-                      id="contact-number"
-                      type="tel"
-                      className="field-input"
-                      placeholder="09XXXXXXXXX (11 digits)"
-                      value={contactNumber}
-                      onChange={(e) => {
-                        const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-                        setContactNumber(digits);
-                      }}
-                      maxLength={11}
-                      autoComplete="tel"
-                      required
-                    />
-                    {contactNumber && PH_MOBILE_REGEX.test(contactNumber) && (
-                      <span className="field-valid-icon" title="Valid Philippine Mobile Number">
-                        <CheckCircle2 size={16} />
-                      </span>
-                    )}
-                  </div>
-                  <span className="field-helper-hint">
-                    Format: 11-digit Philippine mobile number starting with 09 (e.g. 09171234567)
-                  </span>
-                </div>
-
-                {/* Continue to Step 2 Button */}
-                <button
-                  type="submit"
-                  className="submit-btn onboarding-submit-btn"
-                  disabled={!isStep1Complete}
-                  title={!isStep1Complete ? 'Please fill in all required fields (First Name, Last Name, Mobile Number) before proceeding' : undefined}
-                >
-                  <span>Next: Password Setup</span>
-                  <ArrowRight size={18} />
-                </button>
-              </form>
-            ) : (
-              /* STEP 2: SET UP NEW PASSWORD FORM */
-              <form className="login-form" onSubmit={handlePasswordSubmit} noValidate>
-                {/* Temporary Password */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="current-password">
-                    Current Temporary Password <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <Lock size={16} />
-                    </span>
-                    <input
-                      id="current-password"
-                      type={showCurrent ? 'text' : 'password'}
-                      className="field-input"
-                      placeholder="Enter temporary password assigned by manager"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      autoComplete="current-password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-pw"
-                      onClick={() => setShowCurrent(!showCurrent)}
-                      tabIndex={-1}
-                      aria-label={showCurrent ? 'Hide password' : 'Show password'}
-                    >
-                      {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  <span className="field-helper-hint">
-                    Check your onboarding email or notification from your system manager for this password.
-                  </span>
-                </div>
-
-                {/* New Password */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="new-password">
-                    New Password (Min 15 Characters) <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <KeyRound size={16} />
-                    </span>
-                    <input
-                      id="new-password"
-                      type={showNew ? 'text' : 'password'}
-                      className="field-input"
-                      placeholder="Create high-entropy password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      autoComplete="new-password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-pw"
-                      onClick={() => setShowNew(!showNew)}
-                      tabIndex={-1}
-                      aria-label={showNew ? 'Hide password' : 'Show password'}
-                    >
-                      {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
                   </div>
 
-                  {/* Password Strength Meter */}
-                  {newPassword && (
-                    <div className="strength-meter-container">
-                      <div className="strength-bar-track">
-                        <div
-                          className="strength-bar-fill"
-                          style={{
-                            width: `${(strength.level / 3) * 100}%`,
-                            backgroundColor: strength.color,
-                          }}
-                        />
-                      </div>
-                      <span className="strength-label" style={{ color: strength.color }}>
-                        {strength.label}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Confirm New Password */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="confirm-password">
-                    Confirm New Password <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <ShieldCheck size={16} />
-                    </span>
-                    <input
-                      id="confirm-password"
-                      type={showConfirm ? 'text' : 'password'}
-                      className="field-input"
-                      placeholder="Re-enter your new password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      onBlur={() => setTouchedConfirm(true)}
-                      autoComplete="new-password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-pw"
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      tabIndex={-1}
-                      aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                    >
-                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  {touchedConfirm && confirmPassword && !passwordsMatch && (
-                    <span className="field-inline-error">Passwords do not match.</span>
-                  )}
-                </div>
-
-                {/* Live OWASP Complexity Requirements Checklist */}
-                <div className="pw-checklist-card">
-                  <span className="checklist-title">OWASP Password Requirements:</span>
-                  <ul className="checklist-items">
-                    {passwordRules.map((rule) => {
-                      const isValid = rule.test(newPassword);
-                      return (
-                        <li key={rule.id} className={isValid ? 'met' : 'unmet'}>
-                          {isValid ? <Check size={14} /> : <X size={14} />}
-                          <span>{rule.label}</span>
-                        </li>
-                      );
-                    })}
-                    <li className={passwordsMatch ? 'met' : 'unmet'}>
-                      {passwordsMatch ? <Check size={14} /> : <X size={14} />}
-                      <span>Passwords match</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Actions: Back & Save */}
-                <div className="step-actions-row">
-                  <button
-                    type="button"
-                    className="step-back-btn"
-                    onClick={() => {
-                      setStep('profile');
-                      setError(null);
-                    }}
-                    disabled={isSubmitting}
-                  >
-                    <ArrowLeft size={16} />
-                    <span>Back</span>
-                  </button>
-
+                  {/* Continue to Step 2 Button */}
                   <button
                     type="submit"
-                    className="submit-btn onboarding-submit-btn flex-1"
-                    disabled={
-                      isSubmitting ||
-                      !currentPassword ||
-                      !passwordRules.every((r) => r.test(newPassword)) ||
-                      !passwordsMatch
-                    }
+                    className="submit-btn onboarding-submit-btn"
+                    disabled={!isStep1Complete}
+                    title={!isStep1Complete ? 'Please fill in all required fields before proceeding' : undefined}
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 size={18} className="spinner" />
-                        <span>Updating Credentials...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Save Password &amp; Continue</span>
-                        <CheckCircle2 size={18} />
-                      </>
-                    )}
+                    <span>Continue to Password Setup</span>
+                    <ArrowRight size={18} />
                   </button>
-                </div>
-              </form>
-            )}
+                </form>
+              ) : (
+                /* STEP 2: SET UP NEW PASSWORD FORM */
+                <form className="login-form" onSubmit={handlePasswordSubmit} noValidate>
+                  {/* Temporary Password */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="current-password">
+                      Current Temporary Password <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <Lock size={16} />
+                      </span>
+                      <input
+                        id="current-password"
+                        type={showCurrent ? 'text' : 'password'}
+                        className="field-input"
+                        placeholder="Enter temporary password assigned by manager"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        autoComplete="current-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="toggle-pw"
+                        onClick={() => setShowCurrent(!showCurrent)}
+                        tabIndex={-1}
+                        aria-label={showCurrent ? 'Hide password' : 'Show password'}
+                      >
+                        {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    <span className="field-helper-hint">
+                      Provided by your manager or in your onboarding notification.
+                    </span>
+                  </div>
 
+                  {/* New Password */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="new-password">
+                      New Password (Min 15 Characters) <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <KeyRound size={16} />
+                      </span>
+                      <input
+                        id="new-password"
+                        type={showNew ? 'text' : 'password'}
+                        className="field-input"
+                        placeholder="Create your new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="toggle-pw"
+                        onClick={() => setShowNew(!showNew)}
+                        tabIndex={-1}
+                        aria-label={showNew ? 'Hide password' : 'Show password'}
+                      >
+                        {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+
+                    {/* Password Strength Meter */}
+                    {newPassword && (
+                      <div className="strength-meter-container">
+                        <div className="strength-bar-track">
+                          <div
+                            className="strength-bar-fill"
+                            style={{
+                              width: `${(strength.level / 3) * 100}%`,
+                              backgroundColor: strength.color,
+                            }}
+                          />
+                        </div>
+                        <span className="strength-label" style={{ color: strength.color }}>
+                          {strength.label}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="confirm-password">
+                      Confirm New Password <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <ShieldCheck size={16} />
+                      </span>
+                      <input
+                        id="confirm-password"
+                        type={showConfirm ? 'text' : 'password'}
+                        className="field-input"
+                        placeholder="Re-enter your new password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onBlur={() => setTouchedConfirm(true)}
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="toggle-pw"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        tabIndex={-1}
+                        aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                      >
+                        {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    {touchedConfirm && confirmPassword && !passwordsMatch && (
+                      <span className="field-inline-error">Passwords do not match.</span>
+                    )}
+                  </div>
+
+                  {/* Live Complexity Requirements Checklist */}
+                  <div className="pw-checklist-card">
+                    <div className="checklist-header">
+                      <ShieldCheck size={13} className="checklist-shield-icon" />
+                      <span className="checklist-title">Password Requirements</span>
+                    </div>
+                    <ul className="checklist-items">
+                      {passwordRules.map((rule) => {
+                        const isValid = rule.test(newPassword);
+                        return (
+                          <li key={rule.id} className={isValid ? 'met' : 'unmet'}>
+                            <span className="rule-status-icon">
+                              {isValid ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
+                            </span>
+                            <span>{rule.label}</span>
+                          </li>
+                        );
+                      })}
+                      <li className={passwordsMatch && confirmPassword ? 'met' : 'unmet'}>
+                        <span className="rule-status-icon">
+                          {passwordsMatch && confirmPassword ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
+                        </span>
+                        <span>Passwords match</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Actions: Back & Save */}
+                  <div className="step-actions-row">
+                    <button
+                      type="button"
+                      className="step-back-btn"
+                      onClick={() => {
+                        setStep('profile');
+                        setError(null);
+                      }}
+                      disabled={isSubmitting}
+                    >
+                      <ArrowLeft size={16} />
+                      <span>Back</span>
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="submit-btn onboarding-submit-btn flex-1"
+                      disabled={
+                        isSubmitting ||
+                        !currentPassword ||
+                        !passwordRules.every((r) => r.test(newPassword)) ||
+                        !passwordsMatch
+                      }
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 size={18} className="spinner" />
+                          <span>Activating Account...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Save Password &amp; Continue</span>
+                          <CheckCircle2 size={18} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-        </main>
-      </div>
+
+            <footer className="login-footer">
+              <p className="login-footer-copy">
+                © 2026 <span className="login-footer-company">Speedex Courier &amp; Forwarder, Inc.</span> · All rights reserved.
+              </p>
+            </footer>
+          </section>
+        </div>
+      </main>
     </div>
   );
 }
