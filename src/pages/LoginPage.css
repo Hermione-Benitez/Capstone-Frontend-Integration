@@ -471,7 +471,7 @@
   color: #64748b;
 }
 
-/* ── RIGHT COLUMN: WAREHOUSE TEAM ART (Color graded + Soft Curve) ── */
+/* ── RIGHT COLUMN: SPEEDEX TEAM ART (Color graded + Soft Curve) ── */
 .login-card-visual {
   flex: 1 1 auto;
   position: relative;
@@ -486,10 +486,10 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 64% 18%; /* Precisely frames the characters: female employee & male courier */
+  object-position: center center; /* Perfectly centers the Speedex 30th Anniversary banner & office characters */
   display: block;
   /* Harmonize image tones with deep navy & teal palette */
-  filter: brightness(0.96) contrast(1.05) saturate(0.92);
+  filter: brightness(0.98) contrast(1.02);
 }
 
 /* Subtle color grading tint overlay (Navy / Teal harmonious blend) */

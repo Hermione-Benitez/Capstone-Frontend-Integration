@@ -907,11 +907,11 @@ export default function LoginPage() {
             </footer>
           </div>
 
-          {/* RIGHT COLUMN: #ROADTO30 WAREHOUSE TEAM ILLUSTRATION (Starkfest Inspo) */}
+          {/* RIGHT COLUMN: #ROADTO30 SPEEDEX TEAM ILLUSTRATION (Starkfest Inspo) */}
           <div className="login-card-visual" aria-hidden="true">
             <img
-              src="/warehouse-team.png"
-              alt="Speedex Warehouse Logistics Team"
+              src="/login-background.jpg"
+              alt="Speedex 30 Years Team"
               className="login-visual-img"
             />
             {/* Subtle color grading tint overlay (Navy / Teal harmonious blend) */}
