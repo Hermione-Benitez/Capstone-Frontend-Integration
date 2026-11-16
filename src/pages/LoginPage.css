@@ -471,27 +471,15 @@
   color: #64748b;
 }
 
-/* ── RIGHT COLUMN: SPEEDEX TEAM ART (Color graded + Soft Curve) ── */
+/* ── RIGHT COLUMN: SPEEDEX TEAM ART (Bright, Clean & Crisp) ── */
 .login-card-visual {
   flex: 1 1 auto;
   position: relative;
   overflow: hidden;
-  background: #0B1437;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Elegant vignette & ambient shadow frame to blend artwork into the card */
-.login-card-visual::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  box-shadow: inset 0 0 60px rgba(11, 20, 55, 0.22),
-              inset 0 -40px 50px rgba(11, 20, 55, 0.32),
-              inset 0 30px 40px rgba(11, 20, 55, 0.18);
-  pointer-events: none;
-  z-index: 2;
 }
 
 .login-visual-img {
@@ -500,44 +488,32 @@
   object-fit: cover;
   object-position: center center; /* Perfectly centers the Speedex 30th Anniversary banner & office characters */
   display: block;
-  /* Soften stark vector whites and harsh saturation for a calm, premium corporate look */
-  filter: brightness(0.91) contrast(0.96) saturate(0.86);
-  transition: filter 0.3s ease;
+  /* Clean, crisp daylight brightness matching the artwork */
+  filter: brightness(0.99) contrast(1.01);
 }
 
-/* Harmonious deep navy & teal ambient color-grade tint overlay (kills blinding white walls) */
+/* Subtle, barely-there ambient tint (keeps room vibrant and bright) */
 .login-visual-color-grade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    145deg,
-    rgba(11, 20, 55, 0.20) 0%,
-    rgba(0, 169, 157, 0.12) 48%,
-    rgba(11, 20, 55, 0.26) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  mix-blend-mode: multiply;
+  display: none;
 }
 
-/* Soft white gradient feather along the crescent curve (smooth, organic transition) */
+/* Soft transition feather along the crescent curve */
 .login-visual-curve-feather {
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
-  width: 54px;
+  width: 40px;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.35) 0%,
     transparent 100%
   );
   pointer-events: none;
   z-index: 2;
 }
 
-/* Organic convex curve divider with subtle shadow */
+/* Organic convex curve divider with gentle card edge shadow */
 .login-visual-curve {
   position: absolute;
   top: 0;
@@ -547,10 +523,10 @@
   height: 100%;
   pointer-events: none;
   z-index: 3;
-  filter: drop-shadow(3px 0 8px rgba(11, 20, 55, 0.08));
+  filter: drop-shadow(3px 0 6px rgba(0, 0, 0, 0.05));
 }
 
-/* Subtle artist credit watermark (grayish, understated) */
+/* Subtle artist credit watermark (clean, light, and unobtrusive) */
 .login-visual-credit {
   position: absolute;
   bottom: 10px;
@@ -560,13 +536,13 @@
   font-weight: 500;
   letter-spacing: 0.02em;
   color: #64748b;
-  opacity: 0.85;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: 2.5px 8px;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(11, 20, 55, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   pointer-events: none;
   user-select: none;
 }
