@@ -497,23 +497,6 @@ export default function OnboardingPage() {
         <div className="login-unified-card onboarding-unified-card">
           {/* LEFT COLUMN: ONBOARDING FORM */}
           <div className="login-card-form onboarding-card-form">
-            <button
-              type="button"
-              className="back-to-public-btn"
-              onClick={() => {
-                if (step === 'password') {
-                  setStep('profile');
-                  setError(null);
-                } else {
-                  navigate('/login');
-                }
-              }}
-              aria-label={step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}
-            >
-              <ArrowLeft size={14} />
-              <span>{step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}</span>
-            </button>
-
             {/* Stepper Indicator */}
             <div className="onboarding-stepper" role="navigation" aria-label="Onboarding Progress">
               <div
@@ -546,7 +529,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* Card Header */}
-            <div className="card-header">
+            <div className="card-header onboarding-card-header">
               <span className="header-badge">
                 {step === 'profile' ? 'STAFF VERIFICATION' : 'CREDENTIAL SETUP'}
               </span>
