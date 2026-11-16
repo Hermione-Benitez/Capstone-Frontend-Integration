@@ -465,10 +465,17 @@ export default function OnboardingPage() {
             <button
               type="button"
               className="speedex-nav-link speedex-nav-link-public"
-              onClick={() => navigate('/login')}
+              onClick={() => {
+                if (step === 'password') {
+                  setStep('profile');
+                  setError(null);
+                } else {
+                  navigate('/login');
+                }
+              }}
             >
               <ArrowLeft size={14} />
-              <span>Back to Login</span>
+              <span>{step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}</span>
             </button>
             <a
               href="/"
@@ -485,79 +492,11 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      {/* ── 2-COLUMN SPLIT LAYOUT ── */}
-      <div className="login-page-split">
-        {/* LEFT PANEL */}
-        <aside className="login-left">
-          <div className="login-decorative-circle circle-1" />
-          <div className="login-decorative-circle circle-2" />
-          <div className="login-left-content">
-            <div className="login-brand-badge">
-              <div className="brand-icon-box">
-                {step === 'profile' ? <User size={22} /> : <KeyRound size={22} />}
-              </div>
-              <div>
-                <span className="brand-title-badge">Employee Gateway</span>
-                <span className="brand-sub-badge">ACCOUNT ONBOARDING</span>
-              </div>
-            </div>
-
-            <div className="login-headline">
-              <h2>
-                Welcome to Speedex,<br />
-                <span className="headline-accent">get ready to take off.</span>
-              </h2>
-              <p className="headline-body">
-                Complete your staff profile verification and set up a permanent, OWASP-compliant password
-                to activate your enterprise access across STARS, DMS, and FOMS.
-              </p>
-            </div>
-
-            {/* Step Roadmap */}
-            <div className="onboarding-steps-aside">
-              <div className={`aside-step-item ${step === 'profile' ? 'current' : 'done'}`}>
-                <div className="aside-step-bullet">
-                  {step === 'profile' ? '1' : <Check size={14} />}
-                </div>
-                <div className="aside-step-text">
-                  <strong>Staff Profile Setup</strong>
-                  <span>Verify manager-entered details and mobile contact.</span>
-                </div>
-              </div>
-
-              <div className={`aside-step-item ${step === 'password' ? 'current' : ''}`}>
-                <div className="aside-step-bullet">2</div>
-                <div className="aside-step-text">
-                  <strong>Security Password</strong>
-                  <span>Establish your high-entropy personal master password.</span>
-                </div>
-              </div>
-
-              <div className="aside-step-item next-up">
-                <div className="aside-step-bullet">3</div>
-                <div className="aside-step-text">
-                  <strong>Privacy &amp; Terms</strong>
-                  <span>Speedex Data Privacy Act (RA 10173) compliance sign-off.</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="onboarding-compliance-box">
-              <div className="compliance-icon-row">
-                <ShieldCheck size={18} className="compliance-icon" />
-                <span>Speedex Data Governance &amp; Security Compliance</span>
-              </div>
-              <p>
-                Staff accounts are provisioned under Speedex Access Control Policies with enterprise-grade
-                credential protection and zero-knowledge storage standards.
-              </p>
-            </div>
-          </div>
-        </aside>
-
-        {/* RIGHT PANEL */}
-        <main className="login-right">
-          <div className="login-card onboarding-card-enhanced">
+      {/* ── UNIFIED 2-COLUMN FLOATING CARD (Matches Login & Reset Password) ── */}
+      <main className="login-page-main">
+        <div className="login-unified-card onboarding-unified-card">
+          {/* LEFT COLUMN: ONBOARDING FORM */}
+          <div className="login-card-form onboarding-card-form">
             <button
               type="button"
               className="back-to-public-btn"
@@ -569,7 +508,7 @@ export default function OnboardingPage() {
                   navigate('/login');
                 }
               }}
-              aria-label={step === 'password' ? 'Back to Profile' : 'Back to Login'}
+              aria-label={step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}
             >
               <ArrowLeft size={14} />
               <span>{step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}</span>
@@ -964,9 +903,35 @@ export default function OnboardingPage() {
               </form>
             )}
 
-            </div>
-        </main>
-      </div>
+            <footer className="login-footer">
+              <p className="login-footer-copy">
+                © 2026 <span className="login-footer-company">Speedex Courier &amp; Forwarder, Inc.</span> · All rights reserved.
+              </p>
+            </footer>
+          </div>
+
+          {/* RIGHT COLUMN: SPEEDEX 30TH ANNIVERSARY ARTWORK */}
+          <div className="login-card-visual" aria-hidden="true">
+            <img
+              src="/login-background.jpg"
+              alt="Speedex 30 Years Team"
+              className="login-visual-img"
+            />
+            <div className="login-visual-curve-feather" />
+            <svg
+              className="login-visual-curve"
+              viewBox="0 0 40 500"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
+            </svg>
+            <span className="login-visual-credit" aria-label="Illustration credit">
+              Illustrated by: riya
+            </span>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

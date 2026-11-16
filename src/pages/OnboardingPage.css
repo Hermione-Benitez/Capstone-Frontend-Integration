@@ -1,6 +1,6 @@
 /* ================================================================
    Speedex OneUI — Account Onboarding & Credential Setup Styles
-   Harmonized with Speedex Global CSS Design Tokens & Deep Navy Theme
+   Harmonized with Speedex 2-Column Floating Card & UI Audit Master Tokens
    ================================================================ */
 
 .onboarding-view-container {
@@ -9,199 +9,97 @@
   flex-direction: column;
   background: #EEF2F6;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0F172A;
 }
 
-/* ── 2-COLUMN SPLIT LAYOUT ── */
-.login-page-split {
-  display: flex;
-  flex: 1;
-  min-height: calc(100vh - 64px);
+@media (min-width: 901px) {
+  .onboarding-view-container {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* ── UNIFIED 2-COLUMN ONBOARDING FLOATING CARD ── */
+.onboarding-unified-card {
   width: 100%;
-}
-
-/* ── LEFT PANEL: SPEEDEX DEEP NAVY ROADMAP ── */
-.login-left {
-  width: 480px;
-  flex-shrink: 0;
-  background: #0B1437;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 40px;
-  color: #ffffff;
-}
-
-.login-left-content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 400px;
-}
-
-.login-decorative-circle {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.circle-1 {
-  width: 360px;
-  height: 360px;
-  top: -80px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.circle-2 {
-  width: 300px;
-  height: 300px;
-  bottom: -60px;
-  left: -80px;
-  background: radial-gradient(circle, rgba(0, 169, 157, 0.15) 0%, transparent 70%);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.login-brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 9999px;
-  margin-bottom: 24px;
-}
-
-.brand-icon-box {
-  width: 38px;
-  height: 38px;
-  background: linear-gradient(135deg, var(--teal, #00A99D) 0%, #00776D 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 169, 157, 0.35);
-  flex-shrink: 0;
-}
-
-.brand-title-badge {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.25;
-}
-
-.brand-sub-badge {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--teal, #00A99D);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.login-headline h2 {
-  font-size: 2.1rem;
-  font-weight: 800;
-  line-height: 1.2;
-  color: #ffffff;
-  margin-bottom: 14px;
-  letter-spacing: -0.02em;
-}
-
-.headline-accent {
-  background: linear-gradient(135deg, #2dd4bf 0%, #38bdf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.headline-body {
-  font-size: 0.92rem;
-  line-height: 1.6;
-  color: #94a3b8;
-  margin-bottom: 28px;
-}
-
-/* ── RIGHT PANEL: FORM CONTAINER ── */
-.login-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px clamp(20px, 4vw, 48px);
-  background: #EEF2F6;
-  overflow-y: auto;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 540px;
+  max-width: 1080px;
+  min-height: clamp(520px, 74vh, 640px);
+  max-height: 90vh;
   background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 20px;
-  padding: 36px 32px;
-  box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.12),
+  box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.14),
               0 0 0 1px rgba(226, 232, 240, 0.9);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── LEFT COLUMN: ONBOARDING FORM ── */
+.onboarding-card-form {
+  flex: 0 0 530px;
+  width: 530px;
+  max-width: 530px;
+  padding: clamp(18px, 2.4vh, 28px) clamp(24px, 2.6vw, 36px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: #ffffff;
+  z-index: 2;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 20, 55, 0.2) transparent;
+}
+
+.onboarding-card-form::-webkit-scrollbar {
+  width: 5px;
+}
+
+.onboarding-card-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.onboarding-card-form::-webkit-scrollbar-thumb {
+  background: rgba(11, 20, 55, 0.18);
+  border-radius: 999px;
+}
+
+/* ── CARD HEADER ── */
+.onboarding-card-header {
+  margin-bottom: 14px;
+  text-align: left;
 }
 
 .header-badge {
   display: inline-block;
-  padding: 4px 10px;
+  padding: 3px 10px;
   background: rgba(0, 169, 157, 0.08);
   border: 1px solid rgba(0, 169, 157, 0.2);
   border-radius: 9999px;
-  color: var(--teal, #00A99D);
-  font-size: 0.72rem;
+  color: #00776D;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-.onboarding-card-enhanced .card-header {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.onboarding-card-enhanced .card-title {
+.onboarding-card-header .card-title {
   font-family: Montserrat, -apple-system, sans-serif;
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #0B1437;
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
   letter-spacing: -0.02em;
   text-align: left;
 }
 
-.onboarding-card-enhanced .card-subtitle {
-  font-size: 0.85rem;
-  color: #64748b;
+.onboarding-card-header .card-subtitle {
+  font-size: 0.8rem;
+  color: #64748B;
   margin: 0;
   max-width: 100%;
-  line-height: 1.5;
+  line-height: 1.45;
   text-align: left;
-}
-
-.onboarding-card-enhanced {
-  max-width: 540px;
-  width: 100%;
-  animation: spx-card-entrance 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes spx-card-entrance {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* ── STEP PROGRESS INDICATOR ── */
@@ -369,106 +267,6 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   flex-shrink: 0;
-}
-
-/* ── ASIDE ROADMAP (LEFT PANEL) ── */
-.onboarding-steps-aside {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 28px;
-}
-
-.aside-step-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.2s ease;
-}
-
-.aside-step-item.current {
-  background: rgba(0, 169, 157, 0.16);
-  border-color: rgba(0, 169, 157, 0.45);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-.aside-step-item.done {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.aside-step-item.next-up {
-  opacity: 0.75;
-}
-
-.aside-step-bullet {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.aside-step-item.current .aside-step-bullet {
-  background: var(--teal, #00A99D);
-  color: #ffffff;
-  box-shadow: 0 2px 10px rgba(0, 169, 157, 0.45);
-}
-
-.aside-step-item.done .aside-step-bullet {
-  background: #10b981;
-  color: #ffffff;
-}
-
-.aside-step-item.next-up .aside-step-bullet {
-  background: rgba(255, 255, 255, 0.05);
-  color: #64748b;
-}
-
-.aside-step-text strong {
-  display: block;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 2px;
-}
-
-.aside-step-text span {
-  font-size: 0.76rem;
-  color: #94a3b8;
-  line-height: 1.4;
-  display: block;
-}
-
-.aside-step-item.current .aside-step-text span {
-  color: #5eead4;
-}
-
-.aside-step-item.next-up .aside-step-text strong {
-  color: #cbd5e1;
-}
-
-.aside-step-item.next-up .aside-step-text span {
-  color: #64748b;
-}
-  display: block;
-}
-
-.onboarding-compliance-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 16px;
 }
 
 .compliance-icon-row {
@@ -773,22 +571,22 @@
 
 /* ── RESPONSIVE DESIGN ── */
 @media (max-width: 900px) {
-  .login-page-split {
-    flex-direction: column;
+  .onboarding-unified-card {
+    max-width: 540px;
+    min-height: auto;
+    max-height: none;
+    border-radius: 16px;
   }
 
-  .login-left {
+  .onboarding-card-form {
+    flex: 1 1 100%;
     width: 100%;
-    padding: 32px 24px;
-  }
-
-  .login-right {
-    padding: 32px 16px;
-  }
-
-  .onboarding-card-enhanced {
     max-width: 100%;
-    padding: 28px 20px;
+    padding: 24px 20px;
+  }
+
+  .onboarding-view-container .login-card-visual {
+    display: none;
   }
 
   .form-row-split {
