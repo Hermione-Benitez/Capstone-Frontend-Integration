@@ -920,7 +920,7 @@ export default function LoginPage() {
             {/* Soft gradient feather along the crescent curve */}
             <div className="login-visual-curve-feather" />
 
-            {/* Elegant organic convex curve divider (Starkfest Inspo) */}
+            {/* Organic convex crescent curve (Starkfest Inspo SVG) */}
             <svg
               className="login-visual-curve"
               viewBox="0 0 40 500"
@@ -929,6 +929,11 @@ export default function LoginPage() {
             >
               <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
             </svg>
+
+            {/* Subtle artist credit */}
+            <span className="login-visual-credit" aria-label="Illustration credit">
+              Illustrated by: riya
+            </span>
           </div>
         </div>
       </main>

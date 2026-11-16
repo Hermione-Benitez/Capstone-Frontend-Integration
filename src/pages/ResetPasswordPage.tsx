@@ -412,6 +412,11 @@ export default function ResetPasswordPage() {
             >
               <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
             </svg>
+
+            {/* Subtle artist credit */}
+            <span className="login-visual-credit" aria-label="Illustration credit">
+              Illustrated by: riya
+            </span>
           </div>
         </div>
       </main>
