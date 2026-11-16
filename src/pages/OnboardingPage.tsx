@@ -19,6 +19,7 @@ import {
   Edit3,
   KeyRound,
   FileText,
+  ChevronRight,
 } from 'lucide-react';
 import { getStoredAuthSession, saveAuthSession, extractContactNumber, normalizePhMobile } from '../utils/auth';
 import { STARS_API_URL } from '../config/env';
@@ -497,33 +498,35 @@ export default function OnboardingPage() {
         <div className="login-unified-card onboarding-unified-card">
           {/* LEFT COLUMN: ONBOARDING FORM */}
           <div className="login-card-form onboarding-card-form">
-            {/* Stepper Indicator */}
-            <div className="onboarding-stepper" role="navigation" aria-label="Onboarding Progress">
-              <div
-                className={`stepper-step ${step === 'profile' ? 'active' : 'completed'}`}
+            {/* Stepper Progress Bar */}
+            <div className="onboarding-stepper-bar" role="navigation" aria-label="Onboarding Progress">
+              <button
+                type="button"
+                className={`stepper-tab ${step === 'profile' ? 'active' : 'completed'}`}
                 onClick={() => {
                   if (step === 'password') setStep('profile');
                 }}
-                style={{ cursor: step === 'password' ? 'pointer' : 'default' }}
+                disabled={step === 'profile'}
+                title={step === 'password' ? 'Return to Step 1: Profile Details' : undefined}
               >
-                <div className="stepper-circle">
-                  {step === 'password' ? <Check size={14} /> : '1'}
+                <div className="stepper-tab-circle">
+                  {step === 'password' ? <Check size={12} strokeWidth={2.8} /> : '1'}
                 </div>
-                <div className="stepper-labels">
-                  <span className="step-tag">Step 1</span>
-                  <span className="step-name">Profile Details</span>
+                <div className="stepper-tab-labels">
+                  <span className="stepper-tab-tag">Step 1</span>
+                  <span className="stepper-tab-name">Profile Details</span>
                 </div>
+              </button>
+
+              <div className="stepper-tab-arrow" aria-hidden="true">
+                <ChevronRight size={15} />
               </div>
 
-              <div className="stepper-connector">
-                <div className={`stepper-connector-line ${step === 'password' ? 'filled' : ''}`} />
-              </div>
-
-              <div className={`stepper-step ${step === 'password' ? 'active' : ''}`}>
-                <div className="stepper-circle">2</div>
-                <div className="stepper-labels">
-                  <span className="step-tag">Step 2</span>
-                  <span className="step-name">New Password</span>
+              <div className={`stepper-tab ${step === 'password' ? 'active' : ''}`}>
+                <div className="stepper-tab-circle">2</div>
+                <div className="stepper-tab-labels">
+                  <span className="stepper-tab-tag">Step 2</span>
+                  <span className="stepper-tab-name">New Password</span>
                 </div>
               </div>
             </div>
@@ -827,19 +830,26 @@ export default function OnboardingPage() {
 
                 {/* Live OWASP Complexity Requirements Checklist */}
                 <div className="pw-checklist-card">
-                  <span className="checklist-title">OWASP Password Requirements:</span>
+                  <div className="checklist-header">
+                    <ShieldCheck size={13} className="checklist-shield-icon" />
+                    <span className="checklist-title">OWASP Password Requirements</span>
+                  </div>
                   <ul className="checklist-items">
                     {passwordRules.map((rule) => {
                       const isValid = rule.test(newPassword);
                       return (
                         <li key={rule.id} className={isValid ? 'met' : 'unmet'}>
-                          {isValid ? <Check size={14} /> : <X size={14} />}
+                          <span className="rule-status-icon">
+                            {isValid ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
+                          </span>
                           <span>{rule.label}</span>
                         </li>
                       );
                     })}
-                    <li className={passwordsMatch ? 'met' : 'unmet'}>
-                      {passwordsMatch ? <Check size={14} /> : <X size={14} />}
+                    <li className={passwordsMatch && confirmPassword ? 'met' : 'unmet'}>
+                      <span className="rule-status-icon">
+                        {passwordsMatch && confirmPassword ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
+                      </span>
                       <span>Passwords match</span>
                     </li>
                   </ul>

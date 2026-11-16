@@ -27,11 +27,11 @@
   margin: auto 0;
 }
 
-/* ── LEFT COLUMN: ONBOARDING FORM ── */
+/* ── LEFT COLUMN: ONBOARDING FORM (460px to preserve art framing) ── */
 .onboarding-card-form {
-  flex: 0 0 510px;
-  width: 510px;
-  max-width: 510px;
+  flex: 0 0 460px;
+  width: 460px;
+  max-width: 460px;
   padding: 24px 32px 18px 32px;
   display: flex;
   flex-direction: column;
@@ -41,48 +41,85 @@
   overflow: visible;
 }
 
-/* ── STEP PROGRESS INDICATOR ── */
-.onboarding-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #F1F5F9;
-  position: relative;
-}
-
-.stepper-step {
+/* ── STEPPER PROGRESS BAR (Segmented Pill Bar) ── */
+.onboarding-stepper-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  user-select: none;
+  margin-bottom: 14px;
+  padding: 4px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+}
+
+.stepper-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: default;
   transition: all 0.2s ease;
 }
 
-.stepper-circle {
-  width: 26px;
-  height: 26px;
+.stepper-tab.completed {
+  cursor: pointer;
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.stepper-tab.completed:hover {
+  border-color: #00A99D;
+  background: rgba(0, 169, 157, 0.03);
+}
+
+.stepper-tab.active {
+  background: #FFFFFF;
+  border-color: rgba(0, 169, 157, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 169, 157, 0.08);
+}
+
+.stepper-tab-circle {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #F1F5F9;
-  border: 1.5px solid #CBD5E1;
-  color: #64748B;
-  font-size: 0.75rem;
-  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  font-size: 0.72rem;
+  font-weight: 700;
   flex-shrink: 0;
+  background: #E2E8F0;
+  color: #64748B;
+  transition: all 0.2s ease;
 }
 
-.stepper-labels {
+.stepper-tab.active .stepper-tab-circle {
+  background: #00A99D;
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 169, 157, 0.35);
+}
+
+.stepper-tab.completed .stepper-tab-circle {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.stepper-tab-labels {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-.stepper-labels .step-tag {
-  font-size: 0.62rem;
+.stepper-tab-tag {
+  font-size: 0.58rem;
   font-weight: 700;
   color: #94A3B8;
   text-transform: uppercase;
@@ -90,68 +127,35 @@
   line-height: 1;
 }
 
-.stepper-labels .step-name {
-  font-size: 0.8rem;
+.stepper-tab.active .stepper-tab-tag {
+  color: #00A99D;
+}
+
+.stepper-tab-name {
+  font-size: 0.76rem;
   font-weight: 600;
   color: #334155;
-  transition: color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Stepper Active State */
-.stepper-step.active .stepper-circle {
-  background: #00A99D;
-  border-color: #00A99D;
-  color: #ffffff;
-  box-shadow: 0 3px 8px rgba(0, 169, 157, 0.3);
-}
-
-.stepper-step.active .stepper-labels .step-name {
+.stepper-tab.active .stepper-tab-name {
   color: #0B1437;
   font-weight: 700;
 }
 
-.stepper-step.active .stepper-labels .step-tag {
-  color: #00A99D;
+.stepper-tab-arrow {
+  color: #CBD5E1;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-/* Stepper Completed State */
-.stepper-step.completed .stepper-circle {
-  background: #10B981;
-  border-color: #10B981;
-  color: #ffffff;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
-}
-
-.stepper-step.completed .stepper-labels .step-name {
-  color: #0B1437;
-}
-
-/* Stepper Connector Line */
-.stepper-connector {
-  flex: 1;
-  height: 2px;
-  background: #E2E8F0;
-  margin: 0 12px;
-  position: relative;
-  border-radius: 9999px;
-  overflow: hidden;
-}
-
-.stepper-connector-line {
-  height: 100%;
-  width: 0%;
-  background: #10B981;
-  transition: width 0.3s ease;
-}
-
-.stepper-connector-line.filled {
-  width: 100%;
-}
-
-/* ── CARD HEADER ── */
+/* ── CARD HEADER (Centered to match Login Page & UI Audit) ── */
 .onboarding-card-header {
   margin-bottom: 12px;
-  text-align: left;
+  text-align: center;
 }
 
 .onboarding-card-header .header-badge {
@@ -161,7 +165,7 @@
   border: 1px solid rgba(0, 169, 157, 0.22);
   border-radius: 9999px;
   color: #00776D;
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -174,16 +178,17 @@
   font-weight: 800;
   color: #0B1437;
   margin: 0 0 2px 0;
-  letter-spacing: -0.02em;
-  text-align: left;
+  letter-spacing: -0.025em;
+  text-align: center;
 }
 
 .onboarding-card-header .card-subtitle {
   font-size: 0.78rem;
   color: #64748B;
-  margin: 0;
-  line-height: 1.35;
-  text-align: left;
+  margin: 0 auto;
+  max-width: 360px;
+  line-height: 1.38;
+  text-align: center;
 }
 
 /* ── PRE-FILL MANAGER REGISTRATION BANNER ── */
@@ -354,24 +359,34 @@
   pointer-events: none;
 }
 
-/* ── OWASP PASSWORD REQUIREMENTS CHECKLIST ── */
+/* ── OWASP PASSWORD REQUIREMENTS CHECKLIST (Polished Modern Box) ── */
 .pw-checklist-card {
   margin-top: 6px;
-  margin-bottom: 6px;
-  padding: 7px 11px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
-  border-radius: 8px;
+  border-radius: 10px;
+}
+
+.checklist-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.checklist-shield-icon {
+  color: #00A99D;
+  flex-shrink: 0;
 }
 
 .checklist-title {
-  display: block;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   color: #475569;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
+  letter-spacing: 0.05em;
 }
 
 .checklist-items {
@@ -380,25 +395,45 @@
   padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3px 10px;
+  gap: 4px 10px;
 }
 
 .checklist-items li {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-size: 0.72rem;
   line-height: 1.25;
   transition: color 0.15s ease;
 }
 
+.rule-status-icon {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.unmet-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #CBD5E1;
+}
+
 .checklist-items li.met {
-  color: #10B981;
+  color: #059669;
   font-weight: 600;
 }
 
+.checklist-items li.met .rule-status-icon {
+  color: #10B981;
+}
+
 .checklist-items li.unmet {
-  color: #94A3B8;
+  color: #64748B;
 }
 
 /* Password Strength Meter */
@@ -507,7 +542,7 @@
 /* ── RESPONSIVE DESIGN ── */
 @media (max-width: 900px) {
   .onboarding-unified-card {
-    max-width: 520px;
+    max-width: 480px;
     border-radius: 16px;
     margin: 16px 0;
   }
