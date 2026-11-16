@@ -1,161 +1,316 @@
 /* ================================================================
    Speedex OneUI — Account Onboarding & Credential Setup Styles
-   Harmonized with Speedex 2-Column Floating Card & UI Audit Master Tokens
-   Starkfest Inspiration: 2-Column Floating Card with Warehouse Team Art
+   Split Layout: Deep Navy Roadmap Aside + Centered Form Card
+   Harmonized with Speedex Deep Navy #0B1437 & Speedex Teal #00A99D
    ================================================================ */
 
 .onboarding-view-container {
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: #EEF2F6;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #0F172A;
-}
-
-/* ── UNIFIED 2-COLUMN ONBOARDING FLOATING CARD ── */
-.onboarding-unified-card {
-  width: 100%;
-  max-width: 1040px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.14),
-              0 0 0 1px rgba(226, 232, 240, 0.9);
-  display: flex;
   overflow: hidden;
-  position: relative;
-  margin: auto 0;
 }
 
-/* ── LEFT COLUMN: ONBOARDING FORM (460px to preserve art framing) ── */
-.onboarding-card-form {
-  flex: 0 0 460px;
-  width: 460px;
-  max-width: 460px;
-  padding: 24px 32px 18px 32px;
+/* ── SPLIT CONTAINER (Height: calc(100vh - 64px)) ── */
+.onboarding-split-container {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #ffffff;
-  z-index: 2;
-  overflow: visible;
-}
-
-/* ── STEPPER PROGRESS BAR (Segmented Pill Bar) ── */
-.onboarding-stepper-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-  padding: 4px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
-}
-
-.stepper-tab {
   flex: 1;
+  height: calc(100vh - 64px);
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ── LEFT PANEL: DEEP NAVY ROADMAP ── */
+.onboarding-split-left {
+  width: 440px;
+  flex-shrink: 0;
+  background: #0B1437;
+  position: relative;
+  overflow: hidden;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background: transparent;
-  font-family: inherit;
-  text-align: left;
-  cursor: default;
-  transition: all 0.2s ease;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(20px, 3vh, 36px) clamp(26px, 3vw, 40px);
+  color: #ffffff;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.stepper-tab.completed {
-  cursor: pointer;
-  background: #FFFFFF;
-  border-color: #E2E8F0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+.onboarding-left-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 370px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2vh, 20px);
 }
 
-.stepper-tab.completed:hover {
-  border-color: #00A99D;
-  background: rgba(0, 169, 157, 0.03);
-}
-
-.stepper-tab.active {
-  background: #FFFFFF;
-  border-color: rgba(0, 169, 157, 0.4);
-  box-shadow: 0 2px 6px rgba(0, 169, 157, 0.08);
-}
-
-.stepper-tab-circle {
-  width: 22px;
-  height: 22px;
+/* Ambient Decorative Glowing Orbs */
+.onboarding-glow-orb {
+  position: absolute;
   border-radius: 50%;
+  pointer-events: none;
+}
+
+.orb-1 {
+  width: 340px;
+  height: 340px;
+  top: -80px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.16) 0%, transparent 70%);
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  bottom: -60px;
+  left: -80px;
+  background: radial-gradient(circle, rgba(0, 169, 157, 0.2) 0%, transparent 70%);
+}
+
+/* Brand Pill */
+.onboarding-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 13px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.onboarding-brand-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00A99D 0%, #00776D 100%);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
-  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.35);
   flex-shrink: 0;
-  background: #E2E8F0;
-  color: #64748B;
+}
+
+.onboarding-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.onboarding-brand-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.onboarding-brand-subtitle {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #2DD4BF;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Headline */
+.onboarding-headline h2 {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(1.35rem, 1.8vw, 1.68rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.headline-gradient {
+  background: linear-gradient(135deg, #2DD4BF 0%, #38BDF8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.headline-desc {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #94A3B8;
+  margin: 0;
+}
+
+/* Roadmap List */
+.onboarding-roadmap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roadmap-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   transition: all 0.2s ease;
 }
 
-.stepper-tab.active .stepper-tab-circle {
+.roadmap-item.current {
+  background: rgba(0, 169, 157, 0.12);
+  border-color: rgba(0, 169, 157, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 169, 157, 0.15);
+}
+
+.roadmap-item.done {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.roadmap-bullet {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94A3B8;
+  font-size: 0.74rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.roadmap-item.current .roadmap-bullet {
   background: #00A99D;
-  color: #FFFFFF;
-  box-shadow: 0 2px 6px rgba(0, 169, 157, 0.35);
+  border-color: #00A99D;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.4);
 }
 
-.stepper-tab.completed .stepper-tab-circle {
+.roadmap-item.done .roadmap-bullet {
   background: #10B981;
-  color: #FFFFFF;
+  border-color: #10B981;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-.stepper-tab-labels {
+.roadmap-info {
   display: flex;
   flex-direction: column;
-  min-width: 0;
 }
 
-.stepper-tab-tag {
-  font-size: 0.58rem;
+.roadmap-info strong {
+  font-size: 0.8rem;
   font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.roadmap-item.upcoming .roadmap-info strong {
   color: #94A3B8;
+}
+
+.roadmap-info span {
+  font-size: 0.69rem;
+  color: #94A3B8;
+  line-height: 1.35;
+}
+
+/* Compliance Card */
+.onboarding-compliance-card {
+  padding: 9px 13px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.compliance-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #38BDF8;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1;
+  margin-bottom: 3px;
 }
 
-.stepper-tab.active .stepper-tab-tag {
-  color: #00A99D;
+.compliance-shield {
+  color: #38BDF8;
+  flex-shrink: 0;
 }
 
-.stepper-tab-name {
+.onboarding-compliance-card p {
+  font-size: 0.69rem;
+  color: #94A3B8;
+  line-height: 1.38;
+  margin: 0;
+}
+
+/* ── RIGHT PANEL: FORM CANVAS ── */
+.onboarding-split-right {
+  flex: 1;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(14px, 2.2vh, 28px) clamp(18px, 2.8vw, 36px);
+  background: #EEF2F6;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 20, 55, 0.2) transparent;
+}
+
+.onboarding-form-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px -8px rgba(11, 20, 55, 0.12),
+              0 0 0 1px rgba(226, 232, 240, 0.85);
+  padding: 22px 28px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 510px;
+  justify-content: space-between;
+}
+
+/* Card Top Back Link */
+.card-back-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 6px;
+  color: #00776D;
   font-size: 0.76rem;
   font-weight: 600;
-  color: #334155;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  align-self: flex-start;
 }
 
-.stepper-tab.active .stepper-tab-name {
-  color: #0B1437;
-  font-weight: 700;
+.card-back-action:hover {
+  color: #005F57;
+  transform: translateX(-2px);
 }
 
-.stepper-tab-arrow {
-  color: #CBD5E1;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* ── CARD HEADER (Centered to match Login Page & UI Audit) ── */
+/* Card Header */
 .onboarding-card-header {
-  margin-bottom: 12px;
-  text-align: center;
+  margin-bottom: 10px;
+  text-align: left;
 }
 
 .onboarding-card-header .header-badge {
@@ -165,30 +320,49 @@
   border: 1px solid rgba(0, 169, 157, 0.22);
   border-radius: 9999px;
   color: #00776D;
-  font-size: 0.64rem;
+  font-size: 0.63rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .onboarding-card-header .card-title {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.22rem;
   font-weight: 800;
   color: #0B1437;
   margin: 0 0 2px 0;
   letter-spacing: -0.025em;
-  text-align: center;
+  text-align: left;
 }
 
 .onboarding-card-header .card-subtitle {
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   color: #64748B;
-  margin: 0 auto;
-  max-width: 360px;
-  line-height: 1.38;
-  text-align: center;
+  margin: 0;
+  line-height: 1.35;
+  text-align: left;
+}
+
+/* Smooth Fade Transition Container (Eliminates Jumpiness) */
+.step-fade-container {
+  animation: stepFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@keyframes stepFade {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── PRE-FILL MANAGER REGISTRATION BANNER ── */
@@ -196,17 +370,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 7px 11px;
   background: linear-gradient(135deg, rgba(0, 169, 157, 0.08) 0%, rgba(37, 99, 235, 0.05) 100%);
   border: 1px solid rgba(0, 169, 157, 0.25);
   border-radius: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   animation: fadeIn 0.2s ease;
 }
 
 .prefill-notice-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
   background: rgba(0, 169, 157, 0.15);
   color: #00A99D;
@@ -222,28 +396,28 @@
 
 .prefill-notice-content strong {
   display: block;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: #0F172A;
   margin-bottom: 1px;
 }
 
 .prefill-notice-content p {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: #475569;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .prefill-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 5px;
   background: rgba(0, 169, 157, 0.12);
   color: #00A99D;
-  font-size: 0.65rem;
+  font-size: 0.63rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -251,24 +425,24 @@
 }
 
 /* ── FORM FIELD REFINEMENTS ── */
-.onboarding-card-form .login-form {
+.onboarding-form-card .login-form {
   display: flex;
   flex-direction: column;
 }
 
-.onboarding-card-form .field-group {
-  margin-bottom: 8px;
+.onboarding-form-card .field-group {
+  margin-bottom: 7px;
 }
 
-.onboarding-card-form .field-label {
+.onboarding-form-card .field-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: #334155;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
-.onboarding-card-form .field-wrapper {
+.onboarding-form-card .field-wrapper {
   position: relative;
   display: flex;
   align-items: center;
@@ -278,13 +452,13 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.onboarding-card-form .field-wrapper:focus-within {
+.onboarding-form-card .field-wrapper:focus-within {
   border-color: #00776D;
   background: #FFFFFF;
   box-shadow: 0 0 0 3px rgba(0, 119, 109, 0.14);
 }
 
-.onboarding-card-form .field-icon {
+.onboarding-form-card .field-icon {
   position: absolute;
   left: 11px;
   color: #94A3B8;
@@ -293,30 +467,30 @@
   pointer-events: none;
 }
 
-.onboarding-card-form .field-input {
+.onboarding-form-card .field-input {
   width: 100%;
   border: none;
   background: transparent;
-  padding: 7px 12px 7px 34px;
-  font-size: 0.84rem;
+  padding: 6.5px 12px 6.5px 34px;
+  font-size: 0.83rem;
   color: #0F172A;
   outline: none;
   border-radius: 8px;
   font-family: inherit;
 }
 
-.onboarding-card-form .field-input::placeholder {
+.onboarding-form-card .field-input::placeholder {
   color: #94A3B8;
-  font-size: 0.8rem;
+  font-size: 0.79rem;
 }
 
-.onboarding-card-form .field-input.no-left-icon {
-  padding-left: 12px !important;
+.onboarding-form-card .field-input.no-left-icon {
+  padding-left: 11px !important;
 }
 
-.onboarding-card-form .field-helper-hint {
+.onboarding-form-card .field-helper-hint {
   display: block;
-  font-size: 0.69rem;
+  font-size: 0.68rem;
   color: #64748B;
   margin-top: 2px;
   line-height: 1.25;
@@ -346,7 +520,7 @@
 .opt-tag {
   color: #64748B;
   font-weight: 400;
-  font-size: 0.72rem;
+  font-size: 0.71rem;
   margin-left: 3px;
 }
 
@@ -359,21 +533,21 @@
   pointer-events: none;
 }
 
-/* ── OWASP PASSWORD REQUIREMENTS CHECKLIST (Polished Modern Box) ── */
+/* ── OWASP PASSWORD REQUIREMENTS CHECKLIST ── */
 .pw-checklist-card {
-  margin-top: 6px;
-  margin-bottom: 8px;
-  padding: 8px 12px;
+  margin-top: 5px;
+  margin-bottom: 6px;
+  padding: 7px 11px;
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
-  border-radius: 10px;
+  border-radius: 9px;
 }
 
 .checklist-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 5px;
+  margin-bottom: 4px;
 }
 
 .checklist-shield-icon {
@@ -382,7 +556,7 @@
 }
 
 .checklist-title {
-  font-size: 0.66rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: #475569;
   text-transform: uppercase;
@@ -395,14 +569,14 @@
   padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 10px;
+  gap: 3px 10px;
 }
 
 .checklist-items li {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
+  gap: 5px;
+  font-size: 0.71rem;
   line-height: 1.25;
   transition: color 0.15s ease;
 }
@@ -417,8 +591,8 @@
 }
 
 .unmet-dot {
-  width: 5px;
-  height: 5px;
+  width: 4.5px;
+  height: 4.5px;
   border-radius: 50%;
   background: #CBD5E1;
 }
@@ -441,7 +615,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 .strength-bar-track {
@@ -459,27 +633,27 @@
 }
 
 .strength-label {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  min-width: 48px;
+  min-width: 44px;
   text-align: right;
 }
 
 .field-inline-error {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.71rem;
   color: #DC2626;
-  margin-top: 3px;
+  margin-top: 2px;
   font-weight: 500;
 }
 
 /* ── ACTIONS & BUTTONS ── */
 .onboarding-submit-btn {
   margin-top: 6px;
-  padding: 9px 16px;
-  font-size: 0.86rem;
+  padding: 8.5px 16px;
+  font-size: 0.85rem;
   background: linear-gradient(135deg, #00A99D 0%, #00877D 100%);
   box-shadow: 0 4px 12px rgba(0, 169, 157, 0.25);
 }
@@ -502,12 +676,12 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 9px 14px;
+  padding: 8.5px 14px;
   border-radius: 8px;
   background: #F1F5F9;
   border: 1.5px solid #CBD5E1;
   color: #334155;
-  font-size: 0.84rem;
+  font-size: 0.83rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -525,37 +699,47 @@
 }
 
 /* ── FOOTER ── */
-.onboarding-card-form .login-footer {
-  margin-top: 10px;
-  padding-top: 8px;
+.onboarding-form-card .login-footer {
+  margin-top: 8px;
+  padding-top: 6px;
   border-top: 1px solid #F1F5F9;
   text-align: center;
 }
 
-.onboarding-card-form .login-footer-copy {
-  font-size: 0.72rem;
+.onboarding-form-card .login-footer-copy {
+  font-size: 0.71rem;
   color: #94A3B8;
   margin: 0;
   text-align: center;
 }
 
 /* ── RESPONSIVE DESIGN ── */
-@media (max-width: 900px) {
-  .onboarding-unified-card {
-    max-width: 480px;
-    border-radius: 16px;
-    margin: 16px 0;
+@media (max-width: 960px) {
+  .onboarding-view-container {
+    height: auto;
+    overflow-y: auto;
   }
 
-  .onboarding-card-form {
-    flex: 1 1 100%;
+  .onboarding-split-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .onboarding-split-left {
     width: 100%;
-    max-width: 100%;
-    padding: 20px 18px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 32px 24px;
   }
 
-  .onboarding-view-container .login-card-visual {
-    display: none;
+  .onboarding-split-right {
+    height: auto;
+    padding: 28px 16px;
+  }
+
+  .onboarding-form-card {
+    max-width: 520px;
+    min-height: auto;
   }
 
   .form-row-split {

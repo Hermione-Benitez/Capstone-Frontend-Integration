@@ -493,48 +493,112 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      {/* ── UNIFIED 2-COLUMN FLOATING CARD (Matches Login & Reset Password) ── */}
-      <main className="login-page-main">
-        <div className="login-unified-card onboarding-unified-card">
-          {/* LEFT COLUMN: ONBOARDING FORM */}
-          <div className="login-card-form onboarding-card-form">
-            {/* Stepper Progress Bar */}
-            <div className="onboarding-stepper-bar" role="navigation" aria-label="Onboarding Progress">
-              <button
-                type="button"
-                className={`stepper-tab ${step === 'profile' ? 'active' : 'completed'}`}
-                onClick={() => {
-                  if (step === 'password') setStep('profile');
-                }}
-                disabled={step === 'profile'}
-                title={step === 'password' ? 'Return to Step 1: Profile Details' : undefined}
-              >
-                <div className="stepper-tab-circle">
-                  {step === 'password' ? <Check size={12} strokeWidth={2.8} /> : '1'}
-                </div>
-                <div className="stepper-tab-labels">
-                  <span className="stepper-tab-tag">Step 1</span>
-                  <span className="stepper-tab-name">Profile Details</span>
-                </div>
-              </button>
+      {/* ── 2-COLUMN SPLIT SCREEN (Navy Aside + White Form Card) ── */}
+      <div className="onboarding-split-container">
+        {/* LEFT PANEL: DEEP NAVY SPEEDEX ROADMAP */}
+        <aside className="onboarding-split-left">
+          <div className="onboarding-glow-orb orb-1" aria-hidden="true" />
+          <div className="onboarding-glow-orb orb-2" aria-hidden="true" />
 
-              <div className="stepper-tab-arrow" aria-hidden="true">
-                <ChevronRight size={15} />
+          <div className="onboarding-left-inner">
+            {/* Top Brand Pill */}
+            <div className="onboarding-brand-pill">
+              <div className="onboarding-brand-icon">
+                {step === 'profile' ? <User size={18} /> : <KeyRound size={18} />}
               </div>
-
-              <div className={`stepper-tab ${step === 'password' ? 'active' : ''}`}>
-                <div className="stepper-tab-circle">2</div>
-                <div className="stepper-tab-labels">
-                  <span className="stepper-tab-tag">Step 2</span>
-                  <span className="stepper-tab-name">New Password</span>
-                </div>
+              <div className="onboarding-brand-text">
+                <span className="onboarding-brand-title">Employee Gateway</span>
+                <span className="onboarding-brand-subtitle">ACCOUNT ONBOARDING</span>
               </div>
             </div>
 
+            {/* Headline */}
+            <div className="onboarding-headline">
+              <h2>
+                Welcome to Speedex,<br />
+                <span className="headline-gradient">get ready to take off.</span>
+              </h2>
+              <p className="headline-desc">
+                Complete your staff profile verification and set up a permanent, OWASP-compliant password
+                to activate your enterprise access across STARS, DMS, and FOMS.
+              </p>
+            </div>
+
+            {/* Step Roadmap */}
+            <nav className="onboarding-roadmap" aria-label="Onboarding Steps Roadmap">
+              <div
+                className={`roadmap-item ${step === 'profile' ? 'current' : 'done'}`}
+                onClick={() => {
+                  if (step === 'password') setStep('profile');
+                }}
+                style={{ cursor: step === 'password' ? 'pointer' : 'default' }}
+                title={step === 'password' ? 'Click to return to Step 1: Profile Setup' : undefined}
+              >
+                <div className="roadmap-bullet">
+                  {step === 'password' ? <Check size={14} strokeWidth={2.8} /> : '1'}
+                </div>
+                <div className="roadmap-info">
+                  <strong>Staff Profile Setup</strong>
+                  <span>Verify manager-entered details and mobile contact.</span>
+                </div>
+              </div>
+
+              <div className={`roadmap-item ${step === 'password' ? 'current' : ''}`}>
+                <div className="roadmap-bullet">2</div>
+                <div className="roadmap-info">
+                  <strong>Security Password</strong>
+                  <span>Establish your high-entropy personal master password.</span>
+                </div>
+              </div>
+
+              <div className="roadmap-item upcoming">
+                <div className="roadmap-bullet">3</div>
+                <div className="roadmap-info">
+                  <strong>Privacy &amp; Terms</strong>
+                  <span>Speedex Data Privacy Act (RA 10173) compliance sign-off.</span>
+                </div>
+              </div>
+            </nav>
+
+            {/* Compliance Box */}
+            <div className="onboarding-compliance-card">
+              <div className="compliance-header">
+                <ShieldCheck size={15} className="compliance-shield" />
+                <span>SPEEDEX DATA GOVERNANCE &amp; SECURITY COMPLIANCE</span>
+              </div>
+              <p>
+                Staff accounts are provisioned under Speedex Access Control Policies with enterprise-grade
+                credential protection and zero-knowledge storage standards.
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        {/* RIGHT PANEL: FORM CANVAS */}
+        <main className="onboarding-split-right">
+          <div className="onboarding-form-card">
+            {/* Dynamic Card Top Back Link */}
+            <button
+              type="button"
+              className="card-back-action"
+              onClick={() => {
+                if (step === 'password') {
+                  setStep('profile');
+                  setError(null);
+                } else {
+                  navigate('/login');
+                }
+              }}
+              aria-label={step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}
+            >
+              <ArrowLeft size={14} />
+              <span>{step === 'password' ? 'Back to Profile Setup' : 'Back to Login'}</span>
+            </button>
+
             {/* Card Header */}
-            <div className="card-header onboarding-card-header">
+            <div className="onboarding-card-header">
               <span className="header-badge">
-                {step === 'profile' ? 'STAFF VERIFICATION' : 'CREDENTIAL SETUP'}
+                {step === 'profile' ? 'STEP 1 OF 2 · PROFILE VERIFICATION' : 'STEP 2 OF 2 · CREDENTIAL SETUP'}
               </span>
               <h1 className="card-title">
                 {step === 'profile' ? 'Staff Profile Details' : 'Set Up New Password'}
@@ -574,327 +638,330 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* STEP 1: PROFILE SETUP FORM */}
-            {step === 'profile' ? (
-              <form className="login-form" onSubmit={handleProfileNext} noValidate>
-                {/* First Name & Suffix in 2 columns */}
-                <div className="form-row-split">
-                  <div className="field-group flex-2">
-                    <label className="field-label" htmlFor="first-name">
-                      First Name <span className="req-star">*</span>
+            {/* Smooth Animated Form Transition Container */}
+            <div key={step} className="step-fade-container">
+              {/* STEP 1: PROFILE SETUP FORM */}
+              {step === 'profile' ? (
+                <form className="login-form" onSubmit={handleProfileNext} noValidate>
+                  {/* First Name & Suffix in 2 columns */}
+                  <div className="form-row-split">
+                    <div className="field-group flex-2">
+                      <label className="field-label" htmlFor="first-name">
+                        First Name <span className="req-star">*</span>
+                      </label>
+                      <div className="field-wrapper">
+                        <span className="field-icon">
+                          <User size={16} />
+                        </span>
+                        <input
+                          id="first-name"
+                          type="text"
+                          className="field-input"
+                          placeholder="e.g. Juan"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          autoComplete="given-name"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field-group flex-1">
+                      <label className="field-label" htmlFor="suffix">
+                        Suffix <span className="opt-tag">(Optional)</span>
+                      </label>
+                      <div className="field-wrapper">
+                        <input
+                          id="suffix"
+                          type="text"
+                          className="field-input no-left-icon"
+                          placeholder="e.g. Jr., III"
+                          value={suffix}
+                          onChange={(e) => setSuffix(e.target.value)}
+                          autoComplete="honorific-suffix"
+                          maxLength={10}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle Name */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="middle-name">
+                      Middle Name <span className="opt-tag">(Optional)</span>
                     </label>
                     <div className="field-wrapper">
                       <span className="field-icon">
                         <User size={16} />
                       </span>
                       <input
-                        id="first-name"
+                        id="middle-name"
                         type="text"
                         className="field-input"
-                        placeholder="e.g. Juan"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        autoComplete="given-name"
+                        placeholder="e.g. Santos"
+                        value={middleName}
+                        onChange={(e) => setMiddleName(e.target.value)}
+                        autoComplete="additional-name"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Last Name */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="last-name">
+                      Last Name <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <User size={16} />
+                      </span>
+                      <input
+                        id="last-name"
+                        type="text"
+                        className="field-input"
+                        placeholder="e.g. Dela Cruz"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        autoComplete="family-name"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="field-group flex-1">
-                    <label className="field-label" htmlFor="suffix">
-                      Suffix <span className="opt-tag">(Optional)</span>
+                  {/* Philippine Mobile Number */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="contact-number">
+                      Mobile Number <span className="req-star">*</span>
                     </label>
                     <div className="field-wrapper">
+                      <span className="field-icon">
+                        <Phone size={16} />
+                      </span>
                       <input
-                        id="suffix"
-                        type="text"
-                        className="field-input no-left-icon"
-                        placeholder="e.g. Jr., III"
-                        value={suffix}
-                        onChange={(e) => setSuffix(e.target.value)}
-                        autoComplete="honorific-suffix"
-                        maxLength={10}
+                        id="contact-number"
+                        type="tel"
+                        className="field-input"
+                        placeholder="09XXXXXXXXX (11 digits)"
+                        value={contactNumber}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                          setContactNumber(digits);
+                        }}
+                        maxLength={11}
+                        autoComplete="tel"
+                        required
                       />
+                      {contactNumber && PH_MOBILE_REGEX.test(contactNumber) && (
+                        <span className="field-valid-icon" title="Valid Philippine Mobile Number">
+                          <CheckCircle2 size={16} />
+                        </span>
+                      )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Middle Name */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="middle-name">
-                    Middle Name <span className="opt-tag">(Optional)</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <User size={16} />
+                    <span className="field-helper-hint">
+                      Format: 11-digit Philippine mobile number starting with 09 (e.g. 09171234567)
                     </span>
-                    <input
-                      id="middle-name"
-                      type="text"
-                      className="field-input"
-                      placeholder="e.g. Santos"
-                      value={middleName}
-                      onChange={(e) => setMiddleName(e.target.value)}
-                      autoComplete="additional-name"
-                    />
-                  </div>
-                </div>
-
-                {/* Last Name */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="last-name">
-                    Last Name <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <User size={16} />
-                    </span>
-                    <input
-                      id="last-name"
-                      type="text"
-                      className="field-input"
-                      placeholder="e.g. Dela Cruz"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      autoComplete="family-name"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Philippine Mobile Number */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="contact-number">
-                    Mobile Number <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <Phone size={16} />
-                    </span>
-                    <input
-                      id="contact-number"
-                      type="tel"
-                      className="field-input"
-                      placeholder="09XXXXXXXXX (11 digits)"
-                      value={contactNumber}
-                      onChange={(e) => {
-                        const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-                        setContactNumber(digits);
-                      }}
-                      maxLength={11}
-                      autoComplete="tel"
-                      required
-                    />
-                    {contactNumber && PH_MOBILE_REGEX.test(contactNumber) && (
-                      <span className="field-valid-icon" title="Valid Philippine Mobile Number">
-                        <CheckCircle2 size={16} />
-                      </span>
-                    )}
-                  </div>
-                  <span className="field-helper-hint">
-                    Format: 11-digit Philippine mobile number starting with 09 (e.g. 09171234567)
-                  </span>
-                </div>
-
-                {/* Continue to Step 2 Button */}
-                <button
-                  type="submit"
-                  className="submit-btn onboarding-submit-btn"
-                  disabled={!isStep1Complete}
-                  title={!isStep1Complete ? 'Please fill in all required fields (First Name, Last Name, Mobile Number) before proceeding' : undefined}
-                >
-                  <span>Next: Password Setup</span>
-                  <ArrowRight size={18} />
-                </button>
-              </form>
-            ) : (
-              /* STEP 2: SET UP NEW PASSWORD FORM */
-              <form className="login-form" onSubmit={handlePasswordSubmit} noValidate>
-                {/* Temporary Password */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="current-password">
-                    Current Temporary Password <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <Lock size={16} />
-                    </span>
-                    <input
-                      id="current-password"
-                      type={showCurrent ? 'text' : 'password'}
-                      className="field-input"
-                      placeholder="Enter temporary password assigned by manager"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      autoComplete="current-password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-pw"
-                      onClick={() => setShowCurrent(!showCurrent)}
-                      tabIndex={-1}
-                      aria-label={showCurrent ? 'Hide password' : 'Show password'}
-                    >
-                      {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  <span className="field-helper-hint">
-                    Check your onboarding email or notification from your system manager for this password.
-                  </span>
-                </div>
-
-                {/* New Password */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="new-password">
-                    New Password (Min 15 Characters) <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <KeyRound size={16} />
-                    </span>
-                    <input
-                      id="new-password"
-                      type={showNew ? 'text' : 'password'}
-                      className="field-input"
-                      placeholder="Create high-entropy password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      autoComplete="new-password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-pw"
-                      onClick={() => setShowNew(!showNew)}
-                      tabIndex={-1}
-                      aria-label={showNew ? 'Hide password' : 'Show password'}
-                    >
-                      {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
                   </div>
 
-                  {/* Password Strength Meter */}
-                  {newPassword && (
-                    <div className="strength-meter-container">
-                      <div className="strength-bar-track">
-                        <div
-                          className="strength-bar-fill"
-                          style={{
-                            width: `${(strength.level / 3) * 100}%`,
-                            backgroundColor: strength.color,
-                          }}
-                        />
-                      </div>
-                      <span className="strength-label" style={{ color: strength.color }}>
-                        {strength.label}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Confirm New Password */}
-                <div className="field-group">
-                  <label className="field-label" htmlFor="confirm-password">
-                    Confirm New Password <span className="req-star">*</span>
-                  </label>
-                  <div className="field-wrapper">
-                    <span className="field-icon">
-                      <ShieldCheck size={16} />
-                    </span>
-                    <input
-                      id="confirm-password"
-                      type={showConfirm ? 'text' : 'password'}
-                      className="field-input"
-                      placeholder="Re-enter your new password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      onBlur={() => setTouchedConfirm(true)}
-                      autoComplete="new-password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-pw"
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      tabIndex={-1}
-                      aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                    >
-                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  {touchedConfirm && confirmPassword && !passwordsMatch && (
-                    <span className="field-inline-error">Passwords do not match.</span>
-                  )}
-                </div>
-
-                {/* Live OWASP Complexity Requirements Checklist */}
-                <div className="pw-checklist-card">
-                  <div className="checklist-header">
-                    <ShieldCheck size={13} className="checklist-shield-icon" />
-                    <span className="checklist-title">OWASP Password Requirements</span>
-                  </div>
-                  <ul className="checklist-items">
-                    {passwordRules.map((rule) => {
-                      const isValid = rule.test(newPassword);
-                      return (
-                        <li key={rule.id} className={isValid ? 'met' : 'unmet'}>
-                          <span className="rule-status-icon">
-                            {isValid ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
-                          </span>
-                          <span>{rule.label}</span>
-                        </li>
-                      );
-                    })}
-                    <li className={passwordsMatch && confirmPassword ? 'met' : 'unmet'}>
-                      <span className="rule-status-icon">
-                        {passwordsMatch && confirmPassword ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
-                      </span>
-                      <span>Passwords match</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Actions: Back & Save */}
-                <div className="step-actions-row">
-                  <button
-                    type="button"
-                    className="step-back-btn"
-                    onClick={() => {
-                      setStep('profile');
-                      setError(null);
-                    }}
-                    disabled={isSubmitting}
-                  >
-                    <ArrowLeft size={16} />
-                    <span>Back</span>
-                  </button>
-
+                  {/* Continue to Step 2 Button */}
                   <button
                     type="submit"
-                    className="submit-btn onboarding-submit-btn flex-1"
-                    disabled={
-                      isSubmitting ||
-                      !currentPassword ||
-                      !passwordRules.every((r) => r.test(newPassword)) ||
-                      !passwordsMatch
-                    }
+                    className="submit-btn onboarding-submit-btn"
+                    disabled={!isStep1Complete}
+                    title={!isStep1Complete ? 'Please fill in all required fields (First Name, Last Name, Mobile Number) before proceeding' : undefined}
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 size={18} className="spinner" />
-                        <span>Updating Credentials...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Save Password &amp; Continue</span>
-                        <CheckCircle2 size={18} />
-                      </>
-                    )}
+                    <span>Next: Password Setup</span>
+                    <ArrowRight size={18} />
                   </button>
-                </div>
-              </form>
-            )}
+                </form>
+              ) : (
+                /* STEP 2: SET UP NEW PASSWORD FORM */
+                <form className="login-form" onSubmit={handlePasswordSubmit} noValidate>
+                  {/* Temporary Password */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="current-password">
+                      Current Temporary Password <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <Lock size={16} />
+                      </span>
+                      <input
+                        id="current-password"
+                        type={showCurrent ? 'text' : 'password'}
+                        className="field-input"
+                        placeholder="Enter temporary password assigned by manager"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        autoComplete="current-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="toggle-pw"
+                        onClick={() => setShowCurrent(!showCurrent)}
+                        tabIndex={-1}
+                        aria-label={showCurrent ? 'Hide password' : 'Show password'}
+                      >
+                        {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    <span className="field-helper-hint">
+                      Check your onboarding email or notification from your system manager for this password.
+                    </span>
+                  </div>
+
+                  {/* New Password */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="new-password">
+                      New Password (Min 15 Characters) <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <KeyRound size={16} />
+                      </span>
+                      <input
+                        id="new-password"
+                        type={showNew ? 'text' : 'password'}
+                        className="field-input"
+                        placeholder="Create high-entropy password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="toggle-pw"
+                        onClick={() => setShowNew(!showNew)}
+                        tabIndex={-1}
+                        aria-label={showNew ? 'Hide password' : 'Show password'}
+                      >
+                        {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+
+                    {/* Password Strength Meter */}
+                    {newPassword && (
+                      <div className="strength-meter-container">
+                        <div className="strength-bar-track">
+                          <div
+                            className="strength-bar-fill"
+                            style={{
+                              width: `${(strength.level / 3) * 100}%`,
+                              backgroundColor: strength.color,
+                            }}
+                          />
+                        </div>
+                        <span className="strength-label" style={{ color: strength.color }}>
+                          {strength.label}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div className="field-group">
+                    <label className="field-label" htmlFor="confirm-password">
+                      Confirm New Password <span className="req-star">*</span>
+                    </label>
+                    <div className="field-wrapper">
+                      <span className="field-icon">
+                        <ShieldCheck size={16} />
+                      </span>
+                      <input
+                        id="confirm-password"
+                        type={showConfirm ? 'text' : 'password'}
+                        className="field-input"
+                        placeholder="Re-enter your new password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onBlur={() => setTouchedConfirm(true)}
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="toggle-pw"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        tabIndex={-1}
+                        aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                      >
+                        {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    {touchedConfirm && confirmPassword && !passwordsMatch && (
+                      <span className="field-inline-error">Passwords do not match.</span>
+                    )}
+                  </div>
+
+                  {/* Live OWASP Complexity Requirements Checklist */}
+                  <div className="pw-checklist-card">
+                    <div className="checklist-header">
+                      <ShieldCheck size={13} className="checklist-shield-icon" />
+                      <span className="checklist-title">OWASP Password Requirements</span>
+                    </div>
+                    <ul className="checklist-items">
+                      {passwordRules.map((rule) => {
+                        const isValid = rule.test(newPassword);
+                        return (
+                          <li key={rule.id} className={isValid ? 'met' : 'unmet'}>
+                            <span className="rule-status-icon">
+                              {isValid ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
+                            </span>
+                            <span>{rule.label}</span>
+                          </li>
+                        );
+                      })}
+                      <li className={passwordsMatch && confirmPassword ? 'met' : 'unmet'}>
+                        <span className="rule-status-icon">
+                          {passwordsMatch && confirmPassword ? <Check size={12} strokeWidth={2.5} /> : <span className="unmet-dot" />}
+                        </span>
+                        <span>Passwords match</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Actions: Back & Save */}
+                  <div className="step-actions-row">
+                    <button
+                      type="button"
+                      className="step-back-btn"
+                      onClick={() => {
+                        setStep('profile');
+                        setError(null);
+                      }}
+                      disabled={isSubmitting}
+                    >
+                      <ArrowLeft size={16} />
+                      <span>Back</span>
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="submit-btn onboarding-submit-btn flex-1"
+                      disabled={
+                        isSubmitting ||
+                        !currentPassword ||
+                        !passwordRules.every((r) => r.test(newPassword)) ||
+                        !passwordsMatch
+                      }
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 size={18} className="spinner" />
+                          <span>Updating Credentials...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Save Password &amp; Continue</span>
+                          <CheckCircle2 size={18} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
 
             <footer className="login-footer">
               <p className="login-footer-copy">
@@ -902,29 +969,8 @@ export default function OnboardingPage() {
               </p>
             </footer>
           </div>
-
-          {/* RIGHT COLUMN: SPEEDEX 30TH ANNIVERSARY ARTWORK */}
-          <div className="login-card-visual" aria-hidden="true">
-            <img
-              src="/login-background.jpg"
-              alt="Speedex 30 Years Team"
-              className="login-visual-img"
-            />
-            <div className="login-visual-curve-feather" />
-            <svg
-              className="login-visual-curve"
-              viewBox="0 0 40 500"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <path d="M0,0 Q40,250 0,500 L0,0 Z" fill="#ffffff" />
-            </svg>
-            <span className="login-visual-credit" aria-label="Illustration credit">
-              Illustrated by: riya
-            </span>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
