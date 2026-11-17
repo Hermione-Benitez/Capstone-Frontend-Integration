@@ -457,8 +457,21 @@ export default function LoginPage() {
         }
       }
 
+      // Check whether STARS central identity returned an explicit terminal account status
+      // (deactivated, inactive, locked). If STARS says the account is deactivated or locked,
+      // fallback to companion systems (DMS/FOMS) MUST NOT be attempted.
+      const isTerminalAccountState = (reason: string) => {
+        const lower = reason.toLowerCase();
+        return (
+          lower.includes('deactivated') ||
+          lower.includes('inactive') ||
+          lower.includes('locked') ||
+          lower.includes('lockout')
+        );
+      };
+
       // 2. Fallback: Authenticate via DMS for legacy accounts not yet synced
-      if (!authSuccess) {
+      if (!authSuccess && !isTerminalAccountState(failureReason)) {
         const dmsCandidates = getBackendCandidates('dms');
         for (const candidate of dmsCandidates) {
           try {
@@ -547,7 +560,7 @@ export default function LoginPage() {
       }
 
       // 3. Fallback: Authenticate via FOMS for legacy accounts not yet synced
-      if (!authSuccess) {
+      if (!authSuccess && !isTerminalAccountState(failureReason)) {
         const fomsCandidates = getBackendCandidates('foms');
         for (const candidate of fomsCandidates) {
           try {
@@ -613,6 +626,16 @@ export default function LoginPage() {
             },
             replace: true,
           });
+          return;
+        }
+
+        // If server indicated account deactivation or inactivity, show error message directly
+        // without recording password attempt penalties or showing remaining attempts count
+        if (
+          failureReason.toLowerCase().includes('deactivated') ||
+          failureReason.toLowerCase().includes('inactive')
+        ) {
+          setErrorMessage(failureReason);
           return;
         }
 
