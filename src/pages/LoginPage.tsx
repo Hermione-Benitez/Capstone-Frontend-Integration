@@ -469,9 +469,10 @@ export default function LoginPage() {
           lower.includes('lockout')
         );
       };
+      const starsCentralTerminated = isTerminalAccountState(failureReason);
 
       // 2. Fallback: Authenticate via DMS for legacy accounts not yet synced
-      if (!authSuccess && !isTerminalAccountState(failureReason)) {
+      if (!authSuccess && !starsCentralTerminated) {
         const dmsCandidates = getBackendCandidates('dms');
         for (const candidate of dmsCandidates) {
           try {
@@ -560,7 +561,9 @@ export default function LoginPage() {
       }
 
       // 3. Fallback: Authenticate via FOMS for legacy accounts not yet synced
-      if (!authSuccess && !isTerminalAccountState(failureReason)) {
+      // NOTE: Even if DMS returned an error for this ID, EMP-* IDs exist in both DMS and FOMS.
+      // Therefore FOMS must still be evaluated unless STARS explicitly terminated the account.
+      if (!authSuccess && !starsCentralTerminated) {
         const fomsCandidates = getBackendCandidates('foms');
         for (const candidate of fomsCandidates) {
           try {
