@@ -128,8 +128,8 @@
 /* ── UNIFIED 2-COLUMN FLOATING CARD (Starkfest Inspo) ── */
 .login-unified-card {
   width: 100%;
-  max-width: 1040px;
-  min-height: clamp(480px, 68vh, 540px);
+  max-width: 1120px;
+  min-height: clamp(520px, 72vh, 600px);
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 20px 50px -10px rgba(11, 20, 55, 0.14),
@@ -141,9 +141,9 @@
 
 /* ── LEFT COLUMN: FORM ── */
 .login-card-form {
-  flex: 0 0 450px;
-  width: 450px;
-  padding: clamp(20px, 3vh, 30px) clamp(26px, 3vw, 38px);
+  flex: 0 0 490px;
+  width: 490px;
+  padding: clamp(24px, 3.5vh, 36px) clamp(32px, 3.5vw, 48px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -471,12 +471,12 @@
   color: #64748b;
 }
 
-/* ── RIGHT COLUMN: WAREHOUSE TEAM ART (Color graded + Soft Curve) ── */
+/* ── RIGHT COLUMN: SPEEDEX TEAM ART (Bright, Clean & Crisp) ── */
 .login-card-visual {
   flex: 1 1 auto;
   position: relative;
   overflow: hidden;
-  background: #0B1437;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -486,45 +486,34 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 64% 18%; /* Precisely frames the characters: female employee & male courier */
+  object-position: center center; /* Perfectly centers the Speedex 30th Anniversary banner & office characters */
   display: block;
-  /* Harmonize image tones with deep navy & teal palette */
-  filter: brightness(0.96) contrast(1.05) saturate(0.92);
+  /* Clean, crisp daylight brightness matching the artwork */
+  filter: brightness(0.99) contrast(1.01);
 }
 
-/* Subtle color grading tint overlay (Navy / Teal harmonious blend) */
+/* Subtle, barely-there ambient tint (keeps room vibrant and bright) */
 .login-visual-color-grade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(11, 20, 55, 0.08) 0%,
-    rgba(0, 169, 157, 0.05) 50%,
-    rgba(11, 20, 55, 0.12) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  mix-blend-mode: multiply;
+  display: none;
 }
 
-/* Soft white gradient feather along the crescent curve (subtle, non-glowy) */
+/* Soft transition feather along the crescent curve */
 .login-visual-curve-feather {
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
-  width: 48px;
+  width: 40px;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.35) 0%,
     transparent 100%
   );
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
-/* Organic convex curve divider (Starkfest Inspo) */
+/* Organic convex curve divider with gentle card edge shadow */
 .login-visual-curve {
   position: absolute;
   top: 0;
@@ -533,7 +522,29 @@
   width: 44px;
   height: 100%;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
+  filter: drop-shadow(3px 0 6px rgba(0, 0, 0, 0.05));
+}
+
+/* Subtle artist credit watermark (clean, light, and unobtrusive) */
+.login-visual-credit {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  z-index: 4;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  user-select: none;
 }
 
 /* ── RESPONSIVE DESIGN ── */
